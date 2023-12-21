@@ -12,13 +12,13 @@ from sliding_window_ms import sliding_window
 import pickle
 import sys
 
-location = "C:/Users/nilah/OneDrive/Desktop/Work/FLW/Christopher/Datasetbias/Datasets/motion-sense-master/motion-sense-master/data/A_DeviceMotion_data/A_DeviceMotion_data/"
+location = "/vol/actrec/motion-sense-master/data/A_DeviceMotion_data/A_DeviceMotion_data/"
 NB_SENSOR_CHANNELS = 9
 NUM_ACT_CLASSES= 6
 NUM_CLASSES = 24
 
-ws = 100
-ss = 12
+ws = 200
+ss = 25
 
 def norm_ms(data):
     """
@@ -49,7 +49,7 @@ def norm_ms(data):
 
     return data_norm
 
-def opp_sliding_window(data_x, data_y, data_z, label_pos_end=True):
+def opp_sliding_window(data_x, data_y, label_pos_end=True):
 #def opp_sliding_window(data_x, data_y, label_pos_end=True):
     '''
     print("check1")
@@ -62,46 +62,42 @@ def opp_sliding_window(data_x, data_y, data_z, label_pos_end=True):
     print("Sliding window: Creating windows {} with step {}".format(ws, ss))
 
     data_x = sliding_window(data_x, (ws, data_x.shape[1]), (ss, 1))
+    print(data_x.shape)
+    count_l = 0
+    idy=0
     # Label from the end
     if label_pos_end:
+        print("check 1")
         data_y = np.asarray([[i[-1]] for i in sliding_window(data_y, ws, ss)])
-        data_z = np.asarray([[i[-1]] for i in sliding_window(data_z, ws, ss)])
     else:
         if False:
             # Label from the middle
             # not used in experiments
+            print("check 2")
             data_y_labels = np.asarray(
                 [[i[i.shape[0] // 2]] for i in sliding_window(data_y, ws, ss)])
-            data_z_labels = np.asarray(
-                [[i[i.shape[0] // 2]] for i in sliding_window(data_z, ws, ss)])
         else:
             # Label according to mode
             try:
+                print("check 3")
                 data_y_labels = []
-                data_z_labels = []
                 for sw in sliding_window(data_y, ws, ss):
-        
                     count_l = np.bincount(sw.astype(int), minlength=NUM_ACT_CLASSES)
                     idy = np.argmax(count_l)
                     data_y_labels.append(idy)
                 data_y_labels = np.asarray(data_y_labels)
-                for sz in sliding_window(data_z, ws, ss):
-                    count_l = np.bincount(sz.astype(int), minlength=NUM_CLASSES)
-                    idy = np.argmax(count_l)
-                    data_z_labels.append(idy)
-                data_z_labels = np.asarray(data_z_labels)
-
+        
 
             except:
                 print("Sliding window: error with the counting {}".format(count_l))
-                print("Sliding window: error with the counting {}".format(idy))
+                #print("Sliding window: error with the counting {}".format(idy))
                 return np.Inf
 
             # All labels per window
             data_y_all = np.asarray([i[:] for i in sliding_window(data_y, ws, ss)])
-            data_z_all = np.asarray([i[:] for i in sliding_window(data_z, ws, ss)])
-            
-    '''        
+            print(data_y_all.shape)
+    
+    '''
     print("daya_y_labels")
     print(data_y_labels.shape)
     print("daya_y_all")
@@ -111,19 +107,19 @@ def opp_sliding_window(data_x, data_y, data_z, label_pos_end=True):
     print("daya_z_all")
     print(data_z_all.shape)
     '''
-    return data_x.astype(np.float32), data_y_labels.astype(np.uint8), data_y_all.astype(np.uint8), data_z_labels.astype(np.uint8), data_z_all.astype(np.uint8)
+    return data_x.astype(np.float32), data_y_labels.astype(np.uint8), data_y_all.astype(np.uint8)
     #return data_x.astype(np.float32), data_y_labels.astype(np.uint8), data_y_all.astype(np.uint8)
 
 
 def get_ds_infos():
     ## 0:Code, 1:Weight, 2:Height, 3:Age, 4:Gender
-    dss = np.genfromtxt("C:/Users/nilah/OneDrive/Desktop/Work/FLW/Christopher/Datasetbias/Datasets/motion-sense-master/motion-sense-master/data/data_subjects_info.csv", delimiter=',')
+    dss = np.genfromtxt("/vol/actrec/motion-sense-master/data/data_subjects_info.csv", delimiter=',')
     dss = dss[1:]
     print("----> Data subjects information is imported.")
 
     return dss
 
-def creat_time_series(dt_list, act_labels, trial_codes, base_directory, mode="mag", labeled=True, usage_modus='trainval'):
+def creat_time_series(dt_list, act_labels, trial_codes, base_directory, subjects, mode="mag", labeled=True, usage_modus='trainval'):
     """
     Args:
         dt_list: A list of columns that shows the type of data we want.
@@ -139,6 +135,12 @@ def creat_time_series(dt_list, act_labels, trial_codes, base_directory, mode="ma
         It returns a time-series of sensor data.
     
     """
+    #base_directory = '/data/nnair/datasetbias/motionsense/prepros/exp1/'
+    sel_sub=subjects
+    data_dir_train = base_directory + 'sequences_train/'
+    data_dir_val = base_directory + 'sequences_val/'
+    data_dir_test = base_directory + 'sequences_test/'
+    
     num_data_cols = len(dt_list) if mode == "mag" else len(dt_list*3)
 
     if labeled:
@@ -151,7 +153,7 @@ def creat_time_series(dt_list, act_labels, trial_codes, base_directory, mode="ma
     #sel_sub=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24]
 
     if usage_modus=='trainval':
-        sel_sub=[1, 2, 3, 4]
+        #sel_sub=[1, 2, 3, 4]
         
         X_train = np.empty((0, NB_SENSOR_CHANNELS))
         act_train = np.empty((0))
@@ -162,7 +164,7 @@ def creat_time_series(dt_list, act_labels, trial_codes, base_directory, mode="ma
         id_val = np.empty((0))
     
     elif usage_modus=='test':
-        sel_sub=[5, 6, 7, 8]
+        #sel_sub=[5, 6, 7, 8]
         
         X_test = np.empty((0, NB_SENSOR_CHANNELS))
         act_test = np.empty((0))
@@ -204,8 +206,8 @@ def creat_time_series(dt_list, act_labels, trial_codes, base_directory, mode="ma
                         #vals = np.concatenate((vals, lbls), axis=1)
                         
                         if frames != 0:
-                            train_no=round(0.70*frames)
-                            val_no=round(0.15*frames)
+                            train_no=round(0.64*frames)
+                            val_no=round(0.18*frames)
                             tv= train_no+val_no
                     
                             '''
@@ -230,15 +232,32 @@ def creat_time_series(dt_list, act_labels, trial_codes, base_directory, mode="ma
                             act_test = np.append(act_test, [lbls[tv:frames,0]])
                             id_test = np.append(id_test, [lbls[tv:frames,1]])
                             print('done test')
+                    '''
+                    print('frames')
+                    print(frames)
+                    print('train_no')
+                    print(train_no)
+                    print('val_no')
+                    print(val_no)
                     
+                    if usage_modus=='trainval':
+                        print('X_train')
+                        print(X_train.shape)
+                        print('X_val')
+                        print(X_val.shape)
+                    elif usage_modus=='test':
+                        print('X_test')
+                        print(X_test.shape)
+                    #print('X_train')
+                    #print(X_train.shape)
                     #dataset = np.append(dataset,vals, axis=0)
-    print('sliding window')
+                    '''
     try: 
         if usage_modus=='trainval':
-            data_train, act_train, act_all_train, labelid_train, labelid_all_train = opp_sliding_window(X_train, act_train, id_train, label_pos_end = False)
-            data_val, act_val, act_all_val, labelid_val, labelid_all_val = opp_sliding_window(X_val, act_val, id_val, label_pos_end = False)
+            data_train, act_train, act_all_train = opp_sliding_window(X_train, act_train, label_pos_end = False)
+            data_val, act_val, act_all_val = opp_sliding_window(X_val, act_val, label_pos_end = False)
         elif usage_modus=='test':
-            data_test, act_test, act_all_test, labelid_test, labelid_all_test = opp_sliding_window(X_test, act_test, id_test, label_pos_end = False)
+            data_test, act_test, act_all_test = opp_sliding_window(X_test, act_test, label_pos_end = False)
     except:
         print("error in sliding window")
     
@@ -247,7 +266,7 @@ def creat_time_series(dt_list, act_labels, trial_codes, base_directory, mode="ma
         print("window extraction begining")
         
         print("training data save")
-        if usage_modus=='train':
+        if usage_modus=='trainval':
             print("target file name")
             print(data_dir_train)
             counter_seq = 0
@@ -262,7 +281,11 @@ def creat_time_series(dt_list, act_labels, trial_codes, base_directory, mode="ma
                     seq = np.require(seq, dtype=np.float)
                     # Storing the sequences
                     #obj = {"data": seq, "label": labelid}
-                    obj = {"data": seq, "act_label": act_train[f], "act_labels_all": act_all_train[f], "label": labelid_train[f]}
+                    print("input values are")
+                    print(seq.shape)
+                    print(act_train[f])
+                    
+                    obj = {"data": seq, "label": act_train[f], "labels": act_all_train[f]}
                     
                     f = open(os.path.join(data_dir_train, 'seq_{0:06}.pkl'.format(counter_seq)), 'wb')
                     pickle.dump(obj, f, protocol=pickle.HIGHEST_PROTOCOL)
@@ -287,7 +310,10 @@ def creat_time_series(dt_list, act_labels, trial_codes, base_directory, mode="ma
                     seq = np.require(seq, dtype=np.float)
                     # Storing the sequences
                     #obj = {"data": seq, "label": labelid}
-                    obj = {"data": seq, "act_label": act_val[f], "act_labels_all": act_all_val[f], "label": labelid_val[f]}
+                    print("input values are")
+                    print(seq.shape)
+                    print(act_val[f])
+                    obj = {"data": seq, "label": act_val[f], "labels": act_all_val[f]}
                 
                     f = open(os.path.join(data_dir_val, 'seq_{0:06}.pkl'.format(counter_seq)), 'wb')
                     pickle.dump(obj, f, protocol=pickle.HIGHEST_PROTOCOL)
@@ -312,7 +338,10 @@ def creat_time_series(dt_list, act_labels, trial_codes, base_directory, mode="ma
                     seq = np.require(seq, dtype=np.float)
                     # Storing the sequences
                     #obj = {"data": seq, "label": labelid}
-                    obj = {"data": seq, "act_label": act_test[f], "act_labels_all": act_all_test[f], "label": labelid_test[f]}
+                    print("input values are")
+                    print(seq.shape)
+                    print(act_test[f])
+                    obj = {"data": seq, "label": act_test[f], "labels": act_all_test[f]}
                 
                     f = open(os.path.join(data_dir_test, 'seq_{0:06}.pkl'.format(counter_seq)), 'wb')
                     pickle.dump(obj, f, protocol=pickle.HIGHEST_PROTOCOL)
@@ -418,10 +447,13 @@ if __name__ == '__main__':
     print("[INFO] -- Selected activites: "+str(act_labels))    
     trial_codes = [TRIAL_CODES[act] for act in act_labels]
     
-    base_directory = '/data/nnair/motionsense/attr/t0/'
+    base_directory = '/data/nnair/datasetbias/motionsense/prepros/exp26/'
     
-    creat_time_series(dt_list, act_labels, trial_codes, base_directory, mode="raw", labeled=True, usage_modus='trainval')
-    creat_time_series(dt_list, act_labels, trial_codes, base_directory, mode="raw", labeled=True, usage_modus='test')
+    sel_subjects_train=[10,13,17,23]
+    sel_subjects_test=[1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 14, 15, 16, 18, 19, 20, 21, 22, 24]
+    
+    creat_time_series(dt_list, act_labels, trial_codes, base_directory=base_directory, subjects=sel_subjects_train, mode="raw", labeled=True, usage_modus='trainval')
+    creat_time_series(dt_list, act_labels, trial_codes, base_directory=base_directory, subjects=sel_subjects_test, mode="raw", labeled=True, usage_modus='test')
     
     data_dir_train = base_directory + 'sequences_train/'
     data_dir_val = base_directory + 'sequences_val/'
