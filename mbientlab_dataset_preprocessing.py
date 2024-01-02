@@ -17,7 +17,7 @@ from sliding_window import sliding_window
 import pickle
 
 # folder path
-FOLDER_PATH = "/raid/nvidia/imu_data/"
+FOLDER_PATH = "/vol/actrec/DFG_Project/2019/LARa_dataset/Mbientlab/LARa_dataset_mbientlab/"
 
 PERSONS = ['S14']
 
@@ -377,7 +377,7 @@ def create_dataset(identity_bool = False):
     # base_directory = '/path_where_sequences_will_ve_stored/mbientlab_50_persons/'
     # base_directory = '/path_where_sequences_will_ve_stored/mbientlab_10_recordings/'
     #base_directory = '/path_where_sequences_will_ve_stored/mbientlab_50_recordings/'
-    base_directory = '/raid/nvidia/preprocessed/trial/'
+    base_directory = '/data/nnair/icpr2024/lara_imu/prepros/'
 
     data_dir_train = base_directory + 'sequences_train/'
     data_dir_val = base_directory + 'sequences_val/'

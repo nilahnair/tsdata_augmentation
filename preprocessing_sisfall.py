@@ -461,7 +461,7 @@ def main():
     activities= ['D01', 'D02', 'D03', 'D04', 'D05', 'D07', 'D08', 'D09', 
                  'D10', 'D011', 'D12', 'D14', 'D15', 'D16', 'D17']
     
-    base_directory ='/data/nnair/sisfall_prepros/'
+    base_directory ='/data/nnair/icpr2024/sisfall/prepros/'
     data_dir_train = base_directory + 'sequences_train/'
     data_dir_val = base_directory + 'sequences_val/'
     data_dir_test = base_directory + 'sequences_test/'

@@ -206,8 +206,8 @@ def creat_time_series(dt_list, act_labels, trial_codes, base_directory, subjects
                         #vals = np.concatenate((vals, lbls), axis=1)
                         
                         if frames != 0:
-                            train_no=round(0.64*frames)
-                            val_no=round(0.18*frames)
+                            train_no=round(0.70*frames)
+                            val_no=round(0.15*frames)
                             tv= train_no+val_no
                     
                             '''
@@ -447,7 +447,7 @@ if __name__ == '__main__':
     print("[INFO] -- Selected activites: "+str(act_labels))    
     trial_codes = [TRIAL_CODES[act] for act in act_labels]
     
-    base_directory = '/data/nnair/datasetbias/motionsense/prepros/exp26/'
+    base_directory = '/data/nnair/icpr2024/motionsense/prepros/'
     
     sel_subjects_train=[10,13,17,23]
     sel_subjects_test=[1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 14, 15, 16, 18, 19, 20, 21, 22, 24]
