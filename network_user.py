@@ -48,8 +48,8 @@ class Network_User(object):
         self.config = config
         self.device = torch.device("cuda:{}".format(self.config["GPU"]) if torch.cuda.is_available() else "cpu")
 
-        self.attrs = self.reader_att_rep("atts_per_class_lara.txt")
-        self.attr_representation = self.reader_att_rep("atts_per_class_lara.txt")
+        #self.attrs = self.reader_att_rep("atts_per_class_lara.txt")
+        #self.attr_representation = self.reader_att_rep("atts_per_class_lara.txt")
 
         self.normal = torch.distributions.Normal(torch.tensor([0.0]), torch.tensor([0.001]))
         self.exp = exp
@@ -282,6 +282,8 @@ class Network_User(object):
 
         # Selecting the training sets, either train or train final (train  + Validation)
         if self.config['usage_modus'] == 'train':
+            print('networkuser')
+            print(self.config['dataset_root'])
             harwindows_train = HARWindows(csv_file=self.config['dataset_root'] + "train.csv",
                                           root_dir=self.config['dataset_root'])
         elif self.config['usage_modus'] == 'train_final':
