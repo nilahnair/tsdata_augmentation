@@ -120,7 +120,7 @@ def configuration(dataset_idx, network_idx, output_idx, usage_modus_idx=0, datas
                             'lstm': {'softmax': 10, 'attribute': 10},
                             'cnn_imu': {'softmax': 30, 'attribute': 10},
                             'cnn_transformer':{'softmax': 6, 'attribute': 6}},
-              'mobiact': {'cnn': {'softmax': 3, 'attribute': 50},
+              'mobiact': {'cnn': {'softmax': 1, 'attribute': 50},
                           'lstm': {'softmax': 10, 'attribute': 5},
                           'cnn_imu': {'softmax': 32, 'attribute': 50},
                           'cnn_transformer':{'softmax': 6, 'attribute': 6}},
