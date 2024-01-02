@@ -447,11 +447,11 @@ class Network_User(object):
                         train_batch_l = harwindow_batched["labels"][:, :, 0]
                         train_batch_l = train_batch_l.reshape(-1)
                     elif self.config["fully_convolutional"] == "FC":
-                        print('shape of the label')
-                        print(harwindow_batched["label"].shape)
-                        print(harwindow_batched["label"].type)
-                        train_batch_l = harwindow_batched["label"][:, 0]
-                        train_batch_l = train_batch_l.reshape(-1)
+                        if self.config["dataset"]=="mobiact":
+                            train_batch_l = harwindow_batched["label"]
+                        else:
+                            train_batch_l = harwindow_batched["label"][:, 0]
+                            train_batch_l = train_batch_l.reshape(-1)
                 elif self.config['output'] == 'attribute':
                     if self.config["fully_convolutional"] == "FCN":
                         train_batch_l = harwindow_batched["labels"][:, :, 1:]
