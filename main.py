@@ -264,7 +264,7 @@ def configuration(dataset_idx, network_idx, output_idx, usage_modus_idx=0, datas
                      'NB_sensor_channels': NB_sensor_channels[dataset[dataset_idx]],
                      'sliding_window_length': sliding_window_length[dataset[dataset_idx]],
                      'sliding_window_step': sliding_window_step[dataset[dataset_idx]],
-                     'num_attributes': num_attributes[dataset[dataset_idx]],
+                     #'num_attributes': num_attributes[dataset[dataset_idx]],
                      'batch_size_train': batch_size_train[network[network_idx]][dataset[dataset_idx]],
                      'batch_size_val': batch_size_val[network[network_idx]][dataset[dataset_idx]],
                      'num_tr_inputs': num_tr_inputs[dataset[dataset_idx]],
