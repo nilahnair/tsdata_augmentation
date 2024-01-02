@@ -7,6 +7,7 @@ Created on May 18, 2019
 import os
 import numpy as np
 from tqdm import tqdm
+from random import choices
 
 from torch.utils.data import Dataset
 
@@ -28,7 +29,7 @@ class HARWindows(Dataset):
     '''
 
 
-    def __init__(self, config, csv_file, root_dir, transform=None):
+    def __init__(self, config, csv_file, root_dir):
         """
         Args:
             csv_file (string): Path to the csv file with annotations.
@@ -39,7 +40,7 @@ class HARWindows(Dataset):
         self.config = config
         self.harwindows = pd.read_csv(csv_file)
         self.root_dir = root_dir
-        self.transform = transform
+        #self.transform = transform
 
     def __len__(self):
         return len(self.harwindows)
@@ -61,22 +62,50 @@ class HARWindows(Dataset):
         y = data['label']
         Y = data['labels']
         
-        if self.config['usage_modus'] == 'train' and self.config['augmentation_options']:
-            #X, Y = self._time_warp_speed(X, Y, 100)
-            X = self._time_warp(X)
+        if self.config['usage_modus'] == 'train' and self.config['augmentations']=='none':
+            X = X
+        elif self.config['usage_modus']== 'train' and choices(population=["On", "Off"], weights=[0.45, 0.55])[0]=="On":
+            if self.config['augmentations']=='time_warp':
+                #this one or the other one check the difference
+                #X, Y = self._time_warp_speed(X, Y, 100)
+                X = self._time_warp(X)
+            elif self.config['augmentations']=='time_warp_seed':
+                X, Y = self._time_warp_speed(X, Y, 100)
+            elif self.config['augmentations']=='jittering':
+                X = self.jittering(X, sigma = 0.05)
+            elif self.config['augmentations']=='scaling':
+                X = self._scaling(X)
+            elif self.config['augmentations']=='flipping':
+                X = self.flipping(X)
+            elif self.config['augmentations']=='magnitude_warping':
+                X = self.magnitude_warping(X)
+            elif self.config['augmentations']=='permutation':
+                X = self.permutation(X)
+            elif self.config['augmentations']=='slicing':
+                X = self.slicing(X)
+            elif self.config['augmentations']=='window_warping':
+                X = self.window_warping(X)
+            elif self.config['augmentations']=='tilt':
+                X = self.tilt(X)
+            elif self.config['augmentations']=='spawner':
+                X = self.spawner(X)
+            
+            
+            
 
-        identity = data['identity']
-        label_file = data['label_file']
+        #identity = data['identity']
+        #label_file = data['label_file']
         
-        label_file = data['label_file']
-
+        #label_file = data['label_file']
+        '''
         if 'identity' in data.keys():
             i = data['identity']
         
             window_data = {"data" : X, "label" : y, "labels" : Y, "identity": i, "label_file": label_file}
         else:
             window_data = {"data": X, "label": y, "labels": Y, "label_file": label_file}
-
+        '''
+        window_data = {"data": X, "label": y, "labels": Y}
         return window_data
         
     def _random_curve(self, window_len: int, sigma=0.05, knot=4):
