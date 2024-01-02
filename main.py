@@ -308,6 +308,31 @@ def setup_experiment_logger(logging_level=logging.DEBUG, filename=None):
 @ex.config
 def my_config():
     print("configuration function began")
+    config = configuration(dataset_idx=0,
+                           network_idx=2,
+                           output_idx=0,
+                           usage_modus_idx=0,
+                           #dataset_fine_tuning_idx=0,
+                           reshape_input=False,
+                           learning_rates_idx=0,
+                           name_counter=0,
+                           freeze=0,
+                           fully_convolutional=False,
+                           #percentage_idx=12,
+                           #pooling=0
+                           )
+    
+    dataset = config["dataset"]
+    network = config["network"]
+    output = config["output"]
+    reshape_input = config["reshape_input"]
+    usageModus = config["usage_modus"]
+    #dataset_finetuning = config["dataset_finetuning"]
+    #pooling = config["pooling"]
+    lr = config["lr"]
+    bsize = config["batch_size_train"]
+    '''
+    print("configuration function began")
     dataset_idx = [0]
     network_idx = [2]
     reshape_input = [False]
@@ -328,14 +353,15 @@ def my_config():
                                     config = configuration(dataset_idx=dataset_idx[dts],
                                                            network_idx=network_idx[nt],
                                                            output_idx=opt,
-                                                           usage_modus_idx=1,
+                                                           usage_modus_idx=0,
                                                            #dataset_fine_tuning_idx=dft,
                                                            reshape_input=reshape_input[rsi],
                                                            learning_rates_idx=lr,
                                                            name_counter=counter_exp,
                                                            freeze=fr,
                                                            percentage_idx=pr,
-                                                           fully_convolutional=False)
+                                                           fully_convolutional=False
+                                                           )
 
     
     dataset = config["dataset"]
@@ -345,13 +371,15 @@ def my_config():
     usageModus = config["usage_modus"]
     lr = config["lr"]
     bsize = config["batch_size_train"]
+    dataet_root= config["dataset_root"]
+    '''
    
 @ex.capture
 def run(config, dataset, network, output, usageModus):
    
-    file_name='/data/nnair/datasetbias/'
+    file_name='/data/nnair/icpr2024/'
    
-    file_name='/data/nnair/results/'+'logger.txt'
+    file_name='/data/nnair/icpr2024/'+'logger.txt'
     
     setup_experiment_logger(logging_level=logging.DEBUG,filename=file_name)
 
