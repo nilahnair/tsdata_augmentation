@@ -180,6 +180,17 @@ def configuration(dataset_idx, network_idx, output_idx, usage_modus_idx=0, datas
     # dataset/network/output/MLP_type/input_shape/fine_tuning
     # dataset/network/output/MLP_type/input_shape/fine_tuning/plots
 
+    reshape_input = reshape_input
+    if reshape_input:
+        reshape_folder = "reshape"
+    else:
+        reshape_folder = "noreshape"
+
+    if fully_convolutional:
+        fully_convolutional = "FCN"
+    else:
+        fully_convolutional = "FC"
+
     # User gotta take care of creating these folders, or storing the results in a different way
     
     if output[output_idx] == 'softmax':
@@ -333,7 +344,7 @@ def my_config():
     lr = config["lr"]
     bsize = config["batch_size_train"]
     augmentation=config["augmentations"]
-    print(config["augmentations"])
+    
     '''
     print("configuration function began")
     dataset_idx = [0]
