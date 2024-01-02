@@ -317,7 +317,7 @@ def generate_data(ids, sliding_window_length, sliding_window_step, base_director
                     seq = np.require(seq, dtype=np.float)
                     # Storing the sequences
                     #obj = {"data": seq, "label": labelid}
-                    obj = {"data": seq, "act_label": act_train[f], "act_labels_all": act_all_train[f], "label": labelid_train[f]}
+                    obj = {"data": seq, "label": act_train[f], "labels": act_all_train[f], "identity": labelid_train[f]}
                     
                     f = open(os.path.join(data_dir_train, 'seq_{0:06}.pkl'.format(counter_seq)), 'wb')
                     pickle.dump(obj, f, protocol=pickle.HIGHEST_PROTOCOL)
@@ -342,7 +342,7 @@ def generate_data(ids, sliding_window_length, sliding_window_step, base_director
                     seq = np.require(seq, dtype=np.float)
                     # Storing the sequences
                     #obj = {"data": seq, "label": labelid}
-                    obj = {"data": seq, "act_label": act_val[f], "act_labels_all": act_all_val[f], "label": labelid_val[f]}
+                    obj = {"data": seq, "label": act_val[f], "labels": act_all_val[f], "identity": labelid_val[f]}
                 
                     f = open(os.path.join(data_dir_val, 'seq_{0:06}.pkl'.format(counter_seq)), 'wb')
                     pickle.dump(obj, f, protocol=pickle.HIGHEST_PROTOCOL)
