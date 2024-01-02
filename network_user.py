@@ -741,8 +741,11 @@ class Network_User(object):
                 else:
                     predictions_val = torch.cat((predictions_val, predictions), dim=0)
                     if self.config['output'] == 'softmax':
-                        test_labels_batch = harwindow_batched_val["label"][:, 0]
-                        test_labels_batch = test_labels_batch.reshape(-1)
+                        if self.config["dataset"]=="mobiact":
+                            test_labels_batch = harwindow_batched_val["label"]
+                        else:
+                            test_labels_batch = harwindow_batched_val["label"][:, 0]
+                            test_labels_batch = test_labels_batch.reshape(-1)
                     elif self.config['output'] == 'attribute':
                         test_labels_batch = harwindow_batched_val["label"]
                     test_labels = torch.cat((test_labels, test_labels_batch), dim=0)
