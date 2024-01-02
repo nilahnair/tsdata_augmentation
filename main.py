@@ -217,8 +217,8 @@ def configuration(dataset_idx, network_idx, output_idx, usage_modus_idx=0, datas
                     }
 
     # GPU
-    os.environ["CUDA_VISIBLE_DEVICES"] = "0"
-    GPU = 1
+    os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+    GPU = 0
 
     # Labels position on the segmented window
     label_pos = {0: 'middle', 1: 'mode', 2: 'end'}
