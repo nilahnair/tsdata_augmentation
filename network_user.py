@@ -731,8 +731,11 @@ class Network_User(object):
                 if v == 0:
                     predictions_val = predictions
                     if self.config['output'] == 'softmax':
-                        test_labels = harwindow_batched_val["label"][:, 0]
-                        test_labels = test_labels.reshape(-1)
+                        if self.config["dataset"]=="mobiact":
+                            test_labels = harwindow_batched_val["label"]
+                        else:
+                            test_labels = harwindow_batched_val["label"][:, 0]
+                            test_labels = test_labels.reshape(-1)
                     elif self.config['output'] == 'attribute':
                         test_labels = harwindow_batched_val["label"]
                 else:
@@ -863,8 +866,11 @@ class Network_User(object):
                 if v == 0:
                     predictions_test = predictions
                     if self.config['output'] == 'softmax':
-                        test_labels = harwindow_batched_test["label"][:, 0]
-                        test_labels = test_labels.reshape(-1)
+                        if self.config["dataset"]=="mobiact":
+                            test_labels = harwindow_batched_test["label"]
+                        else:
+                            test_labels = harwindow_batched_test["label"][:, 0]
+                            test_labels = test_labels.reshape(-1)
                     elif self.config['output'] == 'attribute':
                         test_labels = harwindow_batched_test["label"]
                 else:
