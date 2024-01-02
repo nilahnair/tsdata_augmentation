@@ -118,7 +118,7 @@ def configuration(dataset_idx, network_idx, output_idx, usage_modus_idx=0, datas
                         'cnn_transformer':{'softmax': 6, 'attribute': 6}},
               'mbientlab': {'cnn': {'softmax': 10, 'attribute': 10},
                             'lstm': {'softmax': 10, 'attribute': 10},
-                            'cnn_imu': {'softmax': 15, 'attribute': 10},
+                            'cnn_imu': {'softmax': 30, 'attribute': 10},
                             'cnn_transformer':{'softmax': 6, 'attribute': 6}},
               'mobiact': {'cnn': {'softmax': 32, 'attribute': 50},
                           'lstm': {'softmax': 10, 'attribute': 5},
