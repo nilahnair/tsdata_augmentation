@@ -71,6 +71,8 @@ class Modus_Selecter(object):
         child = ET.SubElement(child_dataset, "epochs", epochs=str(self.config['epochs']))
         child = ET.SubElement(child_dataset, "reshape_input", reshape_input=str(self.config["reshape_input"]))
 
+        child = ET.SubElement(child_dataset, "batch_size", reshape_input=str(self.config["batch_size_train"]))
+
         child = ET.SubElement(child_dataset, "ea_iter", ea_iter=str(ea_iter))
         child = ET.SubElement(child_dataset, "freeze_options", freeze_options=str(self.config['freeze_options']))
         child = ET.SubElement(child_dataset, "time_iter", time_iter=str(time_iter))
