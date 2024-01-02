@@ -30,6 +30,7 @@ class Modus_Selecter(object):
         logging.info('    Network_selecter: Constructor')
         self.config = config
         logging.info('    Network_selecter: \n{}'.format(config))
+        print(self.config['dataset_root'])
 
         self.exp = exp
         self.network = Network_User(config, self.exp)
