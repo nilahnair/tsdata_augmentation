@@ -73,7 +73,7 @@ def configuration(dataset_idx, network_idx, output_idx, usage_modus_idx=0, datas
 
     # It was thought to have different LR per dataset, but experimentally have worked the next three
     # Learning rate
-    learning_rates = [0.001, 0.00001, 0.000001]
+    learning_rates = [0.001, 0.0001, 0.00001, 0.000001]
     lr = {'mocap': {'cnn': learning_rates[learning_rates_idx],
                     'lstm': learning_rates[learning_rates_idx],
                     'cnn_imu': learning_rates[learning_rates_idx],
@@ -118,7 +118,7 @@ def configuration(dataset_idx, network_idx, output_idx, usage_modus_idx=0, datas
                         'cnn_transformer':{'softmax': 6, 'attribute': 6}},
               'mbientlab': {'cnn': {'softmax': 10, 'attribute': 10},
                             'lstm': {'softmax': 10, 'attribute': 10},
-                            'cnn_imu': {'softmax': 10, 'attribute': 10},
+                            'cnn_imu': {'softmax': 15, 'attribute': 10},
                             'cnn_transformer':{'softmax': 6, 'attribute': 6}},
               'mobiact': {'cnn': {'softmax': 32, 'attribute': 50},
                           'lstm': {'softmax': 10, 'attribute': 5},
