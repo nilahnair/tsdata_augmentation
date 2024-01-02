@@ -447,7 +447,7 @@ class Network_User(object):
                         train_batch_l = harwindow_batched["labels"][:, :, 0]
                         train_batch_l = train_batch_l.reshape(-1)
                     elif self.config["fully_convolutional"] == "FC":
-                        if self.config["dataset"]=="mobiact":
+                        if self.config['NB_sensor_channels']==9:
                             train_batch_l = harwindow_batched["label"]
                         else:
                             train_batch_l = harwindow_batched["label"][:, 0]
@@ -691,7 +691,7 @@ class Network_User(object):
                         test_batch_l = harwindow_batched_val["labels"][:, 0]
                         test_batch_l = test_batch_l.reshape(-1)
                     elif self.config["fully_convolutional"] == "FC":
-                        if self.config["dataset"]=="mobiact":
+                        if self.config['NB_sensor_channels']==9:
                             test_batch_l = harwindow_batched_val["label"]
                         else:
                             test_batch_l = harwindow_batched_val["label"][:, 0]
@@ -731,7 +731,7 @@ class Network_User(object):
                 if v == 0:
                     predictions_val = predictions
                     if self.config['output'] == 'softmax':
-                        if self.config["dataset"]=="mobiact":
+                        if self.config['NB_sensor_channels']==9:
                             test_labels = harwindow_batched_val["label"]
                         else:
                             test_labels = harwindow_batched_val["label"][:, 0]
@@ -741,7 +741,7 @@ class Network_User(object):
                 else:
                     predictions_val = torch.cat((predictions_val, predictions), dim=0)
                     if self.config['output'] == 'softmax':
-                        if self.config["dataset"]=="mobiact":
+                        if self.config['NB_sensor_channels']==9:
                             test_labels_batch = harwindow_batched_val["label"]
                         else:
                             test_labels_batch = harwindow_batched_val["label"][:, 0]
@@ -828,7 +828,7 @@ class Network_User(object):
                         test_batch_l = harwindow_batched_test["labels"][:, 0]
                         test_batch_l = test_batch_l.reshape(-1)
                     elif self.config["fully_convolutional"] == "FC":
-                        if self.config["dataset"]=="mobiact":
+                        if self.config['NB_sensor_channels']==9:
                             test_batch_l= harwindow_batched_test["label"]
                         else:
                             test_batch_l = harwindow_batched_test["label"][:, 0]
@@ -869,7 +869,7 @@ class Network_User(object):
                 if v == 0:
                     predictions_test = predictions
                     if self.config['output'] == 'softmax':
-                        if self.config["dataset"]=="mobiact":
+                        if self.config['NB_sensor_channels']==9:
                             test_labels = harwindow_batched_test["label"]
                         else:
                             test_labels = harwindow_batched_test["label"][:, 0]
