@@ -554,7 +554,7 @@ class Network_User(object):
                             'network': self.config['network'],
                             'output': self.config['output'],
                             'num_classes': self.config['num_classes'],
-                            'num_attributes': self.config['num_attributes'],
+                            #'num_attributes': self.config['num_attributes'],
                             'fully_convolutional': self.config['fully_convolutional'],
                             'labeltype': self.config['labeltype']
                         }
