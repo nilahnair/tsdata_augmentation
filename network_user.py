@@ -284,13 +284,13 @@ class Network_User(object):
         if self.config['usage_modus'] == 'train':
             print('networkuser')
             print(self.config['dataset_root'])
-            harwindows_train = HARWindows(csv_file=self.config['dataset_root'] + "train.csv",
+            harwindows_train = HARWindows(self.config, csv_file=self.config['dataset_root'] + "train.csv",
                                           root_dir=self.config['dataset_root'])
         elif self.config['usage_modus'] == 'train_final':
-            harwindows_train = HARWindows(csv_file=self.config['dataset_root'] + "train.csv",
+            harwindows_train = HARWindows(self.config, csv_file=self.config['dataset_root'] + "train.csv",
                                          root_dir=self.config['dataset_root'])
         elif self.config['usage_modus'] == 'fine_tuning':
-            harwindows_train = HARWindows(csv_file=self.config['dataset_root'] + "train.csv",
+            harwindows_train = HARWindows(self.config, csv_file=self.config['dataset_root'] + "train.csv",
                                          root_dir=self.config['dataset_root'])
 
         # Creating the dataloader
@@ -666,7 +666,7 @@ class Network_User(object):
         '''
 
         # Setting validation set and dataloader
-        harwindows_val = HARWindows(csv_file=self.config['dataset_root'] + "val.csv",
+        harwindows_val = HARWindows(self.config, csv_file=self.config['dataset_root'] + "val.csv",
                                     root_dir=self.config['dataset_root'])
 
         dataLoader_val = DataLoader(harwindows_val, batch_size=self.config['batch_size_val'])
@@ -773,7 +773,7 @@ class Network_User(object):
 
         # Setting the testing set
         logging.info('        Network_User:     Creating Dataloader---->')
-        harwindows_test = HARWindows(csv_file=self.config['dataset_root'] + "test.csv",
+        harwindows_test = HARWindows(self.config, csv_file=self.config['dataset_root'] + "test.csv",
                                      root_dir=self.config['dataset_root'])
 
         dataLoader_test = DataLoader(harwindows_test, batch_size=self.config['batch_size_train'], shuffle=False)
