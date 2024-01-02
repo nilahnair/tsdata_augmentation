@@ -331,6 +331,7 @@ def my_config():
     #pooling = config["pooling"]
     lr = config["lr"]
     bsize = config["batch_size_train"]
+    print(config["dataset_root"])
     '''
     print("configuration function began")
     dataset_idx = [0]
