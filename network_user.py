@@ -17,7 +17,7 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
 
-#from hdfs.config import catch
+from hdfs.config import catch
 
 import matplotlib.pyplot as plt
 from matplotlib import cm
@@ -445,9 +445,6 @@ class Network_User(object):
                         train_batch_l = harwindow_batched["labels"][:, :, 0]
                         train_batch_l = train_batch_l.reshape(-1)
                     elif self.config["fully_convolutional"] == "FC":
-                        print('harwindow batch')
-                        print(harwindow_batched["label"].shape)
-                        #train_batch_l = harwindow_batched["label"]
                         train_batch_l = harwindow_batched["label"][:, 0]
                         train_batch_l = train_batch_l.reshape(-1)
                 elif self.config['output'] == 'attribute':
@@ -515,8 +512,6 @@ class Network_User(object):
                     # Calling the val() function with the current network and criterion
                     del train_batch_v, noise
                     results_val, loss_val = self.validate(network_obj, criterion)
-                    
-                    self.exp.log_scalar("loss_val_int_{}".format(ea_itera), loss_val, itera)
 
                     elapsed_time_val = time.time() - start_time_val
 
@@ -526,10 +521,6 @@ class Network_User(object):
                     f1w_val.append(results_val['f1_weighted'])
                     f1m_val.append(results_val['f1_mean'])
 
-                    self.exp.log_scalar("accuracy_val_int_{}".format(ea_itera),results_val['acc'], itera)
-                    self.exp.log_scalar("f1_w_val_int_{}".format(ea_itera),results_val['f1_weighted'], itera)
-                    self.exp.log_scalar("f1_m_val_int_{}".format(ea_itera), results_val['f1_mean'], itera)
-                    
                     # print statistics
                     logging.info('\n')
                     logging.info(
@@ -622,14 +613,6 @@ class Network_User(object):
                         'Allocated {} GB Cached {} GB'.format(round(torch.cuda.memory_allocated(0)/1024**3, 1),
                                                               round(torch.cuda.memory_cached(0)/1024**3, 1)))
                     logging.info('\n\n--------------------------')
-                    
-                    if self.config["sacred"]==True:
-                        self.exp.log_scalar("accuracy_train_int_{}".format(ea_itera),results_train['acc'], itera)
-                        self.exp.log_scalar("f1_w_train_int_{}".format(ea_itera),results_train['f1_weighted'], itera)
-                        self.exp.log_scalar("f1_m_train_int_{}".format(ea_itera), results_train['f1_mean'], itera)
-                        self.exp.log_scalar("loss_train_int_{}".format(ea_itera), loss_train, itera)
-                      
-                        
             #Step of the scheduler
             scheduler.step()
 
@@ -650,9 +633,7 @@ class Network_User(object):
         np.savetxt(self.config['folder_exp'] + 'plots/f1m_val.txt', f1m_val, delimiter=",", fmt='%s')
         np.savetxt(self.config['folder_exp'] + 'plots/f1w_val.txt', f1w_val, delimiter=",", fmt='%s')
         np.savetxt(self.config['folder_exp'] + 'plots/loss_val.txt', losses_val, delimiter=",", fmt='%s')
-        
-        torch.save({'state_dict': network_obj.state_dict(),'network_config': network_config}, '/data/nnair/idnetwork/results/all/HAR_cnn_mocap_attr.pt')
-        
+
         del losses_train, accs_train, f1w_train, f1m_train
         del losses_val, accs_val, f1w_val, f1m_val
         del loss_train_val, accs_train_val, f1w_train_val, f1m_train_val
@@ -734,8 +715,6 @@ class Network_User(object):
                 if self.config['output'] == 'softmax':
                     loss = criterion(predictions, test_batch_l)
                 elif self.config['output'] == 'attribute':
-                    print(predictions.shape)
-                    print(test_batch_l.shape)
                     loss = criterion(predictions, test_batch_l[:, 1:])
                 loss_val = loss_val + loss.item()
 
@@ -745,6 +724,7 @@ class Network_User(object):
                     predictions_val = predictions
                     if self.config['output'] == 'softmax':
                         test_labels = harwindow_batched_val["label"][:, 0]
+                        test_labels = test_labels.reshape(-1)
                     elif self.config['output'] == 'attribute':
                         test_labels = harwindow_batched_val["label"]
                 else:
@@ -799,7 +779,6 @@ class Network_User(object):
         # Creating a network and loading the weights for testing
         # network is loaded from saved file in the folder of experiment
         logging.info('        Network_User:    Test:    creating network')
-        '''
         if self.config['network'] == 'cnn' or self.config['network'] == 'cnn_imu':
             network_obj = Network(self.config)
 
@@ -809,40 +788,7 @@ class Network_User(object):
 
             logging.info('        Network_User:    Test:    setting device')
             network_obj.to(self.device)
-        '''
-        #modification for LRP
-        network_obj = Network(self.config)
-        print("network weights before initialisation")
-        network_obj.init_weights()
-        print("initalised network with weight")
-        model_dict = network_obj.state_dict()
-        print("model dict with state dict loaded")
-        pretrained_dict= torch.load('/data/nnair/idnetwork/results/all/HAR_cnn_mocap_attr.pt')['state_dict']
-        print("network loaded from cnn_mocap_attr.pt")
-        
-        
-        
-        list_layers = ['conv1_1.weight', 'conv1_1.bias', 'conv1_2.weight', 'conv1_2.bias',
-                           'conv2_1.weight', 'conv2_1.bias', 'conv2_2.weight', 'conv2_2.bias',
-                           'fc3.weight', 'fc3.bias', 'fc4.weight', 'fc4.bias',
-                           'fc5.weight', 'fc5.bias']
-        
-        pretrained_dict = {k: v for k, v in pretrained_dict.items() if k in list_layers}
-        print(pretrained_dict)
 
-        logging.info('        Network_User:        Pretrained layers selected')
-        # 2. overwrite entries in the existing state dict
-        model_dict.update(pretrained_dict)
-        logging.info('        Network_User:        Pretrained layers selected')
-        # 3. load the new state dict
-        network_obj.load_state_dict(model_dict)
-        logging.info('        Network_User:        Weights loaded')
-        
-        print(network_obj)
-        network_obj.eval()
-        network_obj.to(self.device)
-        
-        ####################
         # Setting loss, only for being measured. Network wont be trained
         if self.config['output'] == 'softmax':
             logging.info('        Network_User:    Test:    setting criterion optimizer Softmax')
@@ -850,8 +796,7 @@ class Network_User(object):
         elif self.config['output'] == 'attribute':
             logging.info('        Network_User:    Test:    setting criterion optimizer Attribute')
             criterion = nn.BCELoss()
-        
-        
+
         loss_test = 0
 
         # Creating metric object
@@ -911,10 +856,6 @@ class Network_User(object):
                         test_labels = test_labels.reshape(-1)
                     elif self.config['output'] == 'attribute':
                         test_labels = harwindow_batched_test["label"]
-                        #########lrp change
-                        d= harwindow_batched_test["data"].numpy()
-                        l= harwindow_batched_test["label"].numpy()
-                        p= predictions.detach().cpu().numpy()
                 else:
                     predictions_test = torch.cat((predictions_test, predictions), dim=0)
                     if self.config['output'] == 'softmax':
@@ -922,15 +863,7 @@ class Network_User(object):
                         test_labels_batch = test_labels_batch.reshape(-1)
                     elif self.config['output'] == 'attribute':
                         test_labels_batch = harwindow_batched_test["label"]
-                        ############lrp change
-                        a= harwindow_batched_test["data"].numpy()
-                        b= harwindow_batched_test["label"].numpy()
-                        pre= predictions.detach().cpu().numpy()
-                        
                     test_labels = torch.cat((test_labels, test_labels_batch), dim=0)
-                    d=np.concatenate((d,a), axis=0)
-                    l=np.concatenate((l,b),)
-                    p=np.concatenate((p,pre), axis=0)
 
                 sys.stdout.write("\rTesting: Batch  {}/{}".format(v, len(dataLoader_test)))
                 sys.stdout.flush()
@@ -954,233 +887,7 @@ class Network_User(object):
             test_labels = test_labels
         elif self.config['output'] == 'attribute':
             test_labels = test_labels[:, 0]
-        
-            
-        #########################lrp changes
-        if self.config["dataset"]=='mocap':
-            npz_file = "/data/nnair/idnetwork/results/cnn_act.npz"
-        elif self.config["dataset"]=='mbientlab':
-            npz_file = "/data/nnair/idnetwork/results/cnn_act.npz"
-        
-        np.savez(npz_file, d=d, l=l, p=p)
-        
-        if self.config["dataset"]=='mocap':
-            with np.load("/data/nnair/lrp/exp1/cnn_mocap.npz") as data:
-                 d=data['d']
-                 l=data['l']
-                 p=data['p']
-                 
-        counterp0=[]
-        counterp1=[]
-        counterp2=[]
-        counterp3=[]
-        counterp4=[]
-        counterp5=[]
-        counterp6=[]
-        counterp7=[]
-        countern0=[]
-        countern1=[]
-        countern2=[]
-        countern3=[]
-        countern4=[]
-        countern5=[]
-        countern6=[]
-        countern7=[]
 
-        indxp0=[]
-        indxp1=[]
-        indxp2=[]
-        indxp3=[]
-        indxp4=[]
-        indxp5=[]
-        indxp6=[]
-        indxp7=[]
-        indxn0=[]
-        indxn1=[]
-        indxn2=[]
-        indxn3=[]
-        indxn4=[]
-        indxn5=[]
-        indxn6=[]
-        indxn7=[]
-        
-        for i in range(len(l)):
-            k=p[i]
-            #print(k)
-            for j in range(len(k)):
-                if j==0:
-                    if (l[i] == 0) and (np.argmax(k)==0):
-                        counterp0.append(k[j])
-                        indxp0.append(i)
-                    elif (l[i] == 0) and (np.argmax(k) !=0):
-                        countern0.append(k[j])
-                        indxn0.append(i)
-                elif j==1:
-                    if (l[i] == 1) and (np.argmax(k)==1):
-                        counterp1.append(k[j])
-                        indxp1.append(i)
-                    elif (l[i] == 1) and (np.argmax(k)!=1):
-                        countern1.append(k[j])
-                        indxn1.append(i)
-                elif j==2:
-                    if (l[i] == 2) and (np.argmax(k)==2):
-                        counterp2.append(k[j])
-                        indxp2.append(i)
-                    elif (l[i] == 2) and (np.argmax(k)!=2):
-                        countern2.append(k[j])
-                        indxn2.append(i)
-                elif j==3:
-                    if (l[i] == 3) and (np.argmax(k)==3):
-                        counterp3.append(k[j])
-                        indxp3.append(i)
-                    elif (l[i] == 3) and (np.argmax(k)!=3):
-                        countern3.append(k[j])
-                        indxn3.append(i)
-                elif j==4:
-                    if (l[i] == 4) and (np.argmax(k)==4):
-                        counterp4.append(k[j])
-                        indxp4.append(i)
-                    elif (l[i] == 4) and (np.argmax(k)==4):
-                        countern4.append(k[j])
-                        indxn4.append(i)
-                elif j==5:
-                    if (l[i] == 5) and (np.argmax(k)==5):
-                        counterp5.append(k[j])
-                        indxp5.append(i)
-                    elif (l[i] == 5) and (np.argmax(k)==5):
-                        countern5.append(k[j])
-                        indxn5.append(i)
-                elif j==6:    
-                    if (l[i] == 6) and (np.argmax(k)==6):
-                        counterp6.append(k[j])
-                        indxp6.append(i)
-                    elif (l[i] == 6) and (np.argmax(k)==6):
-                        countern6.append(k[j])
-                        indxn6.append(i)
-                elif j==7:
-                    if (l[i] == 7) and (np.argmax(k)==7):
-                        counterp7.append(k[j])
-                        indxp7.append(i)
-                    elif (l[i] == 7) and (np.argmax(k)==7):
-                        countern7.append(k[j])
-                        indxn7.append(i)
-        b_div=[0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]
-                        
-        fig1,axs1 = plt.subplots(1,1, figsize=(10,7), tight_layout= True)
-        axs1.hist(counterp0, bins= b_div)
-        plt.xlabel("Softmax")
-        plt.ylabel("No: of values")
-        plt.title('Sub 0 - +ve')
-        plt.savefig("i_sub0_p.png")
-        
-        fig2,axs2 = plt.subplots(1,1, figsize=(10,7), tight_layout= True)
-        axs2.hist(countern0, bins= b_div)
-        plt.xlabel("Softmax")
-        plt.ylabel("No: of values")
-        plt.title('Sub 0 - -ve')
-        plt.savefig("i_sub0_n.png")
-        
-        fig3,axs3 = plt.subplots(1,1, figsize=(10,7), tight_layout= True)
-        axs3.hist(counterp1, bins= b_div)
-        plt.xlabel("Softmax")
-        plt.ylabel("No: of values")
-        plt.title('Sub 1 - +ve')
-        plt.savefig("i_sub1_p.png")
-        
-        fig4,axs4 = plt.subplots(1,1, figsize=(10,7), tight_layout= True)
-        axs4.hist(countern1, bins= b_div)
-        plt.xlabel("Softmax")
-        plt.ylabel("No: of values")
-        plt.title('Sub 1 - -ve')
-        plt.savefig("i_sub1_n.png")
-        
-        fig5,axs5 = plt.subplots(1,1, figsize=(10,7), tight_layout= True)
-        axs5.hist(counterp2, bins= b_div)
-        plt.xlabel("Softmax")
-        plt.ylabel("No: of values")
-        plt.title('Sub 2 - +ve')
-        plt.savefig("i_sub2_p.png")
-        
-        fig6,axs6 = plt.subplots(1,1, figsize=(10,7), tight_layout= True)
-        axs6.hist(countern2, bins= b_div)
-        plt.xlabel("Softmax")
-        plt.ylabel("No: of values")
-        plt.title('Sub 2 - -ve')
-        plt.savefig("i_sub2_n.png")
-        
-        fig7,axs7 = plt.subplots(1,1, figsize=(10,7), tight_layout= True)
-        axs7.hist(counterp3, bins= b_div)
-        plt.xlabel("Softmax")
-        plt.ylabel("No: of values")
-        plt.title('Sub 3 - +ve')
-        plt.savefig("i_sub3_p.png")
-        
-        fig8,axs8 = plt.subplots(1,1, figsize=(10,7), tight_layout= True)
-        axs8.hist(countern3, bins= b_div)
-        plt.xlabel("Softmax")
-        plt.ylabel("No: of values")
-        plt.title('Sub 3 - -ve')
-        plt.savefig("i_sub3_n.png")
-        
-        fig9,axs9 = plt.subplots(1,1, figsize=(10,7), tight_layout= True)
-        axs9.hist(counterp4, bins= b_div)
-        plt.xlabel("Softmax")
-        plt.ylabel("No: of values")
-        plt.title('Sub 4 - +ve')
-        plt.savefig("i_sub4_p.png")
-        
-        fig10,axs10 = plt.subplots(1,1, figsize=(10,7), tight_layout= True)
-        axs10.hist(countern4, bins= b_div)
-        plt.xlabel("Softmax")
-        plt.ylabel("No: of values")
-        plt.title('Sub 4 - -ve')
-        plt.savefig("i_sub4_n.png")
-        
-        fig11,axs11 = plt.subplots(1,1, figsize=(10,7), tight_layout= True)
-        axs11.hist(counterp5, bins= b_div)
-        plt.xlabel("Softmax")
-        plt.ylabel("No: of values")
-        plt.title('Sub 5 - +ve')
-        plt.savefig("i_sub5_p.png")
-        
-        fig12,axs12 = plt.subplots(1,1, figsize=(10,7), tight_layout= True)
-        axs12.hist(countern5, bins= b_div)
-        plt.xlabel("Softmax")
-        plt.ylabel("No: of values")
-        plt.title('Sub 5 - -ve')
-        plt.savefig("i_sub5_n.png")
-        
-        fig13,axs13 = plt.subplots(1,1, figsize=(10,7), tight_layout= True)
-        axs13.hist(counterp6, bins= b_div)
-        plt.xlabel("Softmax")
-        plt.ylabel("No: of values")
-        plt.title('Sub 6 - +ve')
-        plt.savefig("i_sub6_p.png")
-        
-        fig14,axs14 = plt.subplots(1,1, figsize=(10,7), tight_layout= True)
-        axs14.hist(countern6, bins= b_div)
-        plt.xlabel("Softmax")
-        plt.ylabel("No: of values")
-        plt.title('Sub 6 - -ve')
-        plt.savefig("i_sub6_n.png")
-        
-        fig15,axs15 = plt.subplots(1,1, figsize=(10,7), tight_layout= True)
-        axs15.hist(counterp7, bins= b_div)
-        plt.xlabel("Softmax")
-        plt.ylabel("No: of values")
-        plt.title('Sub 7 - +ve')
-        plt.savefig("i_sub7_p.png")
-        
-        fig16,axs16 = plt.subplots(1,1, figsize=(10,7), tight_layout= True)
-        axs16.hist(countern7, bins= b_div)
-        plt.xlabel("Softmax")
-        plt.ylabel("No: of values")
-        plt.title('Sub 7 - -ve')
-        plt.savefig("i_sub7_n.png")           
-                        
-                        
-                        
-                        
         # Computing confusion matrix
         confusion_matrix = np.zeros((self.config['num_classes'], self.config['num_classes']))
         for cl in range(self.config['num_classes']):
