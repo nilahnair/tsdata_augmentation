@@ -273,7 +273,7 @@ def configuration(dataset_idx, network_idx, output_idx, usage_modus_idx=0, datas
                      'fully_convolutional': fully_convolutional,
                      'labeltype': labeltype,
                      'sacred':sacred,
-                     'augmentations':0}
+                     'augmentations':augmentations[0]}
 
     return configuration
 
