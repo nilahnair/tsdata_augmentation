@@ -144,12 +144,12 @@ def configuration(dataset_idx, network_idx, output_idx, usage_modus_idx=0, datas
     batch_size_train = {
         'cnn': {'mocap': 100, 'mbientlab': 100, 'mobiact': 100, 'motionsense': 100, 'sisfall': 100},
         'lstm': {'mocap': 100, 'mbientlab': 100, 'mobiact': 100, 'motionsense': 100, 'sisfall': 100},
-        'cnn_imu': {'mocap': 200, 'mbientlab': 200, 'mobiact': 100, 'motionsense': 100, 'sisfall': 100},
+        'cnn_imu': {'mocap': 200, 'mbientlab': 50, 'mobiact': 100, 'motionsense': 100, 'sisfall': 100},
         'cnn_transformer': {'mocap': 200, 'mbientlab': 100, 'mobiact': 100, 'motionsense': 100, 'sisfall': 100}}
 
     batch_size_val = {'cnn': {'mocap': 100, 'mbientlab': 100, 'mobiact': 100, 'motionsense': 100,'sisfall': 100},
                       'lstm': {'mocap': 100, 'mbientlab': 100, 'mobiact': 100, 'motionsense': 100,'sisfall': 100},
-                      'cnn_imu': {'mocap': 200, 'mbientlab': 100,'mobiact': 100, 'motionsense': 100,'sisfall': 100},
+                      'cnn_imu': {'mocap': 200, 'mbientlab': 50,'mobiact': 100, 'motionsense': 100,'sisfall': 100},
                       'cnn_transformer': {'mocap': 200, 'mbientlab': 100,'mobiact': 100, 'motionsense': 100,'sisfall': 100}}
 
     # Number of iterations for accumulating the gradients
@@ -196,7 +196,7 @@ def configuration(dataset_idx, network_idx, output_idx, usage_modus_idx=0, datas
     if output[output_idx] == 'softmax':
         labeltype = "class"
         folder_exp = {'mocap': "/data/nnair/icpr2024/lara/results/trial/",
-                    'mbientlab': "/data/nnair/icpr2024/lara_imu/results/trial/",
+                    'mbientlab': "/data/nnair/icpr2024/lara_imu/results/exp1/",
                     'mobiact': "/data/nnair/icpr2024/mobiact/results/trial/",
                     'motionsense': "/data/nnair/icpr2024/motionsense/results/trial/",
                     'sisfall': "/data/nnair/icpr2024/sisfall/results/trial/"
