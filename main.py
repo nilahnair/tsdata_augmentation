@@ -120,7 +120,7 @@ def configuration(dataset_idx, network_idx, output_idx, usage_modus_idx=0, datas
                             'lstm': {'softmax': 10, 'attribute': 10},
                             'cnn_imu': {'softmax': 30, 'attribute': 10},
                             'cnn_transformer':{'softmax': 6, 'attribute': 6}},
-              'mobiact': {'cnn': {'softmax': 6, 'attribute': 50},
+              'mobiact': {'cnn': {'softmax': 3, 'attribute': 50},
                           'lstm': {'softmax': 10, 'attribute': 5},
                           'cnn_imu': {'softmax': 32, 'attribute': 50},
                           'cnn_transformer':{'softmax': 6, 'attribute': 6}},
@@ -320,7 +320,7 @@ def setup_experiment_logger(logging_level=logging.DEBUG, filename=None):
 @ex.config
 def my_config():
     print("configuration function began")
-    config = configuration(dataset_idx=4,
+    config = configuration(dataset_idx=2,
                            network_idx=0,
                            output_idx=0,
                            usage_modus_idx=0,
