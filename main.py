@@ -272,7 +272,8 @@ def configuration(dataset_idx, network_idx, output_idx, usage_modus_idx=0, datas
                      'percentages_names': percentages_names[percentage_idx],
                      'fully_convolutional': fully_convolutional,
                      'labeltype': labeltype,
-                     'sacred':sacred}
+                     'sacred':sacred,
+                     'augmentations':0}
 
     return configuration
 
