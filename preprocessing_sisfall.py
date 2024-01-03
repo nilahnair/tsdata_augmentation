@@ -299,7 +299,7 @@ def generate_data(ids, activities, sliding_window_length, sliding_window_step, d
                print(activities_id[act])
                #print(activities_id[act].type)
                print(np.full((train_no), activities_id[act]))
-               print(np.full((train_no), activities_id[act]).type)
+               #print(np.full((train_no), activities_id[act]).type)
                
                
                if usage_modus=='trainval':
