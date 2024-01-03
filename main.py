@@ -128,7 +128,7 @@ def configuration(dataset_idx, network_idx, output_idx, usage_modus_idx=0, datas
                              'lstm': {'softmax': 10, 'attribute': 5},
                              'cnn_imu': {'softmax': 32, 'attribute': 10},
                              'cnn_transformer':{'softmax': 6, 'attribute': 6}},
-              'sisfall': {'cnn': {'softmax': 6, 'attribute': 50},
+              'sisfall': {'cnn': {'softmax': 1, 'attribute': 50},
                                   'lstm': {'softmax': 10, 'attribute': 5},
                                   'cnn_imu': {'softmax': 32, 'attribute': 50},
                                   'cnn_transformer':{'softmax': 6, 'attribute': 6}},
