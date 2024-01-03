@@ -397,7 +397,7 @@ def generate_data(ids, activities, sliding_window_length, sliding_window_step, d
                     seq = np.require(seq, dtype=float)
                     # Storing the sequences
                     #obj = {"data": seq, "label": labelid}
-                    obj = {"data": seq, "label": act_test[f], "labels": act_all_test[f], "label": labelid_test[f]}
+                    obj = {"data": seq, "label": act_test[f], "labels": act_all_test[f], "identity": labelid_test[f]}
                 
                     f = open(os.path.join(data_dir_test, 'seq_{0:06}.pkl'.format(counter_seq)), 'wb')
                     pickle.dump(obj, f, protocol=pickle.HIGHEST_PROTOCOL)
