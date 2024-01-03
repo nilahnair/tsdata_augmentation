@@ -320,9 +320,7 @@ def generate_data(ids, activities, sliding_window_length, sliding_window_step, d
             data_val, act_val, act_all_val, labelid_val, labelid_all_val = opp_sliding_window(X_val, act_val.astype(int), id_val, label_pos_end = False)
         elif usage_modus=='test':
             data_test, act_test, act_all_test, labelid_test, labelid_all_test = opp_sliding_window(X_test, act_test.astype(int), id_test, label_pos_end = False)
-            print('print activity label min max')
-            print(act_test.min)
-            print(act_test.max)
+           
     except:
         print("error in sliding window")
         
