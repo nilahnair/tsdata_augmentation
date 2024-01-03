@@ -322,10 +322,10 @@ def generate_data(ids, activities, sliding_window_length, sliding_window_step, d
                     
     try: 
         if usage_modus=='trainval':
-            data_train, act_train, act_all_train, labelid_train, labelid_all_train = opp_sliding_window(X_train, act_train, id_train, label_pos_end = False)
-            data_val, act_val, act_all_val, labelid_val, labelid_all_val = opp_sliding_window(X_val, act_val, id_val, label_pos_end = False)
+            data_train, act_train, act_all_train, labelid_train, labelid_all_train = opp_sliding_window(X_train, act_train.astype(int), id_train, label_pos_end = False)
+            data_val, act_val, act_all_val, labelid_val, labelid_all_val = opp_sliding_window(X_val, act_val.astype(int), id_val, label_pos_end = False)
         elif usage_modus=='test':
-            data_test, act_test, act_all_test, labelid_test, labelid_all_test = opp_sliding_window(X_test, act_test, id_test, label_pos_end = False)
+            data_test, act_test, act_all_test, labelid_test, labelid_all_test = opp_sliding_window(X_test, act_test.astype(int), id_test, label_pos_end = False)
     except:
         print("error in sliding window")
         
