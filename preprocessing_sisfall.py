@@ -295,6 +295,9 @@ def generate_data(ids, activities, sliding_window_length, sliding_window_step, d
                val_no=round(0.15*frames)
                tv= train_no+val_no
                
+               print('activties id')
+               print(activities_id[act])
+               
                if usage_modus=='trainval':
                     X_train = np.vstack((X_train, all_segments[0:train_no,:]))
                     act_train = np.append(act_train, np.full((train_no), activities_id[act]))
