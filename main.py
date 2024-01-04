@@ -326,7 +326,7 @@ def my_config():
                            usage_modus_idx=0,
                            #dataset_fine_tuning_idx=0,
                            reshape_input=False,
-                           learning_rates_idx=0,
+                           learning_rates_idx=1,
                            name_counter=0,
                            freeze=0,
                            fully_convolutional=False,
