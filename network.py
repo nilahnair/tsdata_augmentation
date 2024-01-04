@@ -68,14 +68,14 @@ class Network(nn.Module):
                                        F=(self.config['filter_size'], 1),
                                        P=padding, S=(1, 1), type_layer='conv')
         logging.info('            Network: Wx {} and Hx {}'.format(Wx, Hx))
-        '''
+        
         if self.config["network"] == "lstm":
-            self.hidden_dim = hidden_dim
-            self.layer_dim = layer_dim
-            self.rnn = nn.LSTM(input_dim, hidden_dim, layer_dim, batch_first=True)
+            self.hidden_dim = self.config['hidden_layer']
+            self.layer_dim = self.config['layer_dim']
+            self.rnn = nn.LSTM(in_channels, self.hidden_dim, self.layer_dim, batch_first=True)
             self.batch_size = None
             self.hidden = None
-        '''
+        
             
         # set the Conv layers
         if self.config["network"] == "cnn":
@@ -319,6 +319,8 @@ class Network(nn.Module):
                 self.fc4 = nn.Linear(256 * 5, 256)
             elif self.config["network"] == "cnn_imu" and self.config["NB_sensor_channels"] == 27:
                 self.fc4 = nn.Linear(256 * 3, 256)
+            elif self.config["network"]=="lstm":
+                self.fc4 = nn.Linear(256, 256)
 
         if self.config["fully_convolutional"] == "FCN":
             if self.config['output'] == 'softmax':
@@ -374,7 +376,6 @@ class Network(nn.Module):
                 x = torch.cat((x_LA, x_LL, x_N, x_RA, x_RL), 1)
         elif self.config["network"]=="lstm":
             x=self.lstm(x)
-            x = x[:, -1, :]
 
         # Selecting MLP, either FC or FCN
         if self.config["fully_convolutional"] == "FCN":
