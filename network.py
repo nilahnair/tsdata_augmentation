@@ -376,18 +376,12 @@ class Network(nn.Module):
                 x_LA, x_LL, x_N, x_RA, x_RL = self.tcnn_imu(x)
                 x = torch.cat((x_LA, x_LL, x_N, x_RA, x_RL), 1)
         elif self.config["network"]=="lstm":
-            print('step1')
             x = x.permute(0,2,3,1)
             x = x.view(x.size()[0], x.size()[1], x.size()[2])
-            print('step2')
             x=self.lstm(x)
-            print(x.shape)
             x = x.reshape((-1, x.size()[1] * x.size()[2]))
-            print(x.shape)
-            print('step3')
             x=self.fc3(x)
-            print('step33')
-
+            
         # Selecting MLP, either FC or FCN
         if self.config["fully_convolutional"] == "FCN":
             x = F.dropout(x, training=self.training)
@@ -398,22 +392,18 @@ class Network(nn.Module):
             x = x.view(x.size()[0], x.size()[1], x.size()[2])
             x = x.permute(0, 2, 1)
         elif self.config["fully_convolutional"] == "FC":
-            print('step4')
             x = F.dropout(x, training=self.training)
             x = F.relu(self.fc4(x))
             x = F.dropout(x, training=self.training)
             x = self.fc5(x)
-            print(x.shape)
-            print('step5')
-
+            
         if self.config['output'] == 'attribute':
             x = self.sigmoid(x)
 
         if not self.training:
-            print('step6')
             if self.config['output'] == 'softmax' or self.config['output'] == 'identity':
                 x = self.softmax(x)
-                print('step7')
+               
 
         return x
         #return x11.clone(), x12.clone(), x21.clone(), x22.clone(), x
@@ -484,11 +474,8 @@ class Network(nn.Module):
         @param x: input sequence
         @return x: Prediction of the network
         '''
-        print('step22')
         h0, c0 = self.init_hidden(x)
         x, (hn, cn) = self.rnn(x, (h0, c0))
-        print(x.shape)
-        print('step23')
         #out = self.fc(out[:, -1, :])
         return x
     
