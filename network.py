@@ -72,7 +72,7 @@ class Network(nn.Module):
         if self.config["network"] == "lstm":
             self.hidden_dim = self.config['hidden_layer']
             self.layer_dim = self.config['layer_dim']
-            self.rnn = nn.LSTM(in_channels, self.hidden_dim, self.layer_dim, batch_first=True)
+            self.rnn = nn.LSTM(self.config['NB_sensor_channels'], self.hidden_dim, self.layer_dim, batch_first=True)
             self.batch_size = None
             self.hidden = None
         
@@ -375,6 +375,8 @@ class Network(nn.Module):
                 x_LA, x_LL, x_N, x_RA, x_RL = self.tcnn_imu(x)
                 x = torch.cat((x_LA, x_LL, x_N, x_RA, x_RL), 1)
         elif self.config["network"]=="lstm":
+            x = x.permute(0,3,2,1)
+            x = x.view(x.size()[0], x.size()[1], -1)
             x=self.lstm(x)
 
         # Selecting MLP, either FC or FCN
