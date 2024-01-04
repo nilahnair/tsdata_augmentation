@@ -377,7 +377,7 @@ class Network(nn.Module):
         elif self.config["network"]=="lstm":
             print('shape')
             print(x.shape)
-            x = x.permute(0,3,2,1)
+            x = x.permute(0,2,3,1)
             print(x.shape)
             x = x.view(x.size()[0], x.size()[1], x.size()[2])
             x=self.lstm(x)
