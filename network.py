@@ -382,7 +382,7 @@ class Network(nn.Module):
             print('step2')
             x=self.lstm(x)
             print(x.shape)
-            x = x.reshape((100, -1))
+            x = x.reshape((-1, x.size()[1] * x.size()[2]))
             print(x.shape)
             print('step3')
             x=self.fc3(x)
