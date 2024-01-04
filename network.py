@@ -73,6 +73,7 @@ class Network(nn.Module):
             self.hidden_dim = self.config['hidden_layer']
             self.layer_dim = self.config['layer_dim']
             self.rnn = nn.LSTM(self.config['NB_sensor_channels'], self.hidden_dim, self.layer_dim, batch_first=True)
+            self.fc3 = nn.Linear(self.config['hidden_layer'] * self.config['sliding_window_length'], 256)
             self.batch_size = None
             self.hidden = None
         
@@ -381,9 +382,11 @@ class Network(nn.Module):
             print('step2')
             x=self.lstm(x)
             print(x.shape)
-            x = x.reshape((-1, 256))
+            x = x.reshape((100, -1))
             print(x.shape)
             print('step3')
+            x=self.fc3(x)
+            print('step33')
 
         # Selecting MLP, either FC or FCN
         if self.config["fully_convolutional"] == "FCN":
@@ -484,6 +487,7 @@ class Network(nn.Module):
         print('step22')
         h0, c0 = self.init_hidden(x)
         x, (hn, cn) = self.rnn(x, (h0, c0))
+        print(x.shape)
         print('step23')
         #out = self.fc(out[:, -1, :])
         return x
