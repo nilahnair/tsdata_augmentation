@@ -301,13 +301,20 @@ class Network_User(object):
         if self.config['network'] == 'cnn' or self.config['network'] == 'cnn_imu':
             network_obj = Network(self.config)
             network_obj.init_weights()
-        elif self.config["network"] == 'lstm':
-            network_obj = Network(self.config)
 
             # IF finetuning, load the weights from a source dataset
             if self.config["usage_modus"] == "fine_tuning":
                 network_obj = self.load_weights(network_obj)
 
+            # Displaying size of tensors
+            logging.info('        Network_User:    Train:    network layers')
+            for l in list(network_obj.named_parameters()):
+                logging.info('        Network_User:    Train:    {} : {}'.format(l[0], l[1].detach().numpy().shape))
+
+            logging.info('        Network_User:    Train:    setting device')
+            network_obj.to(self.device)
+        elif self.config["network"] == 'lstm':
+            network_obj = Network(self.config)
             # Displaying size of tensors
             logging.info('        Network_User:    Train:    network layers')
             for l in list(network_obj.named_parameters()):
