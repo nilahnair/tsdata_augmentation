@@ -397,6 +397,7 @@ class Network(nn.Module):
             x = F.relu(self.fc4(x))
             x = F.dropout(x, training=self.training)
             x = self.fc5(x)
+            print(x.shape)
             print('step5')
 
         if self.config['output'] == 'attribute':
