@@ -19,7 +19,7 @@ import datetime
 from sacred import Experiment
 from sacred.observers import MongoObserver
 
-ex= Experiment('lara-imu cnn-imu trial')
+ex= Experiment('lara cnn-imu trial')
 
 ex.observers.append(MongoObserver.create(url='curtiz',
                                          db_name='nnair_sacred',
@@ -144,12 +144,12 @@ def configuration(dataset_idx, network_idx, output_idx, usage_modus_idx=0, datas
     batch_size_train = {
         'cnn': {'mocap': 100, 'mbientlab': 100, 'mobiact': 100, 'motionsense': 100, 'sisfall': 100},
         'lstm': {'mocap': 100, 'mbientlab': 100, 'mobiact': 100, 'motionsense': 100, 'sisfall': 100},
-        'cnn_imu': {'mocap': 100, 'mbientlab': 100, 'mobiact': 100, 'motionsense': 100, 'sisfall': 100},
+        'cnn_imu': {'mocap': 50, 'mbientlab': 100, 'mobiact': 100, 'motionsense': 100, 'sisfall': 100},
         'cnn_transformer': {'mocap': 200, 'mbientlab': 100, 'mobiact': 100, 'motionsense': 100, 'sisfall': 100}}
 
     batch_size_val = {'cnn': {'mocap': 100, 'mbientlab': 100, 'mobiact': 100, 'motionsense': 100,'sisfall': 100},
                       'lstm': {'mocap': 100, 'mbientlab': 100, 'mobiact': 100, 'motionsense': 100,'sisfall': 100},
-                      'cnn_imu': {'mocap': 100, 'mbientlab': 100,'mobiact': 100, 'motionsense': 100,'sisfall': 100},
+                      'cnn_imu': {'mocap': 50, 'mbientlab': 100,'mobiact': 100, 'motionsense': 100,'sisfall': 100},
                       'cnn_transformer': {'mocap': 200, 'mbientlab': 100,'mobiact': 100, 'motionsense': 100,'sisfall': 100}}
 
     # Number of iterations for accumulating the gradients
@@ -195,7 +195,7 @@ def configuration(dataset_idx, network_idx, output_idx, usage_modus_idx=0, datas
     
     if output[output_idx] == 'softmax':
         labeltype = "class"
-        folder_exp = {'mocap': "/data/nnair/icpr2024/lara/results/exp1/",
+        folder_exp = {'mocap': "/data/nnair/icpr2024/lara/results/trial/",
                     'mbientlab': "/data/nnair/icpr2024/lara_imu/results/trial/",
                     'mobiact': "/data/nnair/icpr2024/mobiact/results/exp1/",
                     'motionsense': "/data/nnair/icpr2024/motionsense/results/trial/",
@@ -217,7 +217,7 @@ def configuration(dataset_idx, network_idx, output_idx, usage_modus_idx=0, datas
                     }
 
     # GPU
-    os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "1"
     GPU = 0
 
     # Labels position on the segmented window
@@ -320,13 +320,13 @@ def setup_experiment_logger(logging_level=logging.DEBUG, filename=None):
 @ex.config
 def my_config():
     print("configuration function began")
-    config = configuration(dataset_idx=1,
+    config = configuration(dataset_idx=0,
                            network_idx=2,
                            output_idx=0,
                            usage_modus_idx=0,
                            #dataset_fine_tuning_idx=0,
                            reshape_input=False,
-                           learning_rates_idx=1,
+                           learning_rates_idx=0,
                            name_counter=0,
                            freeze=0,
                            fully_convolutional=False,
