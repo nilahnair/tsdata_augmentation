@@ -301,6 +301,8 @@ class Network_User(object):
         if self.config['network'] == 'cnn' or self.config['network'] == 'cnn_imu':
             network_obj = Network(self.config)
             network_obj.init_weights()
+        elif self.config["network"] == 'lstm':
+            network_obj = Network(self.config)
 
             # IF finetuning, load the weights from a source dataset
             if self.config["usage_modus"] == "fine_tuning":
