@@ -198,7 +198,7 @@ def configuration(dataset_idx, network_idx, output_idx, usage_modus_idx=0, datas
         folder_exp = {'mocap': "/data/nnair/icpr2024/lara/results/exp1/",
                     'mbientlab': "/data/nnair/icpr2024/lara_imu/results/trial/",
                     'mobiact': "/data/nnair/icpr2024/mobiact/results/trial/",
-                    'motionsense': "/data/nnair/icpr2024/motionsense/results/trail/",
+                    'motionsense': "/data/nnair/icpr2024/motionsense/results/trial/",
                     'sisfall': "/data/nnair/icpr2024/sisfall/results/trial/"
                     }
     elif output[output_idx] == 'attribute':
