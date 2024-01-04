@@ -19,7 +19,7 @@ import datetime
 from sacred import Experiment
 from sacred.observers import MongoObserver
 
-ex= Experiment('sisfall cnn trial')
+ex= Experiment('motionsense cnn exp1')
 
 ex.observers.append(MongoObserver.create(url='curtiz',
                                          db_name='nnair_sacred',
@@ -73,7 +73,7 @@ def configuration(dataset_idx, network_idx, output_idx, usage_modus_idx=0, datas
 
     # It was thought to have different LR per dataset, but experimentally have worked the next three
     # Learning rate
-    learning_rates = [0.01, 0.0001, 0.00001, 0.000001]
+    learning_rates = [0.001, 0.0001, 0.00001, 0.000001]
     lr = {'mocap': {'cnn': learning_rates[learning_rates_idx],
                     'lstm': learning_rates[learning_rates_idx],
                     'cnn_imu': learning_rates[learning_rates_idx],
@@ -124,7 +124,7 @@ def configuration(dataset_idx, network_idx, output_idx, usage_modus_idx=0, datas
                           'lstm': {'softmax': 10, 'attribute': 5},
                           'cnn_imu': {'softmax': 32, 'attribute': 50},
                           'cnn_transformer':{'softmax': 6, 'attribute': 6}},
-              'motionsense': {'cnn': {'softmax': 6, 'attribute': 50},
+              'motionsense': {'cnn': {'softmax': 30, 'attribute': 50},
                              'lstm': {'softmax': 10, 'attribute': 5},
                              'cnn_imu': {'softmax': 32, 'attribute': 10},
                              'cnn_transformer':{'softmax': 6, 'attribute': 6}},
@@ -217,7 +217,7 @@ def configuration(dataset_idx, network_idx, output_idx, usage_modus_idx=0, datas
                     }
 
     # GPU
-    os.environ["CUDA_VISIBLE_DEVICES"] = "7"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "4"
     GPU = 0
 
     # Labels position on the segmented window
@@ -320,7 +320,7 @@ def setup_experiment_logger(logging_level=logging.DEBUG, filename=None):
 @ex.config
 def my_config():
     print("configuration function began")
-    config = configuration(dataset_idx=4,
+    config = configuration(dataset_idx=3,
                            network_idx=0,
                            output_idx=0,
                            usage_modus_idx=0,
