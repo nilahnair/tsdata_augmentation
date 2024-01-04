@@ -68,7 +68,15 @@ class Network(nn.Module):
                                        F=(self.config['filter_size'], 1),
                                        P=padding, S=(1, 1), type_layer='conv')
         logging.info('            Network: Wx {} and Hx {}'.format(Wx, Hx))
-
+        '''
+        if self.config["network"] == "lstm":
+            self.hidden_dim = hidden_dim
+            self.layer_dim = layer_dim
+            self.rnn = nn.LSTM(input_dim, hidden_dim, layer_dim, batch_first=True)
+            self.batch_size = None
+            self.hidden = None
+        '''
+            
         # set the Conv layers
         if self.config["network"] == "cnn":
             self.conv1_1 = nn.Conv2d(in_channels=in_channels,
@@ -364,6 +372,9 @@ class Network(nn.Module):
             else:
                 x_LA, x_LL, x_N, x_RA, x_RL = self.tcnn_imu(x)
                 x = torch.cat((x_LA, x_LL, x_N, x_RA, x_RL), 1)
+        elif self.config["network"]=="lstm":
+            x=self.lstm(x)
+            x = x[:, -1, :]
 
         # Selecting MLP, either FC or FCN
         if self.config["fully_convolutional"] == "FCN":
@@ -448,6 +459,23 @@ class Network(nn.Module):
             Hy = 1 + (Hx - F[1]) / S[1]
 
         return Wy, Hy
+    
+    def lstm(self, x):
+        '''
+        lstm network
+
+        @param x: input sequence
+        @return x: Prediction of the network
+        '''
+        h0, c0 = self.init_hidden(x)
+        x, (hn, cn) = self.rnn(x, (h0, c0))
+        #out = self.fc(out[:, -1, :])
+        return x
+    
+    def init_hidden(self, x):
+        h0 = torch.zeros(self.layer_dim, x.size(0), self.hidden_dim)
+        c0 = torch.zeros(self.layer_dim, x.size(0), self.hidden_dim)
+        return [t.cuda() for t in (h0, c0)]
 
 
     def tcnn(self, x):
