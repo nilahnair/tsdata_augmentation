@@ -19,7 +19,7 @@ import datetime
 from sacred import Experiment
 from sacred.observers import MongoObserver
 
-ex= Experiment('sisfall cnn exp1')
+ex= Experiment('sisfall cnn trial')
 
 ex.observers.append(MongoObserver.create(url='curtiz',
                                          db_name='nnair_sacred',
@@ -73,7 +73,7 @@ def configuration(dataset_idx, network_idx, output_idx, usage_modus_idx=0, datas
 
     # It was thought to have different LR per dataset, but experimentally have worked the next three
     # Learning rate
-    learning_rates = [0.001, 0.0001, 0.00001, 0.000001]
+    learning_rates = [0.01, 0.0001, 0.00001, 0.000001]
     lr = {'mocap': {'cnn': learning_rates[learning_rates_idx],
                     'lstm': learning_rates[learning_rates_idx],
                     'cnn_imu': learning_rates[learning_rates_idx],
@@ -199,7 +199,7 @@ def configuration(dataset_idx, network_idx, output_idx, usage_modus_idx=0, datas
                     'mbientlab': "/data/nnair/icpr2024/lara_imu/results/trial/",
                     'mobiact': "/data/nnair/icpr2024/mobiact/results/trial/",
                     'motionsense': "/data/nnair/icpr2024/motionsense/results/exp1/",
-                    'sisfall': "/data/nnair/icpr2024/sisfall/results/exp1/"
+                    'sisfall': "/data/nnair/icpr2024/sisfall/results/trial/"
                     }
     elif output[output_idx] == 'attribute':
         labeltype = "attributes"
