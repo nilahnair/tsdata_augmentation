@@ -397,13 +397,16 @@ class Network(nn.Module):
             x = F.relu(self.fc4(x))
             x = F.dropout(x, training=self.training)
             x = self.fc5(x)
+            print('step5')
 
         if self.config['output'] == 'attribute':
             x = self.sigmoid(x)
 
         if not self.training:
+            print('step6')
             if self.config['output'] == 'softmax' or self.config['output'] == 'identity':
                 x = self.softmax(x)
+                print('step7')
 
         return x
         #return x11.clone(), x12.clone(), x21.clone(), x22.clone(), x
