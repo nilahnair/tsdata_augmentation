@@ -380,6 +380,9 @@ class Network(nn.Module):
             x = x.view(x.size()[0], x.size()[1], x.size()[2])
             print('step2')
             x=self.lstm(x)
+            print(x.shape)
+            x = x.reshape((-1, 256))
+            print(x.shape)
             print('step3')
 
         # Selecting MLP, either FC or FCN
