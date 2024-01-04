@@ -375,12 +375,12 @@ class Network(nn.Module):
                 x_LA, x_LL, x_N, x_RA, x_RL = self.tcnn_imu(x)
                 x = torch.cat((x_LA, x_LL, x_N, x_RA, x_RL), 1)
         elif self.config["network"]=="lstm":
-            print('shape')
-            print(x.shape)
+            print('step1')
             x = x.permute(0,2,3,1)
-            print(x.shape)
             x = x.view(x.size()[0], x.size()[1], x.size()[2])
+            print('step2')
             x=self.lstm(x)
+            print('step3')
 
         # Selecting MLP, either FC or FCN
         if self.config["fully_convolutional"] == "FCN":
@@ -392,6 +392,7 @@ class Network(nn.Module):
             x = x.view(x.size()[0], x.size()[1], x.size()[2])
             x = x.permute(0, 2, 1)
         elif self.config["fully_convolutional"] == "FC":
+            print('step4')
             x = F.dropout(x, training=self.training)
             x = F.relu(self.fc4(x))
             x = F.dropout(x, training=self.training)
@@ -473,8 +474,10 @@ class Network(nn.Module):
         @param x: input sequence
         @return x: Prediction of the network
         '''
+        print('step22')
         h0, c0 = self.init_hidden(x)
         x, (hn, cn) = self.rnn(x, (h0, c0))
+        print('step23')
         #out = self.fc(out[:, -1, :])
         return x
     
