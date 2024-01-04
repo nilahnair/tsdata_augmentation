@@ -376,7 +376,7 @@ class Network(nn.Module):
                 x = torch.cat((x_LA, x_LL, x_N, x_RA, x_RL), 1)
         elif self.config["network"]=="lstm":
             x = x.permute(0,3,2,1)
-            x = x.view(x.size()[0], x.size()[1], -1)
+            x = x.view(x.size()[0], x.size()[1], x.size()[2])
             x=self.lstm(x)
 
         # Selecting MLP, either FC or FCN
