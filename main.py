@@ -19,7 +19,7 @@ import datetime
 from sacred import Experiment
 from sacred.observers import MongoObserver
 
-ex= Experiment('lara_imu lstm trial')
+ex= Experiment('sisfall cnn trial')
 
 ex.observers.append(MongoObserver.create(url='curtiz',
                                          db_name='nnair_sacred',
@@ -142,12 +142,12 @@ def configuration(dataset_idx, network_idx, output_idx, usage_modus_idx=0, datas
 
     # Batch size
     batch_size_train = {
-        'cnn': {'mocap': 100, 'mbientlab': 100, 'mobiact': 50, 'motionsense': 50, 'sisfall': 50},
+        'cnn': {'mocap': 100, 'mbientlab': 100, 'mobiact': 50, 'motionsense': 50, 'sisfall': 100},
         'lstm': {'mocap': 100, 'mbientlab': 100, 'mobiact': 100, 'motionsense': 100, 'sisfall': 100},
         'cnn_imu': {'mocap': 100, 'mbientlab': 100, 'mobiact': 100, 'motionsense': 100, 'sisfall': 100},
         'cnn_transformer': {'mocap': 200, 'mbientlab': 100, 'mobiact': 100, 'motionsense': 100, 'sisfall': 100}}
 
-    batch_size_val = {'cnn': {'mocap': 100, 'mbientlab': 100, 'mobiact': 50, 'motionsense': 50,'sisfall': 50},
+    batch_size_val = {'cnn': {'mocap': 100, 'mbientlab': 100, 'mobiact': 50, 'motionsense': 50,'sisfall': 100},
                       'lstm': {'mocap': 100, 'mbientlab': 100, 'mobiact': 100, 'motionsense': 100,'sisfall': 100},
                       'cnn_imu': {'mocap': 100, 'mbientlab': 100,'mobiact': 100, 'motionsense': 100,'sisfall': 100},
                       'cnn_transformer': {'mocap': 200, 'mbientlab': 100,'mobiact': 100, 'motionsense': 100,'sisfall': 100}}
@@ -219,7 +219,7 @@ def configuration(dataset_idx, network_idx, output_idx, usage_modus_idx=0, datas
                     }
 
     # GPU
-    os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "3"
     GPU = 0
 
     # Labels position on the segmented window
@@ -325,8 +325,8 @@ def setup_experiment_logger(logging_level=logging.DEBUG, filename=None):
 @ex.config
 def my_config():
     print("configuration function began")
-    config = configuration(dataset_idx=1,
-                           network_idx=1,
+    config = configuration(dataset_idx=4,
+                           network_idx=0,
                            output_idx=0,
                            usage_modus_idx=0,
                            #dataset_fine_tuning_idx=0,
