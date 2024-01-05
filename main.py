@@ -19,7 +19,7 @@ import datetime
 from sacred import Experiment
 from sacred.observers import MongoObserver
 
-ex= Experiment('mobiact lstm trial')
+ex= Experiment('mobiact lstm exp1')
 
 ex.observers.append(MongoObserver.create(url='curtiz',
                                          db_name='nnair_sacred',
@@ -199,7 +199,7 @@ def configuration(dataset_idx, network_idx, output_idx, usage_modus_idx=0, datas
         labeltype = "class"
         folder_exp = {'mocap': "/data/nnair/icpr2024/lara/results/trial1/",
                     'mbientlab': "/data/nnair/icpr2024/lara_imu/results/trial/",
-                    'mobiact': "/data/nnair/icpr2024/mobiact/results/trial/",
+                    'mobiact': "/data/nnair/icpr2024/mobiact/results/exp1/",
                     'motionsense': "/data/nnair/icpr2024/motionsense/results/trial1/",
                     'sisfall': "/data/nnair/icpr2024/sisfall/results/exp1/"
                     }
