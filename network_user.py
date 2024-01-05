@@ -824,6 +824,15 @@ class Network_User(object):
 
             logging.info('        Network_User:    Test:    setting device')
             network_obj.to(self.device)
+        elif self.config['network'] == 'lstm':
+            network_obj = Network(self.config)
+
+            #Loading the model
+            network_obj.load_state_dict(torch.load(self.config['folder_exp'] + 'network.pt')['state_dict'])
+            network_obj.eval()
+
+            logging.info('        Network_User:    Test:    setting device')
+            network_obj.to(self.device)
 
         # Setting loss, only for being measured. Network wont be trained
         if self.config['output'] == 'softmax':
