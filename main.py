@@ -19,7 +19,7 @@ import datetime
 from sacred import Experiment
 from sacred.observers import MongoObserver
 
-ex= Experiment('motionsense lstm 100-0.001-15 trial')
+ex= Experiment('motionsense lstm 50-0.001-15 trial1')
 
 ex.observers.append(MongoObserver.create(url='curtiz',
                                          db_name='nnair_sacred',
@@ -143,12 +143,12 @@ def configuration(dataset_idx, network_idx, output_idx, usage_modus_idx=0, datas
     # Batch size
     batch_size_train = {
         'cnn': {'mocap': 100, 'mbientlab': 100, 'mobiact': 100, 'motionsense': 50, 'sisfall': 50},
-        'lstm': {'mocap': 100, 'mbientlab': 100, 'mobiact': 50, 'motionsense': 100, 'sisfall': 100},
+        'lstm': {'mocap': 100, 'mbientlab': 100, 'mobiact': 50, 'motionsense': 50, 'sisfall': 100},
         'cnn_imu': {'mocap': 100, 'mbientlab': 100, 'mobiact': 100, 'motionsense': 100, 'sisfall': 100},
         'cnn_transformer': {'mocap': 200, 'mbientlab': 100, 'mobiact': 100, 'motionsense': 100, 'sisfall': 100}}
 
     batch_size_val = {'cnn': {'mocap': 100, 'mbientlab': 100, 'mobiact': 100, 'motionsense': 50,'sisfall': 50},
-                      'lstm': {'mocap': 100, 'mbientlab': 100, 'mobiact': 50, 'motionsense': 100,'sisfall': 100},
+                      'lstm': {'mocap': 100, 'mbientlab': 100, 'mobiact': 50, 'motionsense': 50,'sisfall': 100},
                       'cnn_imu': {'mocap': 100, 'mbientlab': 100,'mobiact': 100, 'motionsense': 100,'sisfall': 100},
                       'cnn_transformer': {'mocap': 200, 'mbientlab': 100,'mobiact': 100, 'motionsense': 100,'sisfall': 100}}
 
@@ -200,7 +200,7 @@ def configuration(dataset_idx, network_idx, output_idx, usage_modus_idx=0, datas
         folder_exp = {'mocap': "/data/nnair/icpr2024/lara/results/trial1/",
                     'mbientlab': "/data/nnair/icpr2024/lara_imu/results/trial1/",
                     'mobiact': "/data/nnair/icpr2024/mobiact/results/trial1/",
-                    'motionsense': "/data/nnair/icpr2024/motionsense/results/trial/",
+                    'motionsense': "/data/nnair/icpr2024/motionsense/results/trial1/",
                     'sisfall': "/data/nnair/icpr2024/sisfall/results/exp1/"
                     }
     elif output[output_idx] == 'attribute':
