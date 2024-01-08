@@ -19,7 +19,7 @@ import datetime
 from sacred import Experiment
 from sacred.observers import MongoObserver
 
-ex= Experiment('sisfall lstm 100-0.001-10 exp1')
+ex= Experiment('sisfall lstm 100-0.001-15 exp1')
 
 ex.observers.append(MongoObserver.create(url='curtiz',
                                          db_name='nnair_sacred',
@@ -129,7 +129,7 @@ def configuration(dataset_idx, network_idx, output_idx, usage_modus_idx=0, datas
                              'cnn_imu': {'softmax': 32, 'attribute': 10},
                              'cnn_transformer':{'softmax': 6, 'attribute': 6}},
               'sisfall': {'cnn': {'softmax': 30, 'attribute': 50},
-                                  'lstm': {'softmax': 10, 'attribute': 5},
+                                  'lstm': {'softmax': 15, 'attribute': 5},
                                   'cnn_imu': {'softmax': 32, 'attribute': 50},
                                   'cnn_transformer':{'softmax': 6, 'attribute': 6}},
               
