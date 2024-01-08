@@ -19,7 +19,7 @@ import datetime
 from sacred import Experiment
 from sacred.observers import MongoObserver
 
-ex= Experiment('mobiact cnn_trans 100-0.001-6 transt')
+ex= Experiment('lara_imu cnn_trans 100-0.001-6 transt')
 
 ex.observers.append(MongoObserver.create(url='curtiz',
                                          db_name='nnair_sacred',
@@ -229,7 +229,7 @@ def configuration(dataset_idx, network_idx, output_idx, usage_modus_idx=0, datas
                     }
 
     # GPU
-    os.environ["CUDA_VISIBLE_DEVICES"] = "5"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "4"
     GPU = 0
 
     # Labels position on the segmented window
@@ -341,7 +341,7 @@ def setup_experiment_logger(logging_level=logging.DEBUG, filename=None):
 @ex.config
 def my_config():
     print("configuration function began")
-    config = configuration(dataset_idx=2,
+    config = configuration(dataset_idx=1,
                            network_idx=3,
                            output_idx=0,
                            usage_modus_idx=0,
