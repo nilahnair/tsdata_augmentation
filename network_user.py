@@ -323,7 +323,7 @@ class Network_User(object):
             logging.info('        Network_User:    Train:    setting device')
             network_obj.to(self.device)
         
-        elif self.config['network'] == 'transformer':
+        elif self.config['network'] == 'cnn_transformer':
             network_obj = Network(self.config)
             # IF finetuning, load the weights from a source dataset
             if self.config["usage_modus"] == "fine_tuning":
