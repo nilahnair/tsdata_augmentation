@@ -19,7 +19,7 @@ import datetime
 from sacred import Experiment
 from sacred.observers import MongoObserver
 
-ex= Experiment('motionsense lstm 100-0.001-30 trial')
+ex= Experiment('sisfall lstm 50-0.0001-10 trial1')
 
 ex.observers.append(MongoObserver.create(url='curtiz',
                                          db_name='nnair_sacred',
@@ -129,7 +129,7 @@ def configuration(dataset_idx, network_idx, output_idx, usage_modus_idx=0, datas
                              'cnn_imu': {'softmax': 32, 'attribute': 10},
                              'cnn_transformer':{'softmax': 6, 'attribute': 6}},
               'sisfall': {'cnn': {'softmax': 30, 'attribute': 50},
-                                  'lstm': {'softmax': 15, 'attribute': 5},
+                                  'lstm': {'softmax': 10, 'attribute': 5},
                                   'cnn_imu': {'softmax': 32, 'attribute': 50},
                                   'cnn_transformer':{'softmax': 6, 'attribute': 6}},
               
@@ -143,12 +143,12 @@ def configuration(dataset_idx, network_idx, output_idx, usage_modus_idx=0, datas
     # Batch size
     batch_size_train = {
         'cnn': {'mocap': 100, 'mbientlab': 100, 'mobiact': 100, 'motionsense': 50, 'sisfall': 50},
-        'lstm': {'mocap': 100, 'mbientlab': 100, 'mobiact': 50, 'motionsense': 100, 'sisfall': 100},
+        'lstm': {'mocap': 100, 'mbientlab': 100, 'mobiact': 50, 'motionsense': 100, 'sisfall': 50},
         'cnn_imu': {'mocap': 100, 'mbientlab': 100, 'mobiact': 100, 'motionsense': 100, 'sisfall': 100},
         'cnn_transformer': {'mocap': 200, 'mbientlab': 100, 'mobiact': 100, 'motionsense': 100, 'sisfall': 100}}
 
     batch_size_val = {'cnn': {'mocap': 100, 'mbientlab': 100, 'mobiact': 100, 'motionsense': 50,'sisfall': 50},
-                      'lstm': {'mocap': 100, 'mbientlab': 100, 'mobiact': 50, 'motionsense': 100,'sisfall': 100},
+                      'lstm': {'mocap': 100, 'mbientlab': 100, 'mobiact': 50, 'motionsense': 100,'sisfall': 50},
                       'cnn_imu': {'mocap': 100, 'mbientlab': 100,'mobiact': 100, 'motionsense': 100,'sisfall': 100},
                       'cnn_transformer': {'mocap': 200, 'mbientlab': 100,'mobiact': 100, 'motionsense': 100,'sisfall': 100}}
 
@@ -201,7 +201,7 @@ def configuration(dataset_idx, network_idx, output_idx, usage_modus_idx=0, datas
                     'mbientlab': "/data/nnair/icpr2024/lara_imu/results/trial1/",
                     'mobiact': "/data/nnair/icpr2024/mobiact/results/trial1/",
                     'motionsense': "/data/nnair/icpr2024/motionsense/results/trial/",
-                    'sisfall': "/data/nnair/icpr2024/sisfall/results/exp1/"
+                    'sisfall': "/data/nnair/icpr2024/sisfall/results/trial1/"
                     }
     elif output[output_idx] == 'attribute':
         labeltype = "attributes"
@@ -325,13 +325,13 @@ def setup_experiment_logger(logging_level=logging.DEBUG, filename=None):
 @ex.config
 def my_config():
     print("configuration function began")
-    config = configuration(dataset_idx=3,
+    config = configuration(dataset_idx=4,
                            network_idx=1,
                            output_idx=0,
                            usage_modus_idx=0,
                            #dataset_fine_tuning_idx=0,
                            reshape_input=False,
-                           learning_rates_idx=0,
+                           learning_rates_idx=1,
                            name_counter=0,
                            freeze=0,
                            fully_convolutional=False,

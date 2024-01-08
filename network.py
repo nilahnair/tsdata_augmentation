@@ -76,7 +76,21 @@ class Network(nn.Module):
             self.fc3 = nn.Linear(self.config['hidden_layer'] * self.config['sliding_window_length'], 256)
             self.batch_size = None
             self.hidden = None
-        
+        elif self.config["network"]=="cnn_transformer":
+            self.input_dim = self.config['NB_sensor_channels']
+            self.output_dim = self.config['num_classes']
+            self.window_size = self.config['sliding_window_length']
+            self.n_embedding_layer= self.config['trans_embed_layer']
+            transformer_dim=self.config["transformer_dim"]
+            self.transformer_dim = transformer_dim if self.n_embedding_layers > 0 else self.input_dim
+            self.n_head = get_nhead(self.transformer_dim, self.config['transformer_heads'])
+            self.dim_fc = self.config['transformer_fc']
+            self.n_layers = self.config['transformer_layers']
+            self.use_pos_embedding = self.config['trans_pos_embed']
+            activation_function='gelu'
+            self.activation_function = nn.GELU() if activation_function.lower() == 'gelu' else nn.ReLU()
+            
+            
             
         # set the Conv layers
         if self.config["network"] == "cnn":
@@ -301,7 +315,9 @@ class Network(nn.Module):
                                             int(self.config['NB_sensor_channels'] / 5), 256)
                 elif self.config["NB_sensor_channels"] == 126:
                     self.fc3_RL = nn.Linear(self.config['num_filters'] * int(Wx) * 24, 256)
-
+        
+        if self.config["network"]=="cnn_transformer":
+            
         # MLP
         if self.config["fully_convolutional"] == "FCN":
             if self.config["network"] == "cnn":
@@ -659,3 +675,9 @@ class Network(nn.Module):
             return x_LA, x_N, x_RA
         else:
             return x_LA, x_LL, x_N, x_RA, x_RL
+        
+def get_nhead(embed_dim, n_head):
+    for hd in range(n_head, 0, -1):
+        if embed_dim % hd == 0:
+            logging.info('N_head = {}'.format(hd))
+            return hd
