@@ -322,7 +322,21 @@ class Network_User(object):
 
             logging.info('        Network_User:    Train:    setting device')
             network_obj.to(self.device)
+        
+        elif self.config['network'] == 'transformer':
+            network_obj = Network(self.config)
+            # IF finetuning, load the weights from a source dataset
+            if self.config["usage_modus"] == "fine_tuning":
+                network_obj = self.load_weights(network_obj)
 
+            # Displaying size of tensors
+            logging.info('        Network_User:    Train:    network layers')
+            for l in list(network_obj.named_parameters()):
+                logging.info('        Network_User:    Train:    {} : {}'.format(l[0], l[1].detach().numpy().shape))
+
+            logging.info('        Network_User:    Train:    setting device')
+            network_obj.to(self.device)
+            
         # Setting loss
         if self.config['output'] == 'softmax':
             logging.info('        Network_User:    Train:    setting criterion optimizer Softmax')
@@ -342,11 +356,14 @@ class Network_User(object):
             network_obj = self.set_required_grad(network_obj)
 
         # Setting optimizer
-        optimizer = optim.RMSprop(network_obj.parameters(), lr=self.config['lr'], alpha=0.95)
-
-        # Setting scheduler
-        step_lr = self.config['epochs'] / 3
-        scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=math.ceil(step_lr), gamma=0.1)
+        if self.config['network']=='cnn_transformer':
+            optimizer = optim.Adam(network_obj.parameters(), lr=self.config['lr'], eps= 1e-10, weight_decay=1e-4)
+            scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=5, gamma=0.5)
+        else:  
+            optimizer = optim.RMSprop(network_obj.parameters(), lr=self.config['lr'], alpha=0.95)
+            # Setting scheduler
+            step_lr = self.config['epochs'] / 3
+            scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=math.ceil(step_lr), gamma=0.1)
 
         if self.config['plotting']:
             # Plotting the input or feature maps through the network.
@@ -815,7 +832,7 @@ class Network_User(object):
         # Creating a network and loading the weights for testing
         # network is loaded from saved file in the folder of experiment
         logging.info('        Network_User:    Test:    creating network')
-        if self.config['network'] == 'cnn' or self.config['network'] == 'cnn_imu':
+        if self.config['network'] == 'cnn' or self.config['network'] == 'cnn_imu' or self.config['network']=="cnn_transformer":
             network_obj = Network(self.config)
 
             #Loading the model
