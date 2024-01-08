@@ -19,7 +19,7 @@ import datetime
 from sacred import Experiment
 from sacred.observers import MongoObserver
 
-ex= Experiment('lara cnntrans 100-0.001-6 transt')
+ex= Experiment('lara_imu lstm 100-0.001-15 trial2')
 
 ex.observers.append(MongoObserver.create(url='curtiz',
                                          db_name='nnair_sacred',
@@ -207,8 +207,8 @@ def configuration(dataset_idx, network_idx, output_idx, usage_modus_idx=0, datas
     
     if output[output_idx] == 'softmax':
         labeltype = "class"
-        folder_exp = {'mocap': "/data/nnair/icpr2024/lara/results/transt/",
-                    'mbientlab': "/data/nnair/icpr2024/lara_imu/results/transt/",
+        folder_exp = {'mocap': "/data/nnair/icpr2024/lara/results/trial2/",
+                    'mbientlab': "/data/nnair/icpr2024/lara_imu/results/trial2/",
                     'mobiact': "/data/nnair/icpr2024/mobiact/results/transt/",
                     'motionsense': "/data/nnair/icpr2024/motionsense/results/transt/",
                     'sisfall': "/data/nnair/icpr2024/sisfall/results/transt/"
@@ -341,8 +341,8 @@ def setup_experiment_logger(logging_level=logging.DEBUG, filename=None):
 @ex.config
 def my_config():
     print("configuration function began")
-    config = configuration(dataset_idx=0,
-                           network_idx=3,
+    config = configuration(dataset_idx=1,
+                           network_idx=1,
                            output_idx=0,
                            usage_modus_idx=0,
                            #dataset_fine_tuning_idx=0,
