@@ -163,8 +163,18 @@ def configuration(dataset_idx, network_idx, output_idx, usage_modus_idx=0, datas
                    'motionsense': {'cnn': 64, 'lstm': 64, 'cnn_imu': 64, 'cnn_transformer':64},
                    'sisfall': {'cnn': 64, 'lstm': 64, 'cnn_imu': 64, 'cnn_transformer':64}
                    }
+    
+    #lstm hyperparameters hidden layer and layer dimension
     lstm_hidlyr= 256
     lstm_lyrdim= 4
+    
+    #cnntransformer hyperparameters
+    transformer_dim=64
+    n_head=8
+    dim_fc=128
+    n_layers=6
+    n_embedding_layers=4
+    use_pos_embedding=True
 
     freeze_options = [False, True]
 
@@ -288,7 +298,13 @@ def configuration(dataset_idx, network_idx, output_idx, usage_modus_idx=0, datas
                      'sacred':sacred,
                      'augmentations':augmentations[0],
                      'hidden_layer':lstm_hidlyr,
-                     'layer_dim':lstm_lyrdim
+                     'layer_dim':lstm_lyrdim,
+                     'trans_embed_layer': n_embedding_layers,
+                     'transformer_dim': transformer_dim,
+                     'transformer_heads': n_head,
+                     'transformer_fc': dim_fc,
+                     'transformer_layers': n_layers,
+                     'trans_pos_embed': use_pos_embedding,
                      }
 
     return configuration

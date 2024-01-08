@@ -12,7 +12,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F 
 import torch.optim as optim
-
+from torch.nn import TransformerEncoder, TransformerEncoderLayer
 import numpy as np
 
 
@@ -317,46 +317,66 @@ class Network(nn.Module):
                     self.fc3_RL = nn.Linear(self.config['num_filters'] * int(Wx) * 24, 256)
         
         if self.config["network"]=="cnn_transformer":
+            self.input_proj = nn.ModuleList()
+            for _ in range(self.n_embedding_layers):
+                d_in = self.input_dim if len(self.input_proj) == 0 else self.transformer_dim
+                conv_layer = nn.Sequential(nn.Conv1d(d_in, self.transformer_dim, 1), self.activation_function)
+                self.input_proj.append(conv_layer)
             
-        # MLP
-        if self.config["fully_convolutional"] == "FCN":
-            if self.config["network"] == "cnn":
-                self.fc4 = nn.Conv2d(in_channels=256,
+            #setting parameters
+            self.cls_token = nn.Parameter(torch.zeros((1, self.transformer_dim)))
+        
+            #setting positional encoding
+            if self.use_pos_embedding:
+                self.position_embed = nn.Parameter(torch.randn(self.window_size + 1, 1, self.transformer_dim))
+        
+            #set transformer encoder
+            encoder_layer = TransformerEncoderLayer(d_model = self.transformer_dim, nhead = self.n_head, dim_feedforward = self.dim_fc,
+                                       dropout = 0.1, activation = 'gelu')
+            self.transformer_encoder = TransformerEncoder(encoder_layer, num_layers = self.n_layers, norm = nn.LayerNorm(self.transformer_dim))
+        
+            #setting mlp layers
+            self.imu_head = nn.Sequential(nn.LayerNorm(self.transformer_dim), nn.Linear(self.transformer_dim, self.transformer_dim//4),
+                                      self.activation_function, nn.Dropout(0.1), nn.Linear(self.transformer_dim//4, self.output_dim))
+        else:# MLP
+            if self.config["fully_convolutional"] == "FCN":
+                if self.config["network"] == "cnn":
+                    self.fc4 = nn.Conv2d(in_channels=256,
                                      out_channels=256, kernel_size=(1, 1), stride=1, padding=0)
-            elif self.config["network"] == "cnn_imu" and self.config["NB_sensor_channels"] in [30, 126]:
-                self.fc4 = nn.Conv2d(in_channels=256 * 5,
+                elif self.config["network"] == "cnn_imu" and self.config["NB_sensor_channels"] in [30, 126]:
+                    self.fc4 = nn.Conv2d(in_channels=256 * 5,
                                      out_channels=256, kernel_size=(1, 1), stride=1, padding=0)
-            elif self.config["network"] == "cnn_imu" and self.config["NB_sensor_channels"] == 27:
-                self.fc4 = nn.Conv2d(in_channels=256 * 3,
+                elif self.config["network"] == "cnn_imu" and self.config["NB_sensor_channels"] == 27:
+                    self.fc4 = nn.Conv2d(in_channels=256 * 3,
                                      out_channels=256, kernel_size=(1, 1), stride=1, padding=0)
-        elif self.config["fully_convolutional"] == "FC":
-            if self.config["network"] == "cnn":
-                self.fc4 = nn.Linear(256, 256)
-            elif self.config["network"] == "cnn_imu" and self.config["NB_sensor_channels"] in [30, 126]:
-                self.fc4 = nn.Linear(256 * 5, 256)
-            elif self.config["network"] == "cnn_imu" and self.config["NB_sensor_channels"] == 27:
-                self.fc4 = nn.Linear(256 * 3, 256)
-            elif self.config["network"]=="lstm":
-                self.fc4 = nn.Linear(256, 256)
+            elif self.config["fully_convolutional"] == "FC":
+                if self.config["network"] == "cnn":
+                    self.fc4 = nn.Linear(256, 256)
+                elif self.config["network"] == "cnn_imu" and self.config["NB_sensor_channels"] in [30, 126]:
+                    self.fc4 = nn.Linear(256 * 5, 256)
+                elif self.config["network"] == "cnn_imu" and self.config["NB_sensor_channels"] == 27:
+                    self.fc4 = nn.Linear(256 * 3, 256)
+                elif self.config["network"]=="lstm":
+                    self.fc4 = nn.Linear(256, 256)
 
-        if self.config["fully_convolutional"] == "FCN":
-            if self.config['output'] == 'softmax':
-                self.fc5 = nn.Conv2d(in_channels=256,
+            if self.config["fully_convolutional"] == "FCN":
+                if self.config['output'] == 'softmax':
+                    self.fc5 = nn.Conv2d(in_channels=256,
                                      out_channels=self.config['num_classes'], kernel_size=(1, 1), stride=1, padding=0)
-            elif self.config['output'] == 'attribute':
-                self.fc5 = nn.Conv2d(in_channels=256,
+                elif self.config['output'] == 'attribute':
+                    self.fc5 = nn.Conv2d(in_channels=256,
                                      out_channels=self.config['num_attributes'],
                                      kernel_size=(1, 1), stride=1, padding=0)
-            elif self.config['output'] == 'identity':
-                self.fc5 = nn.Conv2d(in_channels=256,
+                elif self.config['output'] == 'identity':
+                    self.fc5 = nn.Conv2d(in_channels=256,
                                      out_channels=self.config['num_classes'], kernel_size=(1, 1), stride=1, padding=0)
-        elif self.config["fully_convolutional"] == "FC":
-            if self.config['output'] == 'softmax':
-                self.fc5 = nn.Linear(256, self.config['num_classes'])
-            elif self.config['output'] == 'attribute':
-                self.fc5 = nn.Linear(256, self.config['num_attributes'])
-            elif self.config['output'] == 'identity':
-                self.fc5 = nn.Linear(256, self.config['num_classes'])
+            elif self.config["fully_convolutional"] == "FC":
+                if self.config['output'] == 'softmax':
+                    self.fc5 = nn.Linear(256, self.config['num_classes'])
+                elif self.config['output'] == 'attribute':
+                    self.fc5 = nn.Linear(256, self.config['num_attributes'])
+                elif self.config['output'] == 'identity':
+                    self.fc5 = nn.Linear(256, self.config['num_classes'])
 
         self.avgpool = nn.AvgPool2d(kernel_size=[1, self.config['NB_sensor_channels']])
 
@@ -398,8 +418,37 @@ class Network(nn.Module):
             x = x.reshape((-1, x.size()[1] * x.size()[2]))
             x=self.fc3(x)
             
-        # Selecting MLP, either FC or FCN
-        if self.config["fully_convolutional"] == "FCN":
+            
+        if self.config["network"]=="cnn_transformer":
+            #here[B,1,Win,D] to [B,Win,D,1]
+            x=x.permute(0,2,3,1)
+            #to [B,D,Win]
+            x = x.view(x.size()[0], x.size()[1], x.size()[2])
+            #testing if the below line makes things work
+            x=x.permute(0,2,1)
+            #input embedding
+            for conv_layer in self.input_proj:
+                x = conv_layer(x)
+            
+            # Reshaping: [B, D', Win] -> [Win, B, D'] 
+            x = x.permute(2, 0, 1)
+        
+            # Prepend class token: [Win, B, D']  -> [Win+1, B, D']
+            cls_token = self.cls_token.unsqueeze(1).repeat(1, x.shape[1], 1)
+            x = torch.cat([cls_token, x])
+        
+            #position embedding
+            if self.use_pos_embedding:
+                x += self.position_embed
+            
+            #transformer
+            # Transformer Encoder pass
+            x = self.transformer_encoder(x)[0]
+            # Pass through fully-connected layers
+            x= self.imu_head(x)
+            
+            # Selecting MLP, either FC or FCN
+        elif self.config["fully_convolutional"] == "FCN":
             x = F.dropout(x, training=self.training)
             x = F.relu(self.fc4(x))
             x = F.dropout(x, training=self.training)
@@ -429,9 +478,16 @@ class Network(nn.Module):
         '''
         Applying initialisation of layers
         '''
-        self.apply(Network._init_weights_orthonormal)
+        if self.config['network']=="cnn_transformer":
+            for p in self.parameters():
+                if p.dim() > 1:
+                    nn.init.xavier_uniform_(p)
+        else:
+            self.apply(Network._init_weights_orthonormal)
         return
-
+    
+    def __str__(self):
+        return 'Transformer_Encoder with dim={} & activation={}'.format(self.transformer_dim, str(self.activation_function))
 
     @staticmethod
     def _init_weights_orthonormal(m):
