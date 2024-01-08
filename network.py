@@ -82,7 +82,7 @@ class Network(nn.Module):
             self.window_size = self.config['sliding_window_length']
             self.n_embedding_layer= self.config['trans_embed_layer']
             transformer_dim=self.config["transformer_dim"]
-            self.transformer_dim = transformer_dim if self.n_embedding_layers > 0 else self.input_dim
+            self.transformer_dim = transformer_dim if self.n_embedding_layer > 0 else self.input_dim
             self.n_head = get_nhead(self.transformer_dim, self.config['transformer_heads'])
             self.dim_fc = self.config['transformer_fc']
             self.n_layers = self.config['transformer_layers']
