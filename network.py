@@ -318,7 +318,7 @@ class Network(nn.Module):
         
         if self.config["network"]=="cnn_transformer":
             self.input_proj = nn.ModuleList()
-            for _ in range(self.n_embedding_layers):
+            for _ in range(self.n_embedding_layer):
                 d_in = self.input_dim if len(self.input_proj) == 0 else self.transformer_dim
                 conv_layer = nn.Sequential(nn.Conv1d(d_in, self.transformer_dim, 1), self.activation_function)
                 self.input_proj.append(conv_layer)
