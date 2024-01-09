@@ -19,7 +19,7 @@ import datetime
 from sacred import Experiment
 from sacred.observers import MongoObserver
 
-ex= Experiment('motionsense lstm 50-0.001-15 trial2')
+ex= Experiment('sisfall lstm 50-0.001-15 trial2')
 
 ex.observers.append(MongoObserver.create(url='curtiz',
                                          db_name='nnair_sacred',
@@ -129,7 +129,7 @@ def configuration(dataset_idx, network_idx, output_idx, usage_modus_idx=0, datas
                              'cnn_imu': {'softmax': 32, 'attribute': 10},
                              'cnn_transformer':{'softmax': 15, 'attribute': 6}},
               'sisfall': {'cnn': {'softmax': 30, 'attribute': 50},
-                                  'lstm': {'softmax': 10, 'attribute': 5},
+                                  'lstm': {'softmax': 15, 'attribute': 5},
                                   'cnn_imu': {'softmax': 32, 'attribute': 50},
                                   'cnn_transformer':{'softmax': 15, 'attribute': 6}},
               
@@ -211,7 +211,7 @@ def configuration(dataset_idx, network_idx, output_idx, usage_modus_idx=0, datas
                     'mbientlab': "/data/nnair/icpr2024/lara_imu/results/transt/",
                     'mobiact': "/data/nnair/icpr2024/mobiact/results/transt/",
                     'motionsense': "/data/nnair/icpr2024/motionsense/results/trial2/",
-                    'sisfall': "/data/nnair/icpr2024/sisfall/results/transt/"
+                    'sisfall': "/data/nnair/icpr2024/sisfall/results/trial2/"
                     }
     elif output[output_idx] == 'attribute':
         labeltype = "attributes"
@@ -341,7 +341,7 @@ def setup_experiment_logger(logging_level=logging.DEBUG, filename=None):
 @ex.config
 def my_config():
     print("configuration function began")
-    config = configuration(dataset_idx=3,
+    config = configuration(dataset_idx=4,
                            network_idx=1,
                            output_idx=0,
                            usage_modus_idx=0,
