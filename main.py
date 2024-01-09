@@ -19,7 +19,7 @@ import datetime
 from sacred import Experiment
 from sacred.observers import MongoObserver
 
-ex= Experiment('mobiact cnntrans 100-0.001-15 transt')
+ex= Experiment('lara_imu cnntrans 100-0.00001-15 transt')
 
 ex.observers.append(MongoObserver.create(url='curtiz',
                                          db_name='nnair_sacred',
@@ -119,7 +119,7 @@ def configuration(dataset_idx, network_idx, output_idx, usage_modus_idx=0, datas
               'mbientlab': {'cnn': {'softmax': 10, 'attribute': 10},
                             'lstm': {'softmax': 15, 'attribute': 10},
                             'cnn_imu': {'softmax': 30, 'attribute': 10},
-                            'cnn_transformer':{'softmax': 6, 'attribute': 6}},
+                            'cnn_transformer':{'softmax': 15, 'attribute': 6}},
               'mobiact': {'cnn': {'softmax': 10, 'attribute': 50},
                           'lstm': {'softmax': 15, 'attribute': 5},
                           'cnn_imu': {'softmax': 32, 'attribute': 50},
@@ -229,7 +229,7 @@ def configuration(dataset_idx, network_idx, output_idx, usage_modus_idx=0, datas
                     }
 
     # GPU
-    os.environ["CUDA_VISIBLE_DEVICES"] = "3"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "4"
     GPU = 0
 
     # Labels position on the segmented window
@@ -341,13 +341,13 @@ def setup_experiment_logger(logging_level=logging.DEBUG, filename=None):
 @ex.config
 def my_config():
     print("configuration function began")
-    config = configuration(dataset_idx=2,
+    config = configuration(dataset_idx=1,
                            network_idx=3,
                            output_idx=0,
                            usage_modus_idx=0,
                            #dataset_fine_tuning_idx=0,
                            reshape_input=False,
-                           learning_rates_idx=0,
+                           learning_rates_idx=2,
                            name_counter=0,
                            freeze=0,
                            fully_convolutional=False,
