@@ -19,7 +19,7 @@ import datetime
 from sacred import Experiment
 from sacred.observers import MongoObserver
 
-ex= Experiment('mobiact lstm 100-0.001-15 trial2')
+ex= Experiment('sisfall cnntrans 100-0.001-15 transt')
 
 ex.observers.append(MongoObserver.create(url='curtiz',
                                          db_name='nnair_sacred',
@@ -131,7 +131,7 @@ def configuration(dataset_idx, network_idx, output_idx, usage_modus_idx=0, datas
               'sisfall': {'cnn': {'softmax': 30, 'attribute': 50},
                                   'lstm': {'softmax': 10, 'attribute': 5},
                                   'cnn_imu': {'softmax': 32, 'attribute': 50},
-                                  'cnn_transformer':{'softmax': 6, 'attribute': 6}},
+                                  'cnn_transformer':{'softmax': 15, 'attribute': 6}},
               
               }
 
@@ -207,9 +207,9 @@ def configuration(dataset_idx, network_idx, output_idx, usage_modus_idx=0, datas
     
     if output[output_idx] == 'softmax':
         labeltype = "class"
-        folder_exp = {'mocap': "/data/nnair/icpr2024/lara/results/trial2/",
-                    'mbientlab': "/data/nnair/icpr2024/lara_imu/results/trial2/",
-                    'mobiact': "/data/nnair/icpr2024/mobiact/results/trial2/",
+        folder_exp = {'mocap': "/data/nnair/icpr2024/lara/results/transt/",
+                    'mbientlab': "/data/nnair/icpr2024/lara_imu/results/transt/",
+                    'mobiact': "/data/nnair/icpr2024/mobiact/results/transt/",
                     'motionsense': "/data/nnair/icpr2024/motionsense/results/transt/",
                     'sisfall': "/data/nnair/icpr2024/sisfall/results/transt/"
                     }
@@ -229,7 +229,7 @@ def configuration(dataset_idx, network_idx, output_idx, usage_modus_idx=0, datas
                     }
 
     # GPU
-    os.environ["CUDA_VISIBLE_DEVICES"] = "7"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "1"
     GPU = 0
 
     # Labels position on the segmented window
@@ -341,8 +341,8 @@ def setup_experiment_logger(logging_level=logging.DEBUG, filename=None):
 @ex.config
 def my_config():
     print("configuration function began")
-    config = configuration(dataset_idx=2,
-                           network_idx=1,
+    config = configuration(dataset_idx=4,
+                           network_idx=3,
                            output_idx=0,
                            usage_modus_idx=0,
                            #dataset_fine_tuning_idx=0,
