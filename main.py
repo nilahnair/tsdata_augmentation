@@ -19,7 +19,7 @@ import datetime
 from sacred import Experiment
 from sacred.observers import MongoObserver
 
-ex= Experiment('sisfall x3 lstm 50-0.001-50 trial1')
+ex= Experiment('sisfall x3 lstm 50-0.001-15 trial2')
 
 ex.observers.append(MongoObserver.create(url='curtiz',
                                          db_name='nnair_sacred',
@@ -129,7 +129,7 @@ def configuration(dataset_idx, network_idx, output_idx, usage_modus_idx=0, datas
                              'cnn_imu': {'softmax': 32, 'attribute': 10},
                              'cnn_transformer':{'softmax': 15, 'attribute': 6}},
               'sisfall': {'cnn': {'softmax': 50, 'attribute': 50},
-                                  'lstm': {'softmax': 50, 'attribute': 5},
+                                  'lstm': {'softmax': 15, 'attribute': 5},
                                   'cnn_imu': {'softmax': 32, 'attribute': 50},
                                   'cnn_transformer':{'softmax': 15, 'attribute': 6}},
               
@@ -211,7 +211,7 @@ def configuration(dataset_idx, network_idx, output_idx, usage_modus_idx=0, datas
                     'mbientlab': "/data/nnair/icpr2024/lara_imu/results/transt/",
                     'mobiact': "/data/nnair/icpr2024/mobiact/results/transt/",
                     'motionsense': "/data/nnair/icpr2024/motionsense/results/trial/",
-                    'sisfall': "/data/nnair/icpr2024/sisfall/results/trial1/"
+                    'sisfall': "/data/nnair/icpr2024/sisfall/results/trial2/"
                     }
     elif output[output_idx] == 'attribute':
         labeltype = "attributes"
@@ -229,7 +229,7 @@ def configuration(dataset_idx, network_idx, output_idx, usage_modus_idx=0, datas
                     }
 
     # GPU
-    os.environ["CUDA_VISIBLE_DEVICES"] = "2"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "1"
     GPU = 0
 
     # Labels position on the segmented window
