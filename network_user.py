@@ -359,7 +359,7 @@ class Network_User(object):
         if self.config['network']=='cnn_transformer':
             optimizer = optim.Adam(network_obj.parameters(), lr=self.config['lr'], eps= 1e-10, weight_decay=1e-4)
             #scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=5, gamma=0.5)
-            scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max', factor=0.1, patience=10, threshold=0.001, threshold_mode='rel', cooldown=0, min_lr=0, eps=1e-08, verbose=False)
+            scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.1, patience=2, threshold=0.001, threshold_mode='rel', cooldown=0, min_lr=0, eps=1e-08, verbose=False)
         else:  
             optimizer = optim.RMSprop(network_obj.parameters(), lr=self.config['lr'], alpha=0.95)
             # Setting scheduler
@@ -511,6 +511,7 @@ class Network_User(object):
                 elif self.config['output'] == 'attribute':
                     loss = criterion(feature_maps, train_batch_l[:, 1:]) * (1 / self.config['accumulation_steps'])
                 loss.backward()
+            
 
                 if (itera + 1) % self.config['accumulation_steps'] == 0:
                     optimizer.step()
@@ -545,6 +546,7 @@ class Network_User(object):
                     del train_batch_v, noise
                     results_val, loss_val = self.validate(network_obj, criterion)
                     self.exp.log_scalar("loss_val_int_{}".format(ea_itera), loss_val, itera)
+                    scheduler.step(loss_val)
 
                     elapsed_time_val = time.time() - start_time_val
 
