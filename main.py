@@ -19,7 +19,7 @@ import datetime
 from sacred import Experiment
 from sacred.observers import MongoObserver
 
-ex= Experiment('lara_imu cnn_trans 128-0.0001-50 transt')
+ex= Experiment('sisfall x3 cnn 50-0.001-50 trial')
 
 ex.observers.append(MongoObserver.create(url='curtiz',
                                          db_name='nnair_sacred',
@@ -128,7 +128,7 @@ def configuration(dataset_idx, network_idx, output_idx, usage_modus_idx=0, datas
                              'lstm': {'softmax': 15, 'attribute': 5},
                              'cnn_imu': {'softmax': 32, 'attribute': 10},
                              'cnn_transformer':{'softmax': 15, 'attribute': 6}},
-              'sisfall': {'cnn': {'softmax': 30, 'attribute': 50},
+              'sisfall': {'cnn': {'softmax': 50, 'attribute': 50},
                                   'lstm': {'softmax': 15, 'attribute': 5},
                                   'cnn_imu': {'softmax': 32, 'attribute': 50},
                                   'cnn_transformer':{'softmax': 15, 'attribute': 6}},
@@ -211,7 +211,7 @@ def configuration(dataset_idx, network_idx, output_idx, usage_modus_idx=0, datas
                     'mbientlab': "/data/nnair/icpr2024/lara_imu/results/transt/",
                     'mobiact': "/data/nnair/icpr2024/mobiact/results/transt/",
                     'motionsense': "/data/nnair/icpr2024/motionsense/results/trial/",
-                    'sisfall': "/data/nnair/icpr2024/sisfall/results/transt/"
+                    'sisfall': "/data/nnair/icpr2024/sisfall/results/trial/"
                     }
     elif output[output_idx] == 'attribute':
         labeltype = "attributes"
@@ -229,7 +229,7 @@ def configuration(dataset_idx, network_idx, output_idx, usage_modus_idx=0, datas
                     }
 
     # GPU
-    os.environ["CUDA_VISIBLE_DEVICES"] = "3"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "0"
     GPU = 0
 
     # Labels position on the segmented window
@@ -341,13 +341,13 @@ def setup_experiment_logger(logging_level=logging.DEBUG, filename=None):
 @ex.config
 def my_config():
     print("configuration function began")
-    config = configuration(dataset_idx=1,
-                           network_idx=3,
+    config = configuration(dataset_idx=4,
+                           network_idx=0,
                            output_idx=0,
                            usage_modus_idx=0,
                            #dataset_fine_tuning_idx=0,
                            reshape_input=False,
-                           learning_rates_idx=1,
+                           learning_rates_idx=0,
                            name_counter=0,
                            freeze=0,
                            fully_convolutional=False,
