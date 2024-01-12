@@ -19,7 +19,7 @@ import datetime
 from sacred import Experiment
 from sacred.observers import MongoObserver
 
-ex= Experiment('mobiact lstm x3 100-0.001-15 trial')
+ex= Experiment('mobiact cnn_trans 200-0.001-15 transt')
 
 ex.observers.append(MongoObserver.create(url='curtiz',
                                          db_name='nnair_sacred',
@@ -209,7 +209,7 @@ def configuration(dataset_idx, network_idx, output_idx, usage_modus_idx=0, datas
         labeltype = "class"
         folder_exp = {'mocap': "/data/nnair/icpr2024/lara/results/trial2/",
                     'mbientlab': "/data/nnair/icpr2024/lara_imu/results/trial/",
-                    'mobiact': "/data/nnair/icpr2024/mobiact/results/trial/",
+                    'mobiact': "/data/nnair/icpr2024/mobiact/results/transt/",
                     'motionsense': "/data/nnair/icpr2024/motionsense/results/transt/",
                     'sisfall': "/data/nnair/icpr2024/sisfall/results/trial2/"
                     }
@@ -229,7 +229,7 @@ def configuration(dataset_idx, network_idx, output_idx, usage_modus_idx=0, datas
                     }
 
     # GPU
-    os.environ["CUDA_VISIBLE_DEVICES"] = "6"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "7"
     GPU = 0
 
     # Labels position on the segmented window
@@ -342,7 +342,7 @@ def setup_experiment_logger(logging_level=logging.DEBUG, filename=None):
 def my_config():
     print("configuration function began")
     config = configuration(dataset_idx=2,
-                           network_idx=1,
+                           network_idx=3,
                            output_idx=0,
                            usage_modus_idx=0,
                            #dataset_fine_tuning_idx=0,
