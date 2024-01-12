@@ -358,7 +358,8 @@ class Network_User(object):
         # Setting optimizer
         if self.config['network']=='cnn_transformer':
             optimizer = optim.Adam(network_obj.parameters(), lr=self.config['lr'], eps= 1e-10, weight_decay=1e-4)
-            scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=5, gamma=0.5)
+            #scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=5, gamma=0.5)
+            scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max', factor=0.1, patience=10, threshold=0.001, threshold_mode='rel', cooldown=0, min_lr=0, eps=1e-08, verbose=False)
         else:  
             optimizer = optim.RMSprop(network_obj.parameters(), lr=self.config['lr'], alpha=0.95)
             # Setting scheduler
