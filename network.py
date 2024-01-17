@@ -32,42 +32,43 @@ class Network(nn.Module):
         logging.info('            Network: Constructor')
         
         self.config = config
+        
+        if self.config['network']=='cnn' or self.config['network'] == 'cnn_imu':
+            if self.config["reshape_input"]:
+                in_channels = 3
+                Hx = int(self.config['NB_sensor_channels'] / 3)
+            else:
+                in_channels = 1
+                Hx = self.config['NB_sensor_channels']
+                Wx = self.config['sliding_window_length']
 
-        if self.config["reshape_input"]:
-            in_channels = 3
-            Hx = int(self.config['NB_sensor_channels'] / 3)
-        else:
-            in_channels = 1
-            Hx = self.config['NB_sensor_channels']
-        Wx = self.config['sliding_window_length']
+            if self.config["fully_convolutional"] == "FCN":
+                padding = [2, 0]
+            elif self.config["fully_convolutional"] == "FC":
+                padding = 0
 
-        if self.config["fully_convolutional"] == "FCN":
-            padding = [2, 0]
-        elif self.config["fully_convolutional"] == "FC":
-            padding = 0
-
-
-        # Computing the size of the feature maps
-        Wx, Hx = self.size_feature_map(Wx=Wx,
+        
+            # Computing the size of the feature maps
+            Wx, Hx = self.size_feature_map(Wx=Wx,
                                        Hx=Hx,
                                        F=(self.config['filter_size'], 1),
                                        P=padding, S=(1, 1), type_layer='conv')
-        logging.info('            Network: Wx {} and Hx {}'.format(Wx, Hx))
-        Wx, Hx = self.size_feature_map(Wx=Wx,
+            logging.info('            Network: Wx {} and Hx {}'.format(Wx, Hx))
+            Wx, Hx = self.size_feature_map(Wx=Wx,
                                        Hx=Hx,
                                        F=(self.config['filter_size'], 1),
                                        P=padding, S=(1, 1), type_layer='conv')
-        logging.info('            Network: Wx {} and Hx {}'.format(Wx, Hx))
-        Wx, Hx = self.size_feature_map(Wx=Wx,
+            logging.info('            Network: Wx {} and Hx {}'.format(Wx, Hx))
+            Wx, Hx = self.size_feature_map(Wx=Wx,
                                        Hx=Hx,
                                        F=(self.config['filter_size'], 1),
                                        P=padding, S=(1, 1), type_layer='conv')
-        logging.info('            Network: Wx {} and Hx {}'.format(Wx, Hx))
-        Wx, Hx = self.size_feature_map(Wx=Wx,
+            logging.info('            Network: Wx {} and Hx {}'.format(Wx, Hx))
+            Wx, Hx = self.size_feature_map(Wx=Wx,
                                        Hx=Hx,
                                        F=(self.config['filter_size'], 1),
                                        P=padding, S=(1, 1), type_layer='conv')
-        logging.info('            Network: Wx {} and Hx {}'.format(Wx, Hx))
+            logging.info('            Network: Wx {} and Hx {}'.format(Wx, Hx))
         
         if self.config["network"] == "lstm":
             self.hidden_dim = self.config['hidden_layer']
