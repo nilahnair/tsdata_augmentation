@@ -19,7 +19,7 @@ import datetime
 from sacred import Experiment
 from sacred.observers import MongoObserver
 
-ex= Experiment('lara cnn_trans x3 100-0.001-30 transt')
+ex= Experiment('lara_imu cnn_trans 128-0.001-30 transt layer 3')
 
 ex.observers.append(MongoObserver.create(url='curtiz',
                                          db_name='nnair_sacred',
@@ -119,7 +119,7 @@ def configuration(dataset_idx, network_idx, output_idx, usage_modus_idx=0, datas
               'mbientlab': {'cnn': {'softmax': 10, 'attribute': 10},
                             'lstm': {'softmax': 15, 'attribute': 10},
                             'cnn_imu': {'softmax': 30, 'attribute': 10},
-                            'cnn_transformer':{'softmax': 50, 'attribute': 6}},
+                            'cnn_transformer':{'softmax': 30, 'attribute': 6}},
               'mobiact': {'cnn': {'softmax': 10, 'attribute': 50},
                           'lstm': {'softmax': 15, 'attribute': 5},
                           'cnn_imu': {'softmax': 32, 'attribute': 50},
@@ -172,7 +172,7 @@ def configuration(dataset_idx, network_idx, output_idx, usage_modus_idx=0, datas
     transformer_dim=64
     n_head=8
     dim_fc=128
-    n_layers=6
+    n_layers=3
     n_embedding_layers=4
     use_pos_embedding=True
 
@@ -229,7 +229,7 @@ def configuration(dataset_idx, network_idx, output_idx, usage_modus_idx=0, datas
                     }
 
     # GPU
-    os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "2"
     GPU = 0
 
     # Labels position on the segmented window
@@ -341,7 +341,7 @@ def setup_experiment_logger(logging_level=logging.DEBUG, filename=None):
 @ex.config
 def my_config():
     print("configuration function began")
-    config = configuration(dataset_idx=0,
+    config = configuration(dataset_idx=1,
                            network_idx=3,
                            output_idx=0,
                            usage_modus_idx=0,
