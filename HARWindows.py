@@ -15,7 +15,7 @@ import numpy as np
 from scipy.interpolate import CubicSpline
 from torch.utils.data import Dataset
 
-import pandas as pd
+from pathlib import Path
 import pickle
 
 # Ignore warnings
@@ -29,7 +29,7 @@ class HARWindows(Dataset):
     '''
 
 
-    def __init__(self, config, csv_file, root_dir):
+    def __init__(self, config, root_dir):
         """
         Args:
             csv_file (string): Path to the csv file with annotations.
@@ -38,12 +38,12 @@ class HARWindows(Dataset):
                 on a sample.
         """
         self.config = config
-        self.harwindows = pd.read_csv(csv_file)
         self.root_dir = root_dir
+        self.file_list = list(Path(self.root_dir).glob('*.pkl')) # list of all pkls in root_dir
         #self.transform = transform
 
     def __len__(self):
-        return len(self.harwindows)
+        return len(self.file_list)
 
     def __getitem__(self, idx):
         '''
@@ -52,11 +52,9 @@ class HARWindows(Dataset):
         @param data: index of item in List
         @return window_data: dict with sequence window, label of window, and labels of each sample in window
         '''
-        window_name = os.path.join(self.root_dir, self.harwindows.iloc[idx, 0])
 
-        f = open(window_name, 'rb')
-        data = pickle.load(f, encoding='bytes')
-        f.close()
+        with open(str(self.file_list[idx]), 'rb') as f:
+            data = pickle.load(f, encoding='bytes')
 
         X = data['data']
         y = data['label']

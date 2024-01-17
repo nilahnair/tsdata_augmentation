@@ -16,6 +16,8 @@ import time
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
 
+import yaml
+
 class Modus_Selecter(object):
     '''
     classdocs
@@ -29,7 +31,7 @@ class Modus_Selecter(object):
 
         logging.info('    Network_selecter: Constructor')
         self.config = config
-        logging.info('    Network_selecter: \n{}'.format(config))
+        logging.info('    Network_selecter: \n{}'.format(yaml.dump(config)))
         
         self.exp = exp
         self.network = Network_User(self.config, self.exp)

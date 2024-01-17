@@ -11,6 +11,7 @@ import logging
 import numpy as np
 import time
 import math
+from pathlib import Path
 
 import torch
 import torch.nn as nn
@@ -281,17 +282,20 @@ class Network_User(object):
         #else:
 
         # Selecting the training sets, either train or train final (train  + Validation)
-        if self.config['usage_modus'] == 'train':
+        if self.config['usage_modus'] == 'train': # TODO: these are all the same, why differentiate?
             print('networkuser')
             print(self.config['dataset_root'])
-            harwindows_train = HARWindows(self.config, csv_file=self.config['dataset_root'] + "train.csv",
-                                          root_dir=self.config['dataset_root'])
+            # harwindows_train = HARWindows(self.config, csv_file=self.config['dataset_root'] + "train.csv",
+            #                               root_dir=self.config['dataset_root'])
+            harwindows_train = HARWindows(self.config, root_dir=str(Path(self.config['dataset_root']) / 'sequences_train'))
         elif self.config['usage_modus'] == 'train_final':
-            harwindows_train = HARWindows(self.config, csv_file=self.config['dataset_root'] + "train.csv",
-                                         root_dir=self.config['dataset_root'])
+            # harwindows_train = HARWindows(self.config, csv_file=self.config['dataset_root'] + "train.csv",
+            #                              root_dir=self.config['dataset_root'])
+            harwindows_train = HARWindows(self.config, root_dir=str(Path(self.config['dataset_root']) / 'sequences_train'))
         elif self.config['usage_modus'] == 'fine_tuning':
-            harwindows_train = HARWindows(self.config, csv_file=self.config['dataset_root'] + "train.csv",
-                                         root_dir=self.config['dataset_root'])
+            # harwindows_train = HARWindows(self.config, csv_file=self.config['dataset_root'] + "train.csv",
+            #                              root_dir=self.config['dataset_root'])
+            harwindows_train = HARWindows(self.config, root_dir=str(Path(self.config['dataset_root']) / 'sequences_train'))
 
         # Creating the dataloader
         dataLoader_train = DataLoader(harwindows_train, batch_size=self.config['batch_size_train'], shuffle=True)
@@ -711,10 +715,13 @@ class Network_User(object):
         '''
 
         # Setting validation set and dataloader
-        harwindows_val = HARWindows(self.config, csv_file=self.config['dataset_root'] + "val.csv",
-                                    root_dir=self.config['dataset_root'])
+        # harwindows_val = HARWindows(self.config, csv_file=self.config['dataset_root'] + "val.csv",
+        #                             root_dir=self.config['dataset_root'])
+        harwindows_val = HARWindows(self.config, root_dir=str(Path(self.config['dataset_root']) / 'sequences_val'))
+
 
         dataLoader_val = DataLoader(harwindows_val, batch_size=self.config['batch_size_val'])
+
 
         # Setting the network to eval mode
         network_obj.eval()
@@ -827,8 +834,9 @@ class Network_User(object):
 
         # Setting the testing set
         logging.info('        Network_User:     Creating Dataloader---->')
-        harwindows_test = HARWindows(self.config, csv_file=self.config['dataset_root'] + "test.csv",
-                                     root_dir=self.config['dataset_root'])
+        # harwindows_test = HARWindows(self.config, csv_file=self.config['dataset_root'] + "test.csv",
+        #                              root_dir=self.config['dataset_root'])
+        harwindows_test = HARWindows(self.config, root_dir=str(Path(self.config['dataset_root']) / 'sequences_test'))
 
         dataLoader_test = DataLoader(harwindows_test, batch_size=self.config['batch_size_train'], shuffle=False)
 

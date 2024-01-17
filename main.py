@@ -6,6 +6,7 @@ Created on May 17, 2019
 
 from __future__ import print_function
 import os
+import io
 import logging
 import torch
 import numpy as np
@@ -15,299 +16,33 @@ import platform
 from modus_selecter import Modus_Selecter
 
 import datetime
+from pathlib import Path
 
 from sacred import Experiment
-from sacred.observers import MongoObserver
+from sacred.observers import MongoObserver, FileStorageObserver
 
-ex= Experiment('lara_imu cnn_trans lr_schecduler 128-0.001-50 trial')
+def load_credentials(path='~/.mongodb_credentials'):
+    path = os.path.expanduser(path)
 
-ex.observers.append(MongoObserver.create(url='curtiz',
-                                         db_name='nnair_sacred',
-                                         username='nnair',
-                                         password='Germany2018',
-                                         authSource='admin',
-                                         authMechanism='SCRAM-SHA-1'))
+    logger = logging.getLogger('::load_credentials')
+    logger.info(f'Loading credientials from {path}')
+    with io.open(path) as f:
+        user, pw = f.read().strip().split(',')
 
-def configuration(dataset_idx, network_idx, output_idx, usage_modus_idx=0, dataset_fine_tuning_idx=0,
-                  reshape_input=False, learning_rates_idx=0, name_counter=0, freeze=0, percentage_idx=0,
-                  fully_convolutional=False, sacred =True):
-    """
-    Set a configuration of all the possible variables that were set in the experiments.
-    This includes the datasets, hyperparameters for training, networks, outputs, datasets paths,
-    results paths
+    return user, pw
 
-    @param dataset_idx: id of dataset
-    @param network_idx: id of network 0 for tcnn, 1, for tcnn-lstm, 2 tcnn-IMU
-    @param output_idx: 0 for softmax, 1 for attributes
-    @param usage_modus_idx: id of the modus 0 for train, 1 for test, 2 for evolution, 3 for train_final,...
-    @param dataset_fine_tuning_idx: id of source dataset in case of finetuning
-    @param reshape_input: reshaping the input False for [C,T] or, True for [3,C/3,T]=[[x,y,z], [sensors], Time]
-    @param learning_rates_idx: id for the Learning Rate
-    @param name_counter: counter for experiments
-    @param name_counter: 0 for freezing the CNN layers, or 1 for fine-tuning
-    @param percentage_idx: Percentage for the training dataset
-    @param fully_convolutional: False for FC or True for FCN
-    @return configuration: dict with all the configurations
-    """
-    # Flags
-    plotting = False
+now = datetime.datetime.now()
+ex= Experiment('ICDAR 2024')
 
-    # Options
-    dataset = {0: 'mocap', 1: 'mbientlab', 2: 'mobiact', 3: 'motionsense', 4: 'sisfall' }
-    network = {0: 'cnn', 1: 'lstm', 2: 'cnn_imu', 3: 'cnn_transformer'}
-    output = {0: 'softmax', 1: 'attribute'}
-    usage_modus = {0: 'train', 1: 'test', 2: 'evolution', 3: 'train_final', 4: 'train_random', 5: 'fine_tuning'}
+if os.uname()[1] in ['rosenblatt', 'cameron']:
+    user, pw = load_credentials()
+    ex.observers.append(MongoObserver.create(url='soderbergh',
+                                            db_name='amatei_sacred',
+                                            username=user,
+                                            password=pw,
+                                            authSource='admin',
+                                            authMechanism='SCRAM-SHA-1'))
 
-    # Dataset Hyperparameters
-    NB_sensor_channels = {'mocap': 126, 'mbientlab': 30, 'mobiact': 9, 'motionsense': 9, 'sisfall': 9}
-    sliding_window_length = {'mocap': 200, 'mbientlab': 100, 'mobiact': 200, 'motionsense': 200, 'sisfall': 200}
-    sliding_window_step = {'mocap': 25, 'mbientlab': 12, 'mobiact': 50, 'motionsense': 25, 'sisfall': 50}
-    
-    # Number of classes for either for activity recognition
-    num_classes = {'mocap': 7, 'mbientlab': 7, 'mobiact': 9, 'motionsense': 6, 'sisfall': 15}
-    num_attributes = {'mocap': 19, 'mbientlab': 19, 'mobiact': 0, 'motionsense': 0, 'sisfall': 0}
-    num_tr_inputs = {'mocap': 345417, 'mbientlab': 94753, 'mobiact': 160561, 'motionsense': 118671, 'sisfall': 118610}
-
-    
-
-
-    # It was thought to have different LR per dataset, but experimentally have worked the next three
-    # Learning rate
-    learning_rates = [0.001, 0.0001, 0.00001, 0.000001]
-    lr = {'mocap': {'cnn': learning_rates[learning_rates_idx],
-                    'lstm': learning_rates[learning_rates_idx],
-                    'cnn_imu': learning_rates[learning_rates_idx],
-                    'cnn_transformer':learning_rates[learning_rates_idx]},
-          'mbientlab': {'cnn': learning_rates[learning_rates_idx],
-                        'lstm': learning_rates[learning_rates_idx],
-                        'cnn_imu': learning_rates[learning_rates_idx],
-                        'cnn_transformer': learning_rates[learning_rates_idx]},
-          'mobiact': {'cnn': learning_rates[learning_rates_idx],
-                      'lstm': learning_rates[learning_rates_idx],
-                      'cnn_imu': learning_rates[learning_rates_idx],
-                      'cnn_transformer':learning_rates[learning_rates_idx]},
-          'motionsense': {'cnn': learning_rates[learning_rates_idx],
-                         'lstm': learning_rates[learning_rates_idx],
-                         'cnn_imu': learning_rates[learning_rates_idx],
-                         'cnn_transformer':learning_rates[learning_rates_idx]},
-          'sisfall': {'cnn': learning_rates[learning_rates_idx],
-                      'lstm': learning_rates[learning_rates_idx],
-                      'cnn_imu': learning_rates[learning_rates_idx],
-                      'cnn_transformer':learning_rates[learning_rates_idx]}
-          
-          }
-    lr_mult = 1.0
-
-    # Maxout
-    use_maxout = {'cnn': False, 'lstm': False, 'cnn_imu': False, 'cnn_transformer':False}
-
-    # Balacing the proportion of classes into the dataset dataset
-    # This will be deprecated
-    balancing = {'mocap': False, 'mbientlab': False, 'mobiact': False, 'motionsense': False, 'sisfall': False}
-
-    # Epochs
-    if usage_modus[usage_modus_idx] == 'train_final' or usage_modus[usage_modus_idx] == 'fine_tuning':
-        epoch_mult = 2
-    else:
-        epoch_mult = 1
-
-    # Number of epochs depending of the dataset and network
-    epochs = {'mocap': {'cnn': {'softmax': 6, 'attribute': 6},
-                        'lstm': {'softmax': 15, 'attribute': 6},
-                        'cnn_imu': {'softmax': 10, 'attribute': 6},
-                        'cnn_transformer':{'softmax': 15, 'attribute': 6}},
-              'mbientlab': {'cnn': {'softmax': 10, 'attribute': 10},
-                            'lstm': {'softmax': 15, 'attribute': 10},
-                            'cnn_imu': {'softmax': 30, 'attribute': 10},
-                            'cnn_transformer':{'softmax': 50, 'attribute': 6}},
-              'mobiact': {'cnn': {'softmax': 10, 'attribute': 50},
-                          'lstm': {'softmax': 15, 'attribute': 5},
-                          'cnn_imu': {'softmax': 32, 'attribute': 50},
-                          'cnn_transformer':{'softmax': 15, 'attribute': 6}},
-              'motionsense': {'cnn': {'softmax': 30, 'attribute': 50},
-                             'lstm': {'softmax': 15, 'attribute': 5},
-                             'cnn_imu': {'softmax': 32, 'attribute': 10},
-                             'cnn_transformer':{'softmax': 15, 'attribute': 6}},
-              'sisfall': {'cnn': {'softmax': 30, 'attribute': 50},
-                                  'lstm': {'softmax': 15, 'attribute': 5},
-                                  'cnn_imu': {'softmax': 32, 'attribute': 50},
-                                  'cnn_transformer':{'softmax': 15, 'attribute': 6}},
-              
-              }
-
-    augmentations = {0: 'none', 1: 'time_warp', 2: 'time_warp_seed', 3: 'jittering', 4: 'scaling', 5: 'flipping', 6: 'magnitude_warping',
-                     7: 'permutation', 8: 'slicing', 9: 'window_warping', 10: 'tilt', 11: 'spawner'}
-    
-    division_epochs = {'mocap': 2, 'mbientlab': 1, 'mobiact': 1, 'motionsense': 1, 'sisfall': 1}
-
-    # Batch size
-    batch_size_train = {
-        'cnn': {'mocap': 100, 'mbientlab': 100, 'mobiact': 100, 'motionsense': 50, 'sisfall': 50},
-        'lstm': {'mocap': 50, 'mbientlab': 50, 'mobiact': 100, 'motionsense': 50, 'sisfall': 50},
-        'cnn_imu': {'mocap': 100, 'mbientlab': 100, 'mobiact': 100, 'motionsense': 100, 'sisfall': 100},
-        'cnn_transformer': {'mocap': 50, 'mbientlab': 128, 'mobiact': 200, 'motionsense': 50, 'sisfall': 50}}
-
-    batch_size_val = {'cnn': {'mocap': 100, 'mbientlab': 100, 'mobiact': 100, 'motionsense': 50,'sisfall': 50},
-                      'lstm': {'mocap': 50, 'mbientlab': 50, 'mobiact': 100, 'motionsense': 50,'sisfall': 50},
-                      'cnn_imu': {'mocap': 100, 'mbientlab': 100,'mobiact': 100, 'motionsense': 100,'sisfall': 100},
-                      'cnn_transformer': {'mocap': 50, 'mbientlab': 128,'mobiact': 200, 'motionsense': 50,'sisfall': 50}}
-
-    # Number of iterations for accumulating the gradients
-    accumulation_steps = {'mocap': 4, 'mbientlab': 4, 'mobiact': 4, 'motionsense': 4, 'sisfall': 4}
-
-    # Filters
-    filter_size = {'mocap': 5, 'mbientlab': 5, 'mobiact': 5, 'motionsense': 5, 'sisfall': 5}
-    num_filters = {'mocap': {'cnn': 64, 'lstm': 64, 'cnn_imu': 64, 'cnn_transformer':64},
-                   'mbientlab': {'cnn': 64, 'lstm': 64, 'cnn_imu': 64, 'cnn_transformer':64},
-                   'mobiact': {'cnn': 64, 'lstm': 64, 'cnn_imu': 64, 'cnn_transformer':64},
-                   'motionsense': {'cnn': 64, 'lstm': 64, 'cnn_imu': 64, 'cnn_transformer':64},
-                   'sisfall': {'cnn': 64, 'lstm': 64, 'cnn_imu': 64, 'cnn_transformer':64}
-                   }
-    
-    #lstm hyperparameters hidden layer and layer dimension
-    lstm_hidlyr= 256
-    lstm_lyrdim= 4
-    
-    #cnntransformer hyperparameters
-    transformer_dim=64
-    n_head=8
-    dim_fc=128
-    n_layers=6
-    n_embedding_layers=4
-    use_pos_embedding=True
-
-    freeze_options = [False, True]
-
-    # Evolution
-    evolution_iter = 10000
-
-    # Results and network will be stored in different folders according to the dataset and network
-    # Network that will be trained and tested are stored in these folders
-    # This as a sort of organisation for tracking the experiments
-    # dataset/network/output/MLP_type/input_shape/
-    # dataset/network/output/MLP_type/input_shape/experiment
-    # dataset/network/output/MLP_type/input_shape/experiment/plots
-    # dataset/network/output/MLP_type/input_shape/final
-    # dataset/network/output/MLP_type/input_shape/final/plots
-    # dataset/network/output/MLP_type/input_shape/fine_tuning
-    # dataset/network/output/MLP_type/input_shape/fine_tuning/plots
-
-    reshape_input = reshape_input
-    if reshape_input:
-        reshape_folder = "reshape"
-    else:
-        reshape_folder = "noreshape"
-
-    if fully_convolutional:
-        fully_convolutional = "FCN"
-    else:
-        fully_convolutional = "FC"
-
-    # User gotta take care of creating these folders, or storing the results in a different way
-    
-    if output[output_idx] == 'softmax':
-        labeltype = "class"
-        folder_exp = {'mocap': "/data/nnair/icpr2024/lara/results/trial2/",
-                    'mbientlab': "/data/nnair/icpr2024/lara_imu/results/trial/",
-                    'mobiact': "/data/nnair/icpr2024/mobiact/results/transt/",
-                    'motionsense': "/data/nnair/icpr2024/motionsense/results/trial/",
-                    'sisfall': "/data/nnair/icpr2024/sisfall/results/transt/"
-                    }
-    elif output[output_idx] == 'attribute':
-        labeltype = "attributes"
-        folder_exp = "/data/nnair/idnetwork/results/all/"
-
-
-    
-    # Paths are given according to the ones created in *preprocessing.py for the datasets
-    
-    dataset_root = {'mocap': "/data/nnair/icpr2024/lara/prepros/",
-                    'mbientlab': "/data/nnair/icpr2024/lara_imu/prepros/",
-                    'mobiact': "/data/nnair/icpr2024/mobiact/prepros/",
-                    'motionsense': "/data/nnair/icpr2024/motionsense/prepros/",
-                    'sisfall': "/data/nnair/icpr2024/sisfall/prepros/"
-                    }
-
-    # GPU
-    os.environ["CUDA_VISIBLE_DEVICES"] = "5"
-    GPU = 0
-
-    # Labels position on the segmented window
-    label_pos = {0: 'middle', 1: 'mode', 2: 'end'}
-
-    percentages_names = ["001", "002", "005", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10"]
-    percentages_dataset = [0.01, 0.02, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
-
-    #train_show_value = num_tr_inputs[dataset[dataset_idx]] * percentages_dataset[percentage_idx]
-    train_show_value = num_tr_inputs[dataset[dataset_idx]] / \
-                       batch_size_train[network[network_idx]][dataset[dataset_idx]]
-    if dataset[dataset_idx] == "mbientlab" or dataset[dataset_idx] == "motionminers_real":
-        train_show = {'cnn': int(train_show_value / 50), 'lstm': 50, 'cnn_imu': int(train_show_value / 50), 'cnn_transformer':int(train_show_value / 50)}
-        valid_show = {'cnn': int(train_show_value / 10), 'lstm': 10, 'cnn_imu': int(train_show_value / 10), 'cnn_transformer': int(train_show_value / 10)}
-    elif dataset[dataset_idx] == "mocap":
-        train_show = {'cnn': int(train_show_value / 100), 'lstm': 100, 'cnn_imu': int(train_show_value / 100), 'cnn_transformer': int(train_show_value / 100)}
-        valid_show = {'cnn': int(train_show_value / 20), 'lstm': 50, 'cnn_imu': int(train_show_value / 20), 'cnn_transformer':int(train_show_value / 20)}
-    else:
-        train_show = {'cnn': int(train_show_value / 100), 'lstm': 100, 'cnn_imu': int(train_show_value / 100), 'cnn_transformer': int(train_show_value / 100)}
-        valid_show = {'cnn': int(train_show_value / 50), 'lstm': 50, 'cnn_imu': int(train_show_value / 50), 'cnn_transformer': int(train_show_value / 50)}
-
-    now = datetime.datetime.now()
-
-
-    configuration = {'dataset': dataset[dataset_idx],
-                     'dataset_finetuning': dataset[dataset_fine_tuning_idx],
-                     'network': network[network_idx],
-                     'output': output[output_idx],
-                     'num_filters': num_filters[dataset[dataset_idx]][network[network_idx]],
-                     'filter_size': filter_size[dataset[dataset_idx]],
-                     'lr': lr[dataset[dataset_idx]][network[network_idx]] * lr_mult,
-                     'epochs': epochs[dataset[dataset_idx]][network[network_idx]][output[output_idx]] * epoch_mult,
-                     'evolution_iter': evolution_iter,
-                     'train_show': train_show[network[network_idx]],
-                     'valid_show': valid_show[network[network_idx]],
-                     'plotting': plotting,
-                     'usage_modus': usage_modus[usage_modus_idx],
-                     'folder_exp': folder_exp[dataset[dataset_idx]],
-                     #'folder_exp_base_fine_tuning': folder_exp_base_fine_tuning,
-                     'use_maxout': use_maxout[network[network_idx]],
-                     'balancing': balancing[dataset[dataset_idx]],
-                     'GPU': GPU,
-                     'division_epochs': division_epochs[dataset[dataset_idx]],
-                     'NB_sensor_channels': NB_sensor_channels[dataset[dataset_idx]],
-                     'sliding_window_length': sliding_window_length[dataset[dataset_idx]],
-                     'sliding_window_step': sliding_window_step[dataset[dataset_idx]],
-                     #'num_attributes': num_attributes[dataset[dataset_idx]],
-                     'batch_size_train': batch_size_train[network[network_idx]][dataset[dataset_idx]],
-                     'batch_size_val': batch_size_val[network[network_idx]][dataset[dataset_idx]],
-                     'num_tr_inputs': num_tr_inputs[dataset[dataset_idx]],
-                     'num_classes': num_classes[dataset[dataset_idx]],
-                     'label_pos': label_pos[2],
-                     'file_suffix': 'results_yy{}mm{}dd{:02d}hh{:02d}mm{:02d}.xml'.format(now.year,
-                                                                                          now.month,
-                                                                                          now.day,
-                                                                                          now.hour,
-                                                                                          now.minute),
-                     'dataset_root': dataset_root[dataset[dataset_idx]],
-                     'accumulation_steps': accumulation_steps[dataset[dataset_idx]],
-                     'reshape_input': reshape_input,
-                     'name_counter': name_counter,
-                     'freeze_options': freeze_options[freeze],
-                     'percentages_names': percentages_names[percentage_idx],
-                     'fully_convolutional': fully_convolutional,
-                     'labeltype': labeltype,
-                     'sacred':sacred,
-                     'augmentations':augmentations[0],
-                     'hidden_layer':lstm_hidlyr,
-                     'layer_dim':lstm_lyrdim,
-                     'trans_embed_layer': n_embedding_layers,
-                     'transformer_dim': transformer_dim,
-                     'transformer_heads': n_head,
-                     'transformer_fc': dim_fc,
-                     'transformer_layers': n_layers,
-                     'trans_pos_embed': use_pos_embedding,
-                     }
-
-    return configuration
 
 
 def setup_experiment_logger(logging_level=logging.DEBUG, filename=None):
@@ -338,35 +73,286 @@ def setup_experiment_logger(logging_level=logging.DEBUG, filename=None):
 
     return
 
+
+
 @ex.config
 def my_config():
     print("configuration function began")
-    config = configuration(dataset_idx=1,
-                           network_idx=3,
-                           output_idx=0,
-                           usage_modus_idx=0,
-                           #dataset_fine_tuning_idx=0,
-                           reshape_input=False,
-                           learning_rates_idx=0,
-                           name_counter=0,
-                           freeze=0,
-                           fully_convolutional=False,
-                           #percentage_idx=12,
-                           #pooling=0
-                           )
     
-    dataset = config["dataset"]
-    network = config["network"]
-    output = config["output"]
-    reshape_input = config["reshape_input"]
-    usageModus = config["usage_modus"]
+    dataset = 'mocap'
+    dataset_finetuning = dataset
+    network = 'cnn'
+    output = 'softmax'
+    reshape_input = False
+    usage_modus = 'train'
+
+    name_counter = 0
+    scared = True
+
     #dataset_finetuning = config["dataset_finetuning"]
     #pooling = config["pooling"]
-    lr = config["lr"]
-    bsize = config["batch_size_train"]
-    augmentation=config["augmentations"]
+
+    assert dataset in ['mocap', 'mbientlab', 'mobiact', 'motionsense', 'sisfall'], 'Dataset is configured wrong'
+    assert network in ['cnn', 'lstm', 'cnn_imu', 'cnn_transformer'], 'Network is configured wrong'
+    assert output in ['softmax', 'attribute'], 'Output is configured wrong'
+    assert usage_modus in ['train', 'test',  'evolution',  'train_final',  'train_random',  'fine_tuning'], 'usage_mouds configured wrong'
+
+    lr = 0.001
+    seed=41
     
-    '''
+    # Flags
+    plotting = False
+
+    # Options
+
+    # Dataset Hyperparameters
+    NB_sensor_channels_defaults = {'mocap': 126, 'mbientlab': 30, 'mobiact': 9, 'motionsense': 9, 'sisfall': 9}
+    sliding_window_length_defaults = {'mocap': 200, 'mbientlab': 100, 'mobiact': 200, 'motionsense': 200, 'sisfall': 200}
+    sliding_window_step_defaults = {'mocap': 25, 'mbientlab': 12, 'mobiact': 50, 'motionsense': 25, 'sisfall': 50}
+
+    NB_sensor_channels = NB_sensor_channels_defaults[dataset]
+    sliding_window_length = sliding_window_length_defaults[dataset]
+    sliding_window_step = sliding_window_step_defaults[dataset]
+    
+    # Number of classes for either for activity recognition
+    num_classes_defaults = {'mocap': 7, 'mbientlab': 7, 'mobiact': 9, 'motionsense': 6, 'sisfall': 15}
+    num_attributes_defaults = {'mocap': 19, 'mbientlab': 19, 'mobiact': 0, 'motionsense': 0, 'sisfall': 0}
+    num_tr_inputs_defaults = {'mocap': 345417, 'mbientlab': 94753, 'mobiact': 160561, 'motionsense': 118671, 'sisfall': 118610}
+
+    num_classes = num_classes_defaults[dataset]
+    num_attributes = num_attributes_defaults[dataset]
+    num_tr_inputs = num_tr_inputs_defaults[dataset]
+
+
+    # It was thought to have different LR per dataset, but experimentally have worked the next three
+    # Learning rate
+    # learning_rates = [0.001, 0.0001, 0.00001, 0.000001]
+    # lr = {'mocap': {'cnn': learning_rates[learning_rates_idx],
+    #                 'lstm': learning_rates[learning_rates_idx],
+    #                 'cnn_imu': learning_rates[learning_rates_idx],
+    #                 'cnn_transformer':learning_rates[learning_rates_idx]},
+    #       'mbientlab': {'cnn': learning_rates[learning_rates_idx],
+    #                     'lstm': learning_rates[learning_rates_idx],
+    #                     'cnn_imu': learning_rates[learning_rates_idx],
+    #                     'cnn_transformer': learning_rates[learning_rates_idx]},
+    #       'mobiact': {'cnn': learning_rates[learning_rates_idx],
+    #                   'lstm': learning_rates[learning_rates_idx],
+    #                   'cnn_imu': learning_rates[learning_rates_idx],
+    #                   'cnn_transformer':learning_rates[learning_rates_idx]},
+    #       'motionsense': {'cnn': learning_rates[learning_rates_idx],
+    #                      'lstm': learning_rates[learning_rates_idx],
+    #                      'cnn_imu': learning_rates[learning_rates_idx],
+    #                      'cnn_transformer':learning_rates[learning_rates_idx]},
+    #       'sisfall': {'cnn': learning_rates[learning_rates_idx],
+    #                   'lstm': learning_rates[learning_rates_idx],
+    #                   'cnn_imu': learning_rates[learning_rates_idx],
+    #                   'cnn_transformer':learning_rates[learning_rates_idx]}
+          
+    #       }
+    lr_mult = 1.0
+
+    # Maxout
+    use_maxout_defaults = {'cnn': False, 'lstm': False, 'cnn_imu': False, 'cnn_transformer':False}
+    use_maxout = use_maxout_defaults[network]
+
+    # Balacing the proportion of classes into the dataset dataset
+    # This will be deprecated
+    balancing_defaults = {'mocap': False, 'mbientlab': False, 'mobiact': False, 'motionsense': False, 'sisfall': False}
+    balancing = balancing_defaults[dataset]
+
+    # Epochs
+    if usage_modus == 'train_final' or usage_modus == 'fine_tuning':
+        epoch_mult = 2
+    else:
+        epoch_mult = 1
+
+    # Number of epochs depending of the dataset and network
+    
+
+    epochs_defaults =  \
+            {'mocap': {'cnn': {'softmax': 6, 'attribute': 6},
+                        'lstm': {'softmax': 15, 'attribute': 6},
+                        'cnn_imu': {'softmax': 10, 'attribute': 6},
+                        'cnn_transformer':{'softmax': 15, 'attribute': 6}},
+              'mbientlab': {'cnn': {'softmax': 10, 'attribute': 10},
+                            'lstm': {'softmax': 15, 'attribute': 10},
+                            'cnn_imu': {'softmax': 30, 'attribute': 10},
+                            'cnn_transformer':{'softmax': 50, 'attribute': 6}},
+              'mobiact': {'cnn': {'softmax': 10, 'attribute': 50},
+                          'lstm': {'softmax': 15, 'attribute': 5},
+                          'cnn_imu': {'softmax': 32, 'attribute': 50},
+                          'cnn_transformer':{'softmax': 15, 'attribute': 6}},
+              'motionsense': {'cnn': {'softmax': 30, 'attribute': 50},
+                             'lstm': {'softmax': 15, 'attribute': 5},
+                             'cnn_imu': {'softmax': 32, 'attribute': 10},
+                             'cnn_transformer':{'softmax': 15, 'attribute': 6}},
+              'sisfall': {'cnn': {'softmax': 30, 'attribute': 50},
+                                  'lstm': {'softmax': 15, 'attribute': 5},
+                                  'cnn_imu': {'softmax': 32, 'attribute': 50},
+                                  'cnn_transformer':{'softmax': 15, 'attribute': 6}},
+              
+              }
+    epochs = epochs_defaults[dataset][network][output]
+
+    augmentations =  'none'
+    assert augmentations in ['none',  'time_warp',  'time_warp_seed',  'jittering',  'scaling',  'flipping',  'magnitude_warping',
+                      'permutation',  'slicing',  'window_warping', 'tilt', 'spawner'], 'augmentation configured wrong'
+    
+    division_epochs_defaults = {'mocap': 2, 'mbientlab': 1, 'mobiact': 1, 'motionsense': 1, 'sisfall': 1}
+    division_epochs = division_epochs_defaults[dataset]
+
+    # Batch size
+    batch_size_train_defaults = {
+        'cnn': {'mocap': 100, 'mbientlab': 100, 'mobiact': 100, 'motionsense': 50, 'sisfall': 50},
+        'lstm': {'mocap': 50, 'mbientlab': 50, 'mobiact': 100, 'motionsense': 50, 'sisfall': 50},
+        'cnn_imu': {'mocap': 100, 'mbientlab': 100, 'mobiact': 100, 'motionsense': 100, 'sisfall': 100},
+        'cnn_transformer': {'mocap': 50, 'mbientlab': 128, 'mobiact': 200, 'motionsense': 50, 'sisfall': 50}}
+
+    batch_size_val_defaults = {'cnn': {'mocap': 100, 'mbientlab': 100, 'mobiact': 100, 'motionsense': 50,'sisfall': 50},
+                      'lstm': {'mocap': 50, 'mbientlab': 50, 'mobiact': 100, 'motionsense': 50,'sisfall': 50},
+                      'cnn_imu': {'mocap': 100, 'mbientlab': 100,'mobiact': 100, 'motionsense': 100,'sisfall': 100},
+                      'cnn_transformer': {'mocap': 50, 'mbientlab': 128,'mobiact': 200, 'motionsense': 50,'sisfall': 50}}
+
+    batch_size_train = batch_size_train_defaults[network][dataset]
+    batch_size_val = batch_size_val_defaults[network][dataset]
+    
+
+    # Number of iterations for accumulating the gradients
+    accumulation_steps_defaults = {'mocap': 4, 'mbientlab': 4, 'mobiact': 4, 'motionsense': 4, 'sisfall': 4}
+    accumulation_steps = accumulation_steps_defaults[dataset]
+
+    # Filters
+    filter_size_defaults = {'mocap': 5, 'mbientlab': 5, 'mobiact': 5, 'motionsense': 5, 'sisfall': 5}
+    filter_size = filter_size_defaults[dataset]
+    num_filters_defaults = {'mocap': {'cnn': 64, 'lstm': 64, 'cnn_imu': 64, 'cnn_transformer':64},
+                   'mbientlab': {'cnn': 64, 'lstm': 64, 'cnn_imu': 64, 'cnn_transformer':64},
+                   'mobiact': {'cnn': 64, 'lstm': 64, 'cnn_imu': 64, 'cnn_transformer':64},
+                   'motionsense': {'cnn': 64, 'lstm': 64, 'cnn_imu': 64, 'cnn_transformer':64},
+                   'sisfall': {'cnn': 64, 'lstm': 64, 'cnn_imu': 64, 'cnn_transformer':64}
+                   }
+    num_filters = num_filters_defaults[dataset][network]
+    
+    #lstm hyperparameters hidden layer and layer dimension
+    lstm_hidlyr= 256
+    hidden_layer = lstm_hidlyr
+    lstm_lyrdim= 4
+    layer_dim = lstm_lyrdim
+    
+    #cnntransformer hyperparameters
+    transformer_dim=64
+    n_head=8
+    dim_fc=128
+    n_layers=6
+    n_embedding_layers=4
+    use_pos_embedding=True
+
+    transformer_heads = n_head
+    transformer_fc = dim_fc
+    transformer_layers = n_layers
+    trans_pos_embed = use_pos_embedding
+    trans_embed_layer = n_embedding_layers
+
+    freeze_options = False
+    assert freeze_options in [True, False], 'ConfigurationError: freeze_options'
+
+    # Evolution
+    evolution_iter = 10000
+
+    # Results and network will be stored in different folders according to the dataset and network
+    # Network that will be trained and tested are stored in these folders
+    # This as a sort of organisation for tracking the experiments
+    # dataset/network/output/MLP_type/input_shape/
+    # dataset/network/output/MLP_type/input_shape/experiment
+    # dataset/network/output/MLP_type/input_shape/experiment/plots
+    # dataset/network/output/MLP_type/input_shape/final
+    # dataset/network/output/MLP_type/input_shape/final/plots
+    # dataset/network/output/MLP_type/input_shape/fine_tuning
+    # dataset/network/output/MLP_type/input_shape/fine_tuning/plots
+
+    if reshape_input:
+        reshape_folder = "reshape"
+    else:
+        reshape_folder = "noreshape"
+
+    # if fully_convolutional:
+    #     fully_convolutional = "FCN"
+    # else:
+    #     fully_convolutional = "FC"
+
+    fully_convolutional = "FC"
+    assert fully_convolutional in ["FC", "FCN"], "ConfigurationError: fully_convolutional"
+
+    run_id = None
+    base_folder_exp = '/data/nnair/icpr2024/'
+    folder_exp = None  # don't set this by hand, set base_folder_exp instead
+
+    if output == 'softmax':
+        labeltype = "class"
+        folder_exp_defaults = { 
+            'mocap':        str(Path(base_folder_exp) / "lara/results/"),
+            'mbientlab':    str(Path(base_folder_exp) / "lara_imu/results/"),
+            'mobiact':      str(Path(base_folder_exp) / "mobiact/results/"),
+            'motionsense':  str(Path(base_folder_exp) / "motionsense/results/"),
+            'sisfall':      str(Path(base_folder_exp) / "sisfall/results/transt/")
+                    }
+        if run_id is None: # if not set by cmd pick highest
+            run_id = _maximum_existing_run_id(_check_and_create_fldr(folder_exp_defaults[dataset]))
+        if folder_exp is None: # if not set via cmd pick from defaults
+            folder_exp =  _check_and_create_fldr(folder_exp_defaults[dataset])
+        folder_exp = str(_check_and_create_fldr(Path(folder_exp) / str(run_id)))
+
+    elif output == 'attribute':
+        labeltype = "attributes"
+        folder_exp = "/data/nnair/idnetwork/results/all/"
+
+    # Paths are given according to the ones created in *preprocessing.py for the datasets
+    
+    dataset_root_defaults = {'mocap': "/data/nnair/icpr2024/lara/prepros/",
+                    'mbientlab': "/data/nnair/icpr2024/lara_imu/prepros/",
+                    'mobiact': "/data/nnair/icpr2024/mobiact/prepros/",
+                    'motionsense': "/data/nnair/icpr2024/motionsense/prepros/",
+                    'sisfall': "/data/nnair/icpr2024/sisfall/prepros/"
+                    }
+    dataset_root = dataset_root_defaults[dataset]
+
+    # GPU
+    # os.environ["CUDA_VISIBLE_DEVICES"] = "5" # set via shell
+    GPU = 0 # first in list of CUDA_VISIBILE_DEVICES
+
+    # Labels position on the segmented window
+    label_pos = 'end'
+    assert label_pos in  ['middle', 'mode', 'end'], f'ConifigurationError: label_pos'
+
+    # percentages_names = ["001", "002", "005", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10"]
+    # percentages_dataset = [0.01, 0.02, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
+
+    #train_show_value = num_tr_inputs[dataset[dataset_idx]] * percentages_dataset[percentage_idx]
+    train_show_value = num_tr_inputs / batch_size_train
+    if dataset == "mbientlab" or dataset == "motionminers_real":
+        train_show_defaults = {'cnn': int(train_show_value / 50), 'lstm': 50, 'cnn_imu': int(train_show_value / 50), 'cnn_transformer':int(train_show_value / 50)}
+        valid_show_defaults = {'cnn': int(train_show_value / 10), 'lstm': 10, 'cnn_imu': int(train_show_value / 10), 'cnn_transformer': int(train_show_value / 10)}
+        train_show = train_show_defaults[network]
+        valid_show = valid_show_defaults[network]
+    elif dataset == "mocap":
+        train_show_defaults = {'cnn': int(train_show_value / 100), 'lstm': 100, 'cnn_imu': int(train_show_value / 100), 'cnn_transformer': int(train_show_value / 100)}
+        valid_show_defaults = {'cnn': int(train_show_value / 20), 'lstm': 50, 'cnn_imu': int(train_show_value / 20), 'cnn_transformer':int(train_show_value / 20)}
+        train_show = train_show_defaults[network]
+        valid_show = valid_show_defaults[network]
+    else:
+        train_show_defaults = {'cnn': int(train_show_value / 100), 'lstm': 100, 'cnn_imu': int(train_show_value / 100), 'cnn_transformer': int(train_show_value / 100)}
+        valid_show_defaults = {'cnn': int(train_show_value / 50), 'lstm': 50, 'cnn_imu': int(train_show_value / 50), 'cnn_transformer': int(train_show_value / 50)}
+        train_show = train_show_defaults[network]
+        valid_show = valid_show_defaults[network]
+
+    file_suffix =  'results_yy{}mm{}dd{:02d}hh{:02d}mm{:02d}.xml'.format(now.year,
+                                                                        now.month,
+                                                                        now.day,
+                                                                        now.hour,
+                                                                        now.minute),
+
+
+
+'''
     print("configuration function began")
     dataset_idx = [0]
     network_idx = [2]
@@ -409,31 +395,8 @@ def my_config():
     dataet_root= config["dataset_root"]
     '''
    
-@ex.capture
-def run(config, dataset, network, output, usageModus):
-   
-    file_name='/data/nnair/icpr2024/'
-   
-    file_name='/data/nnair/icpr2024/'+'logger.txt'
-    
-    setup_experiment_logger(logging_level=logging.DEBUG,filename=file_name)
 
-    logging.info('Finished')
-    logging.info('Dataset {} Network {} Output {} Modus {}'.format(dataset, network, output, usageModus))
-
-    modus = Modus_Selecter(config, ex)
-
-    # Starting process
-    modus.net_modus()
-    
-    print("Done")
-
-
-@ex.automain
-def main():
-    print("main began")
-    #Setting the same RNG seed
-    seed = 42
+def seed_everything(seed=42):
     os.environ['PYTHONHASHSEED'] = str(seed)
     # Torch RNG
     torch.manual_seed(seed)
@@ -443,12 +406,52 @@ def main():
     np.random.seed(seed)
     random.seed(seed)
 
-    print("Python  {}".format(platform.python_version()))
+def _maximum_existing_run_id(basedir):
+    dir_nrs = [int(d) for d in os.listdir(basedir) if os.path.isdir(os.path.join(basedir, d)) and d.isdigit()]
+    if dir_nrs:
+        return max(dir_nrs)
+    else:
+        return 0
+
+def _check_and_create_fldr(folder):
+    folder = Path(folder)
+    folder.mkdir(parents=True, exist_ok=True)
+    return str(folder)
 
 
-    run()
+# @ex.capture
+# def run(config, dataset, network, output, usage_modus):
+@ex.automain
+def run(_config):
+    config = _config
+    seed_everything(config['seed'])
+    file_name='/data/nnair/icpr2024/'
+   
+    file_name='/data/nnair/icpr2024/'+'logger.txt'
+    
+    setup_experiment_logger(logging_level=logging.DEBUG,filename=file_name)
 
+    logging.info('Finished')
+    logging.info('Dataset {} Network {} Output {} Modus {}'.format(config['dataset'], config['network'], config['output'], config['usage_modus']))
+
+    modus = Modus_Selecter(config, ex)
+
+    # Starting process
+    modus.net_modus()
+    
     print("Done")
+
+# @ex.automain
+# def main(config):
+#     print("main began")
+#     #Setting the same RNG seed
+
+#     print("Python  {}".format(platform.python_version()))
+
+
+#     run(config)
+
+#     print("Done")
 
 '''
 def main():
