@@ -19,7 +19,7 @@ import datetime
 from sacred import Experiment
 from sacred.observers import MongoObserver
 
-ex= Experiment('lara_imu cnn_trans 128-0.0001-30 trial layer 3')
+ex= Experiment('lara_imu cnn_trans 128-0.00001-30 trial layer 3')
 
 ex.observers.append(MongoObserver.create(url='curtiz',
                                          db_name='nnair_sacred',
@@ -347,7 +347,7 @@ def my_config():
                            usage_modus_idx=0,
                            #dataset_fine_tuning_idx=0,
                            reshape_input=False,
-                           learning_rates_idx=1,
+                           learning_rates_idx=2,
                            name_counter=0,
                            freeze=0,
                            fully_convolutional=False,
