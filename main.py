@@ -19,7 +19,7 @@ import datetime
 from sacred import Experiment
 from sacred.observers import MongoObserver
 
-ex= Experiment('lara_imu cnn_trans 100-0.0001-100 trial2 layer 3')
+ex= Experiment('lara_imu cnn_trans 40-0.0001-200 trial2 layer 3')
 
 ex.observers.append(MongoObserver.create(url='curtiz',
                                          db_name='nnair_sacred',
@@ -119,7 +119,7 @@ def configuration(dataset_idx, network_idx, output_idx, usage_modus_idx=0, datas
               'mbientlab': {'cnn': {'softmax': 10, 'attribute': 10},
                             'lstm': {'softmax': 15, 'attribute': 10},
                             'cnn_imu': {'softmax': 30, 'attribute': 10},
-                            'cnn_transformer':{'softmax': 100, 'attribute': 6}},
+                            'cnn_transformer':{'softmax': 200, 'attribute': 6}},
               'mobiact': {'cnn': {'softmax': 10, 'attribute': 50},
                           'lstm': {'softmax': 15, 'attribute': 5},
                           'cnn_imu': {'softmax': 32, 'attribute': 50},
@@ -145,12 +145,12 @@ def configuration(dataset_idx, network_idx, output_idx, usage_modus_idx=0, datas
         'cnn': {'mocap': 100, 'mbientlab': 100, 'mobiact': 100, 'motionsense': 50, 'sisfall': 50},
         'lstm': {'mocap': 100, 'mbientlab': 50, 'mobiact': 50, 'motionsense': 100, 'sisfall': 50},
         'cnn_imu': {'mocap': 100, 'mbientlab': 100, 'mobiact': 100, 'motionsense': 100, 'sisfall': 100},
-        'cnn_transformer': {'mocap': 100, 'mbientlab': 100, 'mobiact': 50, 'motionsense': 100, 'sisfall': 50}}
+        'cnn_transformer': {'mocap': 100, 'mbientlab': 40, 'mobiact': 50, 'motionsense': 100, 'sisfall': 50}}
 
     batch_size_val = {'cnn': {'mocap': 100, 'mbientlab': 100, 'mobiact': 100, 'motionsense': 50,'sisfall': 50},
                       'lstm': {'mocap': 100, 'mbientlab': 50, 'mobiact': 50, 'motionsense': 100,'sisfall': 50},
                       'cnn_imu': {'mocap': 100, 'mbientlab': 100,'mobiact': 100, 'motionsense': 100,'sisfall': 100},
-                      'cnn_transformer': {'mocap': 100, 'mbientlab': 100,'mobiact': 50, 'motionsense': 100,'sisfall': 50}}
+                      'cnn_transformer': {'mocap': 100, 'mbientlab': 40,'mobiact': 50, 'motionsense': 100,'sisfall': 50}}
 
     # Number of iterations for accumulating the gradients
     accumulation_steps = {'mocap': 4, 'mbientlab': 4, 'mobiact': 4, 'motionsense': 4, 'sisfall': 4}
