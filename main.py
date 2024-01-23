@@ -27,17 +27,17 @@ def load_credentials(path='~/.mongodb_credentials'):
     logger = logging.getLogger('::load_credentials')
     logger.info(f'Loading credientials from {path}')
     with io.open(path) as f:
-        user, pw = f.read().strip().split(',')
+        user, pw, url, db_name = f.read().strip().split(',')
 
-    return user, pw
+    return user, pw, url, db_name
 
 now = datetime.datetime.now()
 ex= Experiment('ICDAR 2024')
 
 if os.uname()[1] in ['rosenblatt', 'cameron']:
-    user, pw = load_credentials()
-    ex.observers.append(MongoObserver.create(url='soderbergh',
-                                            db_name='amatei_sacred',
+    user, pw, url, db_name = load_credentials()
+    ex.observers.append(MongoObserver.create(url=url,
+                                            db_name=db_name,
                                             username=user,
                                             password=pw,
                                             authSource='admin',
