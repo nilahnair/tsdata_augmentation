@@ -182,7 +182,7 @@ class Metrics(object):
 
         # F1 weighted
         weighted_f1 = proportions * (multi_pre_rec / sum_pre_rec)
-        weighted_f1[np.isnan(weighted_f1)] = 0
+        weighted_f1[torch.isnan(weighted_f1)] = 0
 
         F1_weighted = torch.sum(weighted_f1) * 2
 
