@@ -33,7 +33,7 @@ def load_credentials(path='~/.mongodb_credentials'):
 
 user, pw = load_credentials(path='~/.mongodb_credentials')
 
-ex= Experiment('motionsense cnn networksave 50-0.001-30')
+ex= Experiment('motionsense cnn id 50-0.001-30')
 
 
 
@@ -80,7 +80,7 @@ def configuration(dataset_idx, network_idx, output_idx, usage_modus_idx=0, datas
     sliding_window_step = {'mocap': 25, 'mbientlab': 12, 'mobiact': 50, 'motionsense': 25, 'sisfall': 50}
     
     # Number of classes for either for activity recognition
-    num_classes = {'mocap': 7, 'mbientlab': 7, 'mobiact': 9, 'motionsense': 6, 'sisfall': 15}
+    num_classes = {'mocap': 7, 'mbientlab': 7, 'mobiact': 9, 'motionsense': 24, 'sisfall': 15} #motionsense 6
     num_attributes = {'mocap': 19, 'mbientlab': 19, 'mobiact': 0, 'motionsense': 0, 'sisfall': 0}
     num_tr_inputs = {'mocap': 345417, 'mbientlab': 94753, 'mobiact': 160561, 'motionsense': 118671, 'sisfall': 118610}
 
@@ -226,7 +226,7 @@ def configuration(dataset_idx, network_idx, output_idx, usage_modus_idx=0, datas
         folder_exp = {'mocap': "/data/nnair/icpr2024/lara/results/transt/",
                     'mbientlab': "/data/nnair/icpr2024/lara_imu/results/trial/",
                     'mobiact': "/data/nnair/icpr2024/mobiact/results/trial1/",
-                    'motionsense': "/data/nnair/motionsense/activity/results/",#/data/nnair/icpr2024/motionsense/results/trial/",
+                    'motionsense': "/data/nnair/motionsense/id/results/",#/data/nnair/icpr2024/motionsense/results/trial/",
                     'sisfall': "/data/nnair/icpr2024/sisfall/results/trial/"
                     }
     elif output[output_idx] == 'attribute':
@@ -240,12 +240,12 @@ def configuration(dataset_idx, network_idx, output_idx, usage_modus_idx=0, datas
     dataset_root = {'mocap': "/data/nnair/icpr2024/lara/prepros/",
                     'mbientlab': "/data/nnair/icpr2024/lara_imu/prepros/",
                     'mobiact': "/data/nnair/icpr2024/mobiact/prepros/",
-                    'motionsense': "/data/nnair/icpr2024/motionsense/prepros/",
+                    'motionsense': "/data/nnair/motionsense/id/prepros/",#/data/nnair/icpr2024/motionsense/prepros/",
                     'sisfall': "/data/nnair/icpr2024/sisfall/prepros/"
                     }
 
     # GPU
-    os.environ["CUDA_VISIBLE_DEVICES"] = "6"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "7"
     GPU = 0
 
     # Labels position on the segmented window
