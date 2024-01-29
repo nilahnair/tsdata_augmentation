@@ -10,6 +10,7 @@ import logging
 import torch
 import numpy as np
 import random
+import io
 
 import platform
 from modus_selecter import Modus_Selecter
@@ -19,12 +20,27 @@ import datetime
 from sacred import Experiment
 from sacred.observers import MongoObserver
 
-ex= Experiment('lara_imu cnn_trans 100-0.0001-200 trial layer 6')
+def load_credentials(path='~/.mongodb_credentials'):
+    path = os.path.expanduser(path)
+ 
+    logger = logging.getLogger('::load_credentials')
+    logger.info(f'Loading credientials from {path}')
+    with io.open(path) as f:
+        user, pw = f.read().strip().split(',')
+ 
+    return user, pw
+
+
+user, pw = load_credentials(path='~/.mongodb_credentials')
+
+ex= Experiment('motionsense cnn networksave 50-0.001-30')
+
+
 
 ex.observers.append(MongoObserver.create(url='curtiz',
                                          db_name='nnair_sacred',
-                                         username='nnair',
-                                         password='Germany2018',
+                                         username=user,
+                                         password=pw,
                                          authSource='admin',
                                          authMechanism='SCRAM-SHA-1'))
 
@@ -210,7 +226,7 @@ def configuration(dataset_idx, network_idx, output_idx, usage_modus_idx=0, datas
         folder_exp = {'mocap': "/data/nnair/icpr2024/lara/results/transt/",
                     'mbientlab': "/data/nnair/icpr2024/lara_imu/results/trial/",
                     'mobiact': "/data/nnair/icpr2024/mobiact/results/trial1/",
-                    'motionsense': "/data/nnair/icpr2024/motionsense/results/trial/",
+                    'motionsense': "/data/nnair/motionsense/activity/results/",#/data/nnair/icpr2024/motionsense/results/trial/",
                     'sisfall': "/data/nnair/icpr2024/sisfall/results/trial/"
                     }
     elif output[output_idx] == 'attribute':
@@ -341,13 +357,13 @@ def setup_experiment_logger(logging_level=logging.DEBUG, filename=None):
 @ex.config
 def my_config():
     print("configuration function began")
-    config = configuration(dataset_idx=1,
-                           network_idx=3,
+    config = configuration(dataset_idx=3,
+                           network_idx=0,
                            output_idx=0,
                            usage_modus_idx=0,
                            #dataset_fine_tuning_idx=0,
                            reshape_input=False,
-                           learning_rates_idx=1,
+                           learning_rates_idx=0,
                            name_counter=0,
                            freeze=0,
                            fully_convolutional=False,
