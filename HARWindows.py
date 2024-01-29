@@ -60,7 +60,7 @@ class HARWindows(Dataset):
 
         X = data['data']
         y = data['label']
-        Y = data['labels']
+        #Y = data['labels']
         
         if self.config['usage_modus'] == 'train' and self.config['augmentations']=='none':
             X = X
@@ -70,7 +70,7 @@ class HARWindows(Dataset):
                 #X, Y = self._time_warp_speed(X, Y, 100)
                 X = self._time_warp(X)
             elif self.config['augmentations']=='time_warp_seed':
-                X, Y = self._time_warp_speed(X, Y, 100)
+                X = X# X, Y = self._time_warp_speed(X, Y, 100)
             elif self.config['augmentations']=='jittering':
                 X = self.jittering(X, sigma = 0.05)
             elif self.config['augmentations']=='scaling':
@@ -105,7 +105,8 @@ class HARWindows(Dataset):
         else:
             window_data = {"data": X, "label": y, "labels": Y, "label_file": label_file}
         '''
-        window_data = {"data": X, "label": y, "labels": Y}
+        #window_data = {"data": X, "label": y, "labels": Y}
+        window_data = {"data": X, "label": y}
         return window_data
         
     def _random_curve(self, window_len: int, sigma=0.05, knot=4):
