@@ -33,7 +33,7 @@ def load_credentials(path='~/.mongodb_credentials'):
 
 user, pw = load_credentials(path='~/.mongodb_credentials')
 
-ex= Experiment('motionsense cnn id 50-0.001-30')
+ex= Experiment('motionsense cnn id 50-0.001-100')
 
 
 
@@ -140,7 +140,7 @@ def configuration(dataset_idx, network_idx, output_idx, usage_modus_idx=0, datas
                           'lstm': {'softmax': 15, 'attribute': 5},
                           'cnn_imu': {'softmax': 32, 'attribute': 50},
                           'cnn_transformer':{'softmax': 15, 'attribute': 6}},
-              'motionsense': {'cnn': {'softmax': 30, 'attribute': 50},
+              'motionsense': {'cnn': {'softmax': 100, 'attribute': 50},
                              'lstm': {'softmax': 30, 'attribute': 5},
                              'cnn_imu': {'softmax': 32, 'attribute': 10},
                              'cnn_transformer':{'softmax': 15, 'attribute': 6}},
@@ -245,7 +245,7 @@ def configuration(dataset_idx, network_idx, output_idx, usage_modus_idx=0, datas
                     }
 
     # GPU
-    os.environ["CUDA_VISIBLE_DEVICES"] = "7"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "6"
     GPU = 0
 
     # Labels position on the segmented window
