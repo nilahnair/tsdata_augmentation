@@ -682,8 +682,8 @@ class Network_User(object):
         np.savetxt(self.config['folder_exp'] + 'plots/loss_val.txt', losses_val, delimiter=",", fmt='%s')
         
         
-        #'''save the model into the desired location'''
-        #torch.save({'state_dict': network_obj.state_dict(),'network_config': network_config}, '/data/nnair/motionsense/activity/cnn_motionsense_act.pt')
+        '''save the model into the desired location'''
+        torch.save({'state_dict': network_obj.state_dict(),'network_config': network_config}, '/data/nnair/motionsense/id/cnn_motionsense_id.pt')
 
         del losses_train, accs_train, f1w_train, f1m_train
         del losses_val, accs_val, f1w_val, f1m_val
