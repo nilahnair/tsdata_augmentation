@@ -779,7 +779,7 @@ class Network_User(object):
 
                 #Counting iterations
                 # itera = (ep * harwindow_batched["data"].shape[0]) + b
-                itera = (e * harwindow_batched["data"].shape[0]) + b
+                itera += 1 #why not just +1?
 
                 #Selecting batch
                 train_batch_v = harwindow_batched["data"]
