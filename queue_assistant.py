@@ -20,6 +20,12 @@ from sacred.observers import (FileStorageObserver, MongoObserver,
                               QueuedMongoObserver)
 
 
+from sacred import SETTINGS
+
+def configure_sacred():
+    SETTINGS.DISCOVER_SOURCES = 'dir'
+    SETTINGS.DISCOVER_DEPENDENCIES = 'sys'
+
 def load_credentials(path='~/.mongodb_readonly_credentials'):
     path = os.path.expanduser(path)
 
@@ -42,7 +48,7 @@ class QAssistant(object):
         max_used_mem=3,
         ignore_ready_check=False,
         readonly=False,
-        logdir='~/queue_assistant_logs'):
+        logdir='queue_assistant_logs/'):
         '''
         Constructor
         '''
@@ -68,8 +74,9 @@ class QAssistant(object):
                                    )
 
         self.db = mongo_client[self.db_name]
-        
-        self.logdir = logdir
+        logdir = Path(logdir)
+        logdir.mkdir(exist_ok=True)
+        self.logdir = str(logdir)
         
     def _get_free_gpus(self, max_used_percent):
         logger = logging.getLogger('QAssistant::get_free_gpus')
@@ -94,7 +101,7 @@ class QAssistant(object):
             else:
                 device = nvmlDeviceGetHandleByIndex(index=int(id))
 
-            uuid = nvmlDeviceGetUUID(device).decode()
+            uuid = nvmlDeviceGetUUID(device)
             mem_info = nvmlDeviceGetMemoryInfo(device)
             mem_used = mem_info.used * 9.5367e-7 # in MiB
             mem_total = mem_info.total * 9.5367e-7 # in MiB
@@ -297,14 +304,14 @@ class QAssistant(object):
                 log_file = os.path.join(self.logdir, log_file_name)
                 
                 cmd_list = ['nice', 'python3', '-c',
-                            'from utils.sacred_utils.queue_assistant import start_experiment; start_experiment()',
+                            'from queue_assistant import start_experiment; start_experiment()',
                             '-exp_id', str(exp_id),
                             # '-gpu_id', str(gpu_id)
                             ]
             
                 if 'env' in exp['config']:
-                    # cmd_list = ['/home/amatei/.local/bin/miniconda3/bin/conda', 'run','-n', exp['config']['env']] + cmd_list #TODO: find better way to specify path of conda
-                    cmd_list = ['conda', 'run','-n', exp['config']['env']] + cmd_list
+                    cmd_list = ['/home/amatei/.local/bin/miniconda3/bin/conda', 'run','-n', exp['config']['env']] + cmd_list #TODO: find better way to specify path of conda
+                    # cmd_list = ['conda', 'run','-n', exp['config']['env']] + cmd_list
                     
                 logger.info('Starting Subprocess...')
                 logger.info(' '.join(cmd_list))
@@ -342,8 +349,7 @@ def rerun_experiment():
     parser.add_argument('--exp_id', '-exp_id', action='store', type=int, required=True)
     args = parser.parse_args()
 
-    assistant = QAssistant(db_host=args.db_host, port=args.db_port,
-                           db_name=args.db_name,
+    assistant = QAssistant(port=args.db_port,
                            visible_gpus=args.visible_gpus
                            )
 
@@ -470,8 +476,8 @@ def start_experiment():
     parser.add_argument('--exp_id', '-exp_id', action='store', type=int, required=True)
     args = parser.parse_args()
     
-    assistant = QAssistant(db_host=args.db_host, port=args.db_port, 
-                           db_name=args.db_name,visible_gpus=args.visible_gpus)
+    assistant = QAssistant(port=args.db_port, 
+                           visible_gpus=args.visible_gpus)
     
     exp = assistant._load_experiment(args.exp_id)
     assistant._start_experiment(exp)
@@ -490,8 +496,7 @@ if __name__ == '__main__':
     parser.add_argument('--ignore_ready_check', '-irc', action='store_true')
     args = parser.parse_args()
 
-    assistant = QAssistant(db_host='soderbergh', port='27017', db_name='amatei_sacred',
-                           visible_gpus=args.visible_gpus,
+    assistant = QAssistant(visible_gpus=args.visible_gpus,
                            visible_exps=args.visible_exps,
                            max_used_mem=args.max_used_mem_perc,
                            ignore_ready_check=args.ignore_ready_check

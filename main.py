@@ -21,8 +21,9 @@ from pathlib import Path
 from sacred import Experiment
 from sacred.observers import MongoObserver, FileStorageObserver
 
-from queue_assistant import load_credentials
+from queue_assistant import load_credentials, configure_sacred
 
+configure_sacred()
 
 now = datetime.datetime.now()
 ex= Experiment('ICDAR 2024')
@@ -80,7 +81,7 @@ def my_config():
     usage_modus = 'train'
 
     name_counter = 0
-    scared = True
+    sacred = True
 
     #dataset_finetuning = config["dataset_finetuning"]
     #pooling = config["pooling"]
@@ -288,10 +289,10 @@ def my_config():
             'motionsense':  str(Path(base_folder_exp) / "motionsense/results/"),
             'sisfall':      str(Path(base_folder_exp) / "sisfall/results/transt/")
                     }
-        if run_id is None: # if not set by cmd pick highest
-            run_id = _maximum_existing_run_id(_check_and_create_fldr(folder_exp_defaults[dataset]))
         if folder_exp is None: # if not set via cmd pick from defaults
             folder_exp =  _check_and_create_fldr(folder_exp_defaults[dataset])
+        if run_id is None: # if not set by cmd pick highest
+            run_id = _maximum_existing_run_id(folder_exp) + 1
         folder_exp = str(_check_and_create_fldr(Path(folder_exp) / str(run_id)))
 
     elif output == 'attribute':
@@ -316,8 +317,8 @@ def my_config():
     label_pos = 'end'
     assert label_pos in  ['middle', 'mode', 'end'], f'ConifigurationError: label_pos'
 
-    # percentages_names = ["001", "002", "005", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10"]
-    # percentages_dataset = [0.01, 0.02, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
+    percentages_names = ["001", "002", "005", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10"]
+    percentages_dataset = [0.01, 0.02, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
 
     #train_show_value = num_tr_inputs[dataset[dataset_idx]] * percentages_dataset[percentage_idx]
     train_show_value = num_tr_inputs / batch_size_train
@@ -341,7 +342,7 @@ def my_config():
                                                                         now.month,
                                                                         now.day,
                                                                         now.hour,
-                                                                        now.minute),
+                                                                        now.minute)
 
 
 

@@ -56,7 +56,7 @@ class Modus_Selecter(object):
         @param recalls: List of class recalls
         @param best_itera: Best evolution iteration
         """
-        xml_file_path = self.config['folder_exp'] + self.config['file_suffix']
+        xml_file_path = os.path.join(self.config['folder_exp'], self.config['file_suffix'])
 
         xml_root = ET.Element("Experiment_{}".format(self.config["name_counter"]))
         child_network = ET.SubElement(xml_root, "network", dataset=str(self.config['network']))
@@ -152,10 +152,10 @@ class Modus_Selecter(object):
                          'f1_weighted {}, f1_mean {}'.format(time_train, results_train['acc'],
                                                              results_train['f1_weighted'], results_train['f1_mean']))
             
-            self.exp.log_scalar("accuracy_train_mo_{}".format(iter_evl),results_train['acc'])
-            self.exp.log_scalar("f1_w_train_mo_{}".format(iter_evl),results_train['f1_weighted'])
-            self.exp.log_scalar("f1_m_train_mo_{}".format(iter_evl), results_train['f1_mean'])
-            self.exp.log_scalar("best_iter_{}".format(iter_evl), best_itera)
+            self.exp.log_scalar(f"per_iter.accuracy_train", results_train['acc'], iter_evl)
+            self.exp.log_scalar(f"per_iter.f1_w_train",results_train['f1_weighted'], iter_evl)
+            self.exp.log_scalar(f"per_iter.f1_m_train", results_train['f1_mean'], iter_evl)
+            self.exp.log_scalar(f"best_iter", best_itera)
             
             
             # Saving the results
@@ -179,14 +179,14 @@ class Modus_Selecter(object):
                       confusion_matrix=confusion_matrix_test, time_iter=time_test, precisions=np.array(precisions_test),
                       recalls=np.array(recalls_test))
             
-            self.exp.log_scalar("accuracy_test_mo_{}".format(iter_evl),results_test['acc'])
-            self.exp.log_scalar("f1_w_test_mo_{}".format(iter_evl),results_test['f1_weighted'])
-            self.exp.log_scalar("f1_m_test_mo_{}".format(iter_evl),results_test['f1_mean'])
+            self.exp.log_scalar("per_iter.accuracy_test",results_test['acc'], iter_evl)
+            self.exp.log_scalar("per_iter.f1_w_test",results_test['f1_weighted'], iter_evl)
+            self.exp.log_scalar("per_iter.f1_m_test",results_test['f1_mean'], iter_evl)
             
 
         if self.config["usage_modus"] == "train":
             logging.info('    Network_selecter:    Train:    eliminating network file')
-            os.remove(self.config['folder_exp'] + 'network.pt')
+            os.remove(os.path.join(self.config['folder_exp'], 'network.pt'))
 
         return
 
