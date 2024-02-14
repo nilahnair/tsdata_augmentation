@@ -33,7 +33,7 @@ def load_credentials(path='~/.mongodb_credentials'):
 
 user, pw = load_credentials(path='~/.mongodb_credentials')
 
-ex= Experiment('motionsense cnn id 100-0.001-50')
+ex= Experiment('lara cnnimu act network')
 
 
 
@@ -80,7 +80,7 @@ def configuration(dataset_idx, network_idx, output_idx, usage_modus_idx=0, datas
     sliding_window_step = {'mocap': 25, 'mbientlab': 12, 'mobiact': 50, 'motionsense': 25, 'sisfall': 50}
     
     # Number of classes for either for activity recognition
-    num_classes = {'mocap': 7, 'mbientlab': 7, 'mobiact': 9, 'motionsense': 24, 'sisfall': 15} #motionsense 6
+    num_classes = {'mocap': 7, 'mbientlab': 7, 'mobiact': 9, 'motionsense': 24, 'sisfall': 6} 
     num_attributes = {'mocap': 19, 'mbientlab': 19, 'mobiact': 0, 'motionsense': 0, 'sisfall': 0}
     num_tr_inputs = {'mocap': 345417, 'mbientlab': 94753, 'mobiact': 160561, 'motionsense': 118671, 'sisfall': 118610}
 
@@ -136,16 +136,16 @@ def configuration(dataset_idx, network_idx, output_idx, usage_modus_idx=0, datas
                             'lstm': {'softmax': 15, 'attribute': 10},
                             'cnn_imu': {'softmax': 30, 'attribute': 10},
                             'cnn_transformer':{'softmax': 200, 'attribute': 6}},
-              'mobiact': {'cnn': {'softmax': 10, 'attribute': 50},
+              'mobiact': {'cnn': {'softmax': 30, 'attribute': 50},
                           'lstm': {'softmax': 15, 'attribute': 5},
                           'cnn_imu': {'softmax': 32, 'attribute': 50},
                           'cnn_transformer':{'softmax': 15, 'attribute': 6}},
-              'motionsense': {'cnn': {'softmax': 100, 'attribute': 50},
+              'motionsense': {'cnn': {'softmax': 30, 'attribute': 50},
                              'lstm': {'softmax': 30, 'attribute': 5},
                              'cnn_imu': {'softmax': 32, 'attribute': 10},
                              'cnn_transformer':{'softmax': 15, 'attribute': 6}},
               'sisfall': {'cnn': {'softmax': 50, 'attribute': 50},
-                                  'lstm': {'softmax': 15, 'attribute': 5},
+                                  'lstm': {'softmax': 50, 'attribute': 5},
                                   'cnn_imu': {'softmax': 32, 'attribute': 50},
                                   'cnn_transformer':{'softmax': 30, 'attribute': 6}},
               
@@ -161,12 +161,12 @@ def configuration(dataset_idx, network_idx, output_idx, usage_modus_idx=0, datas
         'cnn': {'mocap': 100, 'mbientlab': 100, 'mobiact': 100, 'motionsense': 50, 'sisfall': 50},
         'lstm': {'mocap': 100, 'mbientlab': 50, 'mobiact': 50, 'motionsense': 100, 'sisfall': 50},
         'cnn_imu': {'mocap': 100, 'mbientlab': 100, 'mobiact': 100, 'motionsense': 100, 'sisfall': 100},
-        'cnn_transformer': {'mocap': 100, 'mbientlab': 100, 'mobiact': 50, 'motionsense': 100, 'sisfall': 50}}
+        'cnn_transformer': {'mocap': 100, 'mbientlab': 50, 'mobiact': 50, 'motionsense': 50, 'sisfall': 50}}
 
     batch_size_val = {'cnn': {'mocap': 100, 'mbientlab': 100, 'mobiact': 100, 'motionsense': 50,'sisfall': 50},
                       'lstm': {'mocap': 100, 'mbientlab': 50, 'mobiact': 50, 'motionsense': 100,'sisfall': 50},
                       'cnn_imu': {'mocap': 100, 'mbientlab': 100,'mobiact': 100, 'motionsense': 100,'sisfall': 100},
-                      'cnn_transformer': {'mocap': 100, 'mbientlab': 100,'mobiact': 50, 'motionsense': 100,'sisfall': 50}}
+                      'cnn_transformer': {'mocap': 100, 'mbientlab': 50,'mobiact': 50, 'motionsense': 50,'sisfall': 50}}
 
     # Number of iterations for accumulating the gradients
     accumulation_steps = {'mocap': 4, 'mbientlab': 4, 'mobiact': 4, 'motionsense': 4, 'sisfall': 4}
@@ -223,10 +223,10 @@ def configuration(dataset_idx, network_idx, output_idx, usage_modus_idx=0, datas
     
     if output[output_idx] == 'softmax':
         labeltype = "class"
-        folder_exp = {'mocap': "/data/nnair/icpr2024/lara/results/transt/",
+        folder_exp = {'mocap': "/data/nnair/icpr2024/lara/results/trial/",
                     'mbientlab': "/data/nnair/icpr2024/lara_imu/results/trial/",
-                    'mobiact': "/data/nnair/icpr2024/mobiact/results/trial1/",
-                    'motionsense': "/data/nnair/motionsense/id/results/",#/data/nnair/icpr2024/motionsense/results/trial/",
+                    'mobiact': "/data/nnair/icpr2024/mobiact/results/trial/",
+                    'motionsense': "/data/nnair/icpr2024/motionsense/results/trial/",
                     'sisfall': "/data/nnair/icpr2024/sisfall/results/trial/"
                     }
     elif output[output_idx] == 'attribute':
@@ -240,12 +240,12 @@ def configuration(dataset_idx, network_idx, output_idx, usage_modus_idx=0, datas
     dataset_root = {'mocap': "/data/nnair/icpr2024/lara/prepros/",
                     'mbientlab': "/data/nnair/icpr2024/lara_imu/prepros/",
                     'mobiact': "/data/nnair/icpr2024/mobiact/prepros/",
-                    'motionsense': "/data/nnair/motionsense/id/prepros/",#/data/nnair/icpr2024/motionsense/prepros/",
+                    'motionsense': "/data/nnair/icpr2024/motionsense/prepros/",
                     'sisfall': "/data/nnair/icpr2024/sisfall/prepros/"
                     }
 
     # GPU
-    os.environ["CUDA_VISIBLE_DEVICES"] = "6"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "0"
     GPU = 0
 
     # Labels position on the segmented window
@@ -357,8 +357,8 @@ def setup_experiment_logger(logging_level=logging.DEBUG, filename=None):
 @ex.config
 def my_config():
     print("configuration function began")
-    config = configuration(dataset_idx=3,
-                           network_idx=0,
+    config = configuration(dataset_idx=0,
+                           network_idx=2,
                            output_idx=0,
                            usage_modus_idx=0,
                            #dataset_fine_tuning_idx=0,
