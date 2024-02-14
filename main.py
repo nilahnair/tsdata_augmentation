@@ -223,7 +223,7 @@ def configuration(dataset_idx, network_idx, output_idx, usage_modus_idx=0, datas
     
     if output[output_idx] == 'softmax':
         labeltype = "class"
-        folder_exp = {'mocap': "/data/nnair/icpr2024/lara/results/trial/",
+        folder_exp = {'mocap': "/data/nnair/icpr2024/lara/results/trial1/",
                     'mbientlab': "/data/nnair/icpr2024/lara_imu/results/trial/",
                     'mobiact': "/data/nnair/icpr2024/mobiact/results/trial/",
                     'motionsense': "/data/nnair/icpr2024/motionsense/results/trial/",
@@ -245,7 +245,7 @@ def configuration(dataset_idx, network_idx, output_idx, usage_modus_idx=0, datas
                     }
 
     # GPU
-    os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "1"
     GPU = 0
 
     # Labels position on the segmented window
@@ -358,7 +358,7 @@ def setup_experiment_logger(logging_level=logging.DEBUG, filename=None):
 def my_config():
     print("configuration function began")
     config = configuration(dataset_idx=0,
-                           network_idx=2,
+                           network_idx=1,
                            output_idx=0,
                            usage_modus_idx=0,
                            #dataset_fine_tuning_idx=0,
