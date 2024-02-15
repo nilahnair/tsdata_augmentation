@@ -683,7 +683,7 @@ class Network_User(object):
         
         
         '''save the model into the desired location'''
-        torch.save({'state_dict': network_obj.state_dict(),'network_config': network_config}, '/data/nnair/icpr2024/networks/lstm_sisfall_act.pt')
+        torch.save({'state_dict': network_obj.state_dict(),'network_config': network_config}, '/data/nnair/icpr2024/networks/cnntrans_sisfall_act.pt')
 
         del losses_train, accs_train, f1w_train, f1m_train
         del losses_val, accs_val, f1w_val, f1m_val

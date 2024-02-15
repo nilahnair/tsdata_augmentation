@@ -33,7 +33,7 @@ def load_credentials(path='~/.mongodb_credentials'):
 
 user, pw = load_credentials(path='~/.mongodb_credentials')
 
-ex= Experiment('sisfall lstm act network')
+ex= Experiment('sisfall cnntrans act network')
 
 
 
@@ -227,7 +227,7 @@ def configuration(dataset_idx, network_idx, output_idx, usage_modus_idx=0, datas
                     'mbientlab': "/data/nnair/icpr2024/lara_imu/results/trial2/",
                     'mobiact': "/data/nnair/icpr2024/mobiact/results/trial2/",
                     'motionsense': "/data/nnair/icpr2024/motionsense/results/trial2/",
-                    'sisfall': "/data/nnair/icpr2024/sisfall/results/trial1/"
+                    'sisfall': "/data/nnair/icpr2024/sisfall/results/trial2/"
                     }
     elif output[output_idx] == 'attribute':
         labeltype = "attributes"
@@ -245,7 +245,7 @@ def configuration(dataset_idx, network_idx, output_idx, usage_modus_idx=0, datas
                     }
 
     # GPU
-    os.environ["CUDA_VISIBLE_DEVICES"] = "3"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "4"
     GPU = 0
 
     # Labels position on the segmented window
@@ -358,7 +358,7 @@ def setup_experiment_logger(logging_level=logging.DEBUG, filename=None):
 def my_config():
     print("configuration function began")
     config = configuration(dataset_idx=4,
-                           network_idx=1,
+                           network_idx=3,
                            output_idx=0,
                            usage_modus_idx=0,
                            #dataset_fine_tuning_idx=0,
