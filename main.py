@@ -75,12 +75,12 @@ def configuration(dataset_idx, network_idx, output_idx, usage_modus_idx=0, datas
     usage_modus = {0: 'train', 1: 'test', 2: 'evolution', 3: 'train_final', 4: 'train_random', 5: 'fine_tuning'}
 
     # Dataset Hyperparameters
-    NB_sensor_channels = {'mocap': 126, 'mbientlab': 30, 'mobiact': 9, 'motionsense': 9, 'sisfall': 15}
+    NB_sensor_channels = {'mocap': 126, 'mbientlab': 30, 'mobiact': 9, 'motionsense': 9, 'sisfall': 9}
     sliding_window_length = {'mocap': 200, 'mbientlab': 100, 'mobiact': 200, 'motionsense': 200, 'sisfall': 200}
     sliding_window_step = {'mocap': 25, 'mbientlab': 12, 'mobiact': 50, 'motionsense': 25, 'sisfall': 50}
     
     # Number of classes for either for activity recognition
-    num_classes = {'mocap': 7, 'mbientlab': 7, 'mobiact': 9, 'motionsense': 24, 'sisfall': 6} 
+    num_classes = {'mocap': 7, 'mbientlab': 7, 'mobiact': 9, 'motionsense': 24, 'sisfall': 15} 
     num_attributes = {'mocap': 19, 'mbientlab': 19, 'mobiact': 0, 'motionsense': 0, 'sisfall': 0}
     num_tr_inputs = {'mocap': 345417, 'mbientlab': 94753, 'mobiact': 160561, 'motionsense': 118671, 'sisfall': 118610}
 
