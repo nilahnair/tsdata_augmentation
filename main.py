@@ -33,7 +33,7 @@ def load_credentials(path='~/.mongodb_credentials'):
 
 user, pw = load_credentials(path='~/.mongodb_credentials')
 
-ex= Experiment('mobiact cnntrans act network')
+ex= Experiment('motionsense cnn act network')
 
 
 
@@ -245,7 +245,7 @@ def configuration(dataset_idx, network_idx, output_idx, usage_modus_idx=0, datas
                     }
 
     # GPU
-    os.environ["CUDA_VISIBLE_DEVICES"] = "3"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "4"
     GPU = 0
 
     # Labels position on the segmented window
@@ -357,8 +357,8 @@ def setup_experiment_logger(logging_level=logging.DEBUG, filename=None):
 @ex.config
 def my_config():
     print("configuration function began")
-    config = configuration(dataset_idx=2,
-                           network_idx=3,
+    config = configuration(dataset_idx=3,
+                           network_idx=0,
                            output_idx=0,
                            usage_modus_idx=0,
                            #dataset_fine_tuning_idx=0,
