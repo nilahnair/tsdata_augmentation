@@ -844,7 +844,7 @@ class Network_User(object):
             network_obj = Network(self.config)
 
             #Loading the model
-            network_obj.load_state_dict(torch.load(self.config['folder_exp'] + 'network.pt')['state_dict'])
+            network_obj.load_state_dict(torch.load('/data/nnair/icpr2024/networks/cnn_mobiact_act.pt')['state_dict'])
             network_obj.eval()
 
             logging.info('        Network_User:    Test:    setting device')
@@ -871,136 +871,138 @@ class Network_User(object):
 
         # Creating metric object
         metrics_obj = Metrics(self.config, self.device, self.attrs)
-
+        
         logging.info('        Network_User:    Testing')
         start_time_test = time.time()
         # loop for testing
-        for aug in range(0,1,0.1):
-        with torch.no_grad():
-            for v, harwindow_batched_test in enumerate(dataLoader_test):
-                #Selecting batch
-                test_batch_v = harwindow_batched_test["data"]
-                if self.config['output'] == 'softmax':
-                    if self.config["fully_convolutional"] == "FCN":
-                        test_batch_l = harwindow_batched_test["labels"][:, 0]
-                        test_batch_l = test_batch_l.reshape(-1)
-                    elif self.config["fully_convolutional"] == "FC":
-                        if self.config['NB_sensor_channels']==9:
-                            test_batch_l= harwindow_batched_test["label"]
-                        else:
-                            test_batch_l = harwindow_batched_test["label"][:, 0]
+        for aug in range(0,0.5,0.01):
+            with torch.no_grad():
+                for v, harwindow_batched_test in enumerate(dataLoader_test):
+                    #Selecting batch
+                    test_batch_v = harwindow_batched_test["data"]
+                    if self.config['output'] == 'softmax':
+                        if self.config["fully_convolutional"] == "FCN":
+                            test_batch_l = harwindow_batched_test["labels"][:, 0]
                             test_batch_l = test_batch_l.reshape(-1)
-                elif self.config['output'] == 'attribute':
-                    if self.config["fully_convolutional"] == "FCN":
-                        test_batch_l = harwindow_batched_test["labels"]
-                    elif self.config["fully_convolutional"] == "FC":
-                        test_batch_l = harwindow_batched_test["label"]
+                        elif self.config["fully_convolutional"] == "FC":
+                            if self.config['NB_sensor_channels']==9:
+                                test_batch_l= harwindow_batched_test["label"]
+                            else:
+                                test_batch_l = harwindow_batched_test["label"][:, 0]
+                                test_batch_l = test_batch_l.reshape(-1)
+                    elif self.config['output'] == 'attribute':
+                        if self.config["fully_convolutional"] == "FCN":
+                            test_batch_l = harwindow_batched_test["labels"]
+                        elif self.config["fully_convolutional"] == "FC":
+                            test_batch_l = harwindow_batched_test["label"]
                         
-                # Add augmentation here
-                noise = self.normal.sample((train_batch_v.size()))
-                noise = noise.reshape(train_batch_v.size())
-                noise = noise.to(self.device, dtype=torch.float)
+                    # Add augmentation here
+                    augment = np.random.normal(loc=0., scale=aug, size=test_batch_v.shape)
+                    test_batch_v = test_batch_v + augment
 
-                # Sending to GPU
-                test_batch_v = test_batch_v.to(self.device, dtype=torch.float)
-                if self.config['output'] == 'softmax':
-                    test_batch_l = test_batch_l.to(self.device, dtype=torch.long)
-                    # labels for crossentropy needs long type
-                elif self.config['output'] == 'attribute':
-                    # labels for binerycrossentropy needs float type
-                    test_batch_l = test_batch_l.to(self.device, dtype=torch.float)
-
-                #forward
-                if self.config["dataset"] == "virtual_quarter" or self.config["dataset"] == "mocap_quarter" or \
-                        self.config["dataset"] == "mbientlab_quarter":
-                    idx_frequency = np.arange(0, 100, 4)
-                    test_batch_v = test_batch_v[:, :, idx_frequency, :]
-                predictions = network_obj(test_batch_v)
-                if self.config['output'] == 'softmax':
-                    loss = criterion(predictions, test_batch_l)
-                elif self.config['output'] == 'attribute':
-                    loss = criterion(predictions, test_batch_l[:, 1:])
-                loss_test = loss_test + loss.item()
-
-                # Summing the loss
-                loss_test = loss_test + loss.item()
-
-                # Concatenating all of the batches for computing the metrics for the entire testing set
-                # and not only for a batch
-                # As creating an empty tensor and sending to device and then concatenating isnt working
-                if v == 0:
-                    predictions_test = predictions
+                    # Sending to GPU
+                    test_batch_v = test_batch_v.to(self.device, dtype=torch.float)
                     if self.config['output'] == 'softmax':
-                        if self.config['NB_sensor_channels']==9:
+                        test_batch_l = test_batch_l.to(self.device, dtype=torch.long)
+                        # labels for crossentropy needs long type
+                    elif self.config['output'] == 'attribute':
+                        # labels for binerycrossentropy needs float type
+                        test_batch_l = test_batch_l.to(self.device, dtype=torch.float)
+
+                    #forward
+                    if self.config["dataset"] == "virtual_quarter" or self.config["dataset"] == "mocap_quarter" or \
+                            self.config["dataset"] == "mbientlab_quarter":
+                        idx_frequency = np.arange(0, 100, 4)
+                        test_batch_v = test_batch_v[:, :, idx_frequency, :]
+                    predictions = network_obj(test_batch_v)
+                    if self.config['output'] == 'softmax':
+                        loss = criterion(predictions, test_batch_l)
+                    elif self.config['output'] == 'attribute':
+                        loss = criterion(predictions, test_batch_l[:, 1:])
+                    loss_test = loss_test + loss.item()
+
+                    # Summing the loss
+                    loss_test = loss_test + loss.item()
+
+                    # Concatenating all of the batches for computing the metrics for the entire testing set
+                    # and not only for a batch
+                    # As creating an empty tensor and sending to device and then concatenating isnt working
+                    if v == 0:
+                        predictions_test = predictions
+                        if self.config['output'] == 'softmax':
+                            if self.config['NB_sensor_channels']==9:
+                                test_labels = harwindow_batched_test["label"]
+                            else:
+                                test_labels = harwindow_batched_test["label"][:, 0]
+                                test_labels = test_labels.reshape(-1)
+                        elif self.config['output'] == 'attribute':
                             test_labels = harwindow_batched_test["label"]
-                        else:
-                            test_labels = harwindow_batched_test["label"][:, 0]
-                            test_labels = test_labels.reshape(-1)
-                    elif self.config['output'] == 'attribute':
-                        test_labels = harwindow_batched_test["label"]
-                else:
-                    predictions_test = torch.cat((predictions_test, predictions), dim=0)
-                    if self.config['output'] == 'softmax':
-                        if self.config['NB_sensor_channels']==9:
+                    else:
+                        predictions_test = torch.cat((predictions_test, predictions), dim=0)
+                        if self.config['output'] == 'softmax':
+                            if self.config['NB_sensor_channels']==9:
+                                test_labels_batch = harwindow_batched_test["label"]
+                            else:
+                                test_labels_batch = harwindow_batched_test["label"][:, 0]
+                                test_labels_batch = test_labels_batch.reshape(-1)
+                        elif self.config['output'] == 'attribute':
                             test_labels_batch = harwindow_batched_test["label"]
-                        else:
-                            test_labels_batch = harwindow_batched_test["label"][:, 0]
-                            test_labels_batch = test_labels_batch.reshape(-1)
-                    elif self.config['output'] == 'attribute':
-                        test_labels_batch = harwindow_batched_test["label"]
-                    test_labels = torch.cat((test_labels, test_labels_batch), dim=0)
+                        test_labels = torch.cat((test_labels, test_labels_batch), dim=0)
 
-                sys.stdout.write("\rTesting: Batch  {}/{}".format(v, len(dataLoader_test)))
-                sys.stdout.flush()
+                    sys.stdout.write("\rTesting: Batch  {}/{}".format(v, len(dataLoader_test)))
+                    sys.stdout.flush()
+                    
 
-        elapsed_time_test = time.time() - start_time_test
+            elapsed_time_test = time.time() - start_time_test
 
-        #Computing metrics for the entire testing set
-        test_labels = test_labels.to(self.device, dtype=torch.float)
-        logging.info('            Train:    type targets vector: {}'.format(test_labels.type()))
-        results_test = metrics_obj.metric(test_labels, predictions_test)
+            #Computing metrics for the entire testing set
+            test_labels = test_labels.to(self.device, dtype=torch.float)
+            logging.info('            Train:    type targets vector: {}'.format(test_labels.type()))
+            results_test = metrics_obj.metric(test_labels, predictions_test)
 
-        # print statistics
-        logging.info(
-            '        Network_User:        Testing:    elapsed time {} acc {}, f1_weighted {}, f1_mean {}'.format(
-                elapsed_time_test, results_test['acc'], results_test['f1_weighted'], results_test['f1_mean']))
+            # print statistics
+            logging.info(
+                '        Network_User:        Testing:    elapsed time {} acc {}, f1_weighted {}, f1_mean {}'.format(
+                    elapsed_time_test, results_test['acc'], results_test['f1_weighted'], results_test['f1_mean']))
 
-        #predictions_labels = torch.argmax(predictions_test, dim=1)
-        predictions_labels = results_test['predicted_classes'].to("cpu", torch.double).numpy()
-        test_labels = test_labels.to("cpu", torch.double).numpy()
-        if self.config['output'] == 'softmax':
-            test_labels = test_labels
-        elif self.config['output'] == 'attribute':
-            test_labels = test_labels[:, 0]
+            #predictions_labels = torch.argmax(predictions_test, dim=1)
+            predictions_labels = results_test['predicted_classes'].to("cpu", torch.double).numpy()
+            test_labels = test_labels.to("cpu", torch.double).numpy()
+            if self.config['output'] == 'softmax':
+                test_labels = test_labels
+            elif self.config['output'] == 'attribute':
+                test_labels = test_labels[:, 0]
 
-        # Computing confusion matrix
-        confusion_matrix = np.zeros((self.config['num_classes'], self.config['num_classes']))
-        for cl in range(self.config['num_classes']):
-            pos_tg = test_labels == cl
-            pos_pred = predictions_labels[pos_tg]
-            bincount = np.bincount(pos_pred.astype(int), minlength=self.config['num_classes'])
-            confusion_matrix[cl, :] = bincount
+            # Computing confusion matrix
+            confusion_matrix = np.zeros((self.config['num_classes'], self.config['num_classes']))
+            for cl in range(self.config['num_classes']):
+                pos_tg = test_labels == cl
+                pos_pred = predictions_labels[pos_tg]
+                bincount = np.bincount(pos_pred.astype(int), minlength=self.config['num_classes'])
+                confusion_matrix[cl, :] = bincount
 
-        logging.info("        Network_User:        Testing:    Confusion matrix \n{}\n".format(confusion_matrix.astype(int)))
+            logging.info("        Network_User:        Testing:    Confusion matrix \n{}\n".format(confusion_matrix.astype(int)))
 
-        percentage_pred = []
-        for cl in range(self.config['num_classes']):
-            pos_trg = np.reshape(test_labels, newshape=test_labels.shape[0]) == cl
-            percentage_pred.append(confusion_matrix[cl, cl] / float(np.sum(pos_trg)))
-        percentage_pred = np.array(percentage_pred)
+            percentage_pred = []
+            for cl in range(self.config['num_classes']):
+                pos_trg = np.reshape(test_labels, newshape=test_labels.shape[0]) == cl
+                percentage_pred.append(confusion_matrix[cl, cl] / float(np.sum(pos_trg)))
+                percentage_pred = np.array(percentage_pred)
 
-        logging.info("        Network_User:        Validating:    percentage Pred \n{}\n".format(percentage_pred))
-        
-        #saving the list to csv for plotting
-        with open('filename', 'w', newline='') as myfile:
-            wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
-            wr.writerow(mylist)
+            logging.info("        Network_User:        Validating:    percentage Pred \n{}\n".format(percentage_pred))
+            
+            tolist =[aug, results_test['acc'], results_test['f1_weighted']]
+            
+            #saving the list to csv for plotting
+            with open('jitter_test.csv', 'w', newline='') as myfile:
+                wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
+                wr.writerow(tolist)
         
         '''
         import pandas
-df = pandas.DataFrame(data={"col1": list_1, "col2": list_2})
-df.to_csv("./file.csv", sep=',',index=False)
-'''
+        df = pandas.DataFrame(data={"col1": list_1, "col2": list_2})
+        df.to_csv("./file.csv", sep=',',index=False)
+        '''
 
         #plot predictions
         if self.config["plotting"]:

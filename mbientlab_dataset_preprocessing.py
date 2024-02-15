@@ -377,15 +377,15 @@ def create_dataset(identity_bool = False):
     # base_directory = '/path_where_sequences_will_ve_stored/mbientlab_50_persons/'
     # base_directory = '/path_where_sequences_will_ve_stored/mbientlab_10_recordings/'
     #base_directory = '/path_where_sequences_will_ve_stored/mbientlab_50_recordings/'
-    base_directory = '/data/nnair/icpr2024/lara_imu/prepros/'
+    base_directory = '/data/nnair/icpr2024/lara_imu/prepros2/'
 
     data_dir_train = base_directory + 'sequences_train/'
     data_dir_val = base_directory + 'sequences_val/'
     data_dir_test = base_directory + 'sequences_test/'
 
-    generate_data(train_ids, sliding_window_length=100, sliding_window_step=12, data_dir=data_dir_train)
-    generate_data(val_ids, sliding_window_length=100, sliding_window_step=12, data_dir=data_dir_val)
-    generate_data(test_ids, sliding_window_length=100, sliding_window_step=12, data_dir=data_dir_test)
+    generate_data(train_ids, sliding_window_length=200, sliding_window_step=12, data_dir=data_dir_train)
+    generate_data(val_ids, sliding_window_length=200, sliding_window_step=12, data_dir=data_dir_val)
+    generate_data(test_ids, sliding_window_length=200, sliding_window_step=12, data_dir=data_dir_test)
 
     generate_CSV(base_directory, "train.csv", data_dir_train)
     generate_CSV(base_directory, "val.csv", data_dir_val)
