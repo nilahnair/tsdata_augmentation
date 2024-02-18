@@ -225,7 +225,7 @@ def configuration(dataset_idx, network_idx, output_idx, usage_modus_idx=0, datas
         labeltype = "class"
         folder_exp = {'mocap': "/data/nnair/icpr2024/lara/results/trial2/",
                     'mbientlab': "/data/nnair/icpr2024/lara_imu/results/trial2/",
-                    'mobiact': "/data/nnair/icpr2024/mobiact/results/trial2/",
+                    'mobiact': "/data/nnair/icpr2024/mobiact/results/trial/",
                     'motionsense': "/data/nnair/icpr2024/motionsense/results/trial2/",
                     'sisfall': "/data/nnair/icpr2024/sisfall/results/trial2/"
                     }
@@ -359,8 +359,8 @@ def my_config():
     print("configuration function began")
     config = configuration(dataset_idx=2,
                            network_idx=0,
-                           output_idx=1,
-                           usage_modus_idx=0,
+                           output_idx=0,
+                           usage_modus_idx=1,
                            #dataset_fine_tuning_idx=0,
                            reshape_input=False,
                            learning_rates_idx=0,
