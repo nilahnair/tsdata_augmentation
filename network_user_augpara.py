@@ -875,7 +875,8 @@ class Network_User(object):
         logging.info('        Network_User:    Testing')
         start_time_test = time.time()
         # loop for testing
-        for aug in range(0,0.5,0.01):
+        p=range(0.01, 0.5, 0.001)
+        for aug in p:
             with torch.no_grad():
                 for v, harwindow_batched_test in enumerate(dataLoader_test):
                     #Selecting batch
