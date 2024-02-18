@@ -904,6 +904,7 @@ class Network_User(object):
                         
                         # Add augmentation here
                         flip = np.random.choice([-1, 1], size=(test_batch_v.shape[0],test_batch_v.shape[2],test_batch_v.shape[3]))
+                        print(flip.shape)
                         rotate_axis = np.arange(test_batch_v.shape[2])
                         np.random.shuffle(rotate_axis)    
                         test_batch_v= flip[:,np.newaxis,:] * test_batch_v[:,:,rotate_axis]
