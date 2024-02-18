@@ -903,6 +903,7 @@ class Network_User(object):
                                 test_batch_l = harwindow_batched_test["label"]
                         
                         # Add augmentation here
+                        print(test_batch_v.shape)
                         flip = np.random.choice([-1, 1], size=(test_batch_v.shape[0],test_batch_v.shape[2],test_batch_v.shape[3]))
                         print(flip.shape)
                         rotate_axis = np.arange(test_batch_v.shape[2])
