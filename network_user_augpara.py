@@ -877,7 +877,7 @@ class Network_User(object):
         start_time_test = time.time()
         # loop for testing
         save_list=[]
-        p=np.arange(0.01, 0.05, 0.01)
+        p=np.arange(0.01, 0.1, 0.01)
         with open('/data/nnair/icpr2024/augment_test/jitter_cnn_motionsense.csv', 'a') as myfile:
             for aug in p:
                 print('augmentation value')
