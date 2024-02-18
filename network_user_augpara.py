@@ -876,7 +876,7 @@ class Network_User(object):
         start_time_test = time.time()
         # loop for testing
         p=np.arange(0.01, 0.5, 0.01)
-        with open('/data/nnair/icpr2024/augment_test/jitter_test.csv', 'w', newline='') as myfile:
+        with open('/data/nnair/icpr2024/augment_test/jitter_test.csv', 'a') as myfile:
             for aug in p:
                 print('augmentation value')
                 print(aug)
@@ -981,9 +981,10 @@ class Network_User(object):
                 print(tolist)
                 
                 #saving the list to csv for plotting
-            
-                wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
-                wr.writerow(tolist)
+                
+                myfile.write(tolist)
+                #wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
+                #wr.writerow(tolist)
 
         # Computing confusion matrix
         confusion_matrix = np.zeros((self.config['num_classes'], self.config['num_classes']))
