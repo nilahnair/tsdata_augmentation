@@ -995,7 +995,7 @@ class Network_User(object):
             tolist =[aug, results_test['acc'], results_test['f1_weighted']]
             
             #saving the list to csv for plotting
-            with open('jitter_test.csv', 'w', newline='') as myfile:
+            with open('/data/nnair/icpr2024/augment_test/jitter_test.csv', 'w', newline='') as myfile:
                 wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
                 wr.writerow(tolist)
         
