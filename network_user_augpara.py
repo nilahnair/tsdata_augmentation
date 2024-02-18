@@ -875,7 +875,7 @@ class Network_User(object):
         logging.info('        Network_User:    Testing')
         start_time_test = time.time()
         # loop for testing
-        p=np.arange(0.01, 0.5, 0.001)
+        p=np.arange(0.01, 0.5, 0.01)
         for aug in p:
             print('augmentation value')
             print(aug)
