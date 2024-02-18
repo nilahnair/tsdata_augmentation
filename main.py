@@ -33,7 +33,7 @@ def load_credentials(path='~/.mongodb_credentials'):
 
 user, pw = load_credentials(path='~/.mongodb_credentials')
 
-ex= Experiment('sisfall cnntrans act network')
+ex= Experiment('jitter aug test')
 
 
 
