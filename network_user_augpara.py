@@ -877,6 +877,8 @@ class Network_User(object):
         # loop for testing
         p=np.arange(0.01, 0.5, 0.001)
         for aug in p:
+            print('augmentation value')
+            print(aug)
             with torch.no_grad():
                 for v, harwindow_batched_test in enumerate(dataLoader_test):
                     #Selecting batch
@@ -973,31 +975,36 @@ class Network_User(object):
                 test_labels = test_labels
             elif self.config['output'] == 'attribute':
                 test_labels = test_labels[:, 0]
-
-            # Computing confusion matrix
-            confusion_matrix = np.zeros((self.config['num_classes'], self.config['num_classes']))
-            for cl in range(self.config['num_classes']):
-                pos_tg = test_labels == cl
-                pos_pred = predictions_labels[pos_tg]
-                bincount = np.bincount(pos_pred.astype(int), minlength=self.config['num_classes'])
-                confusion_matrix[cl, :] = bincount
-
-            logging.info("        Network_User:        Testing:    Confusion matrix \n{}\n".format(confusion_matrix.astype(int)))
-
-            percentage_pred = []
-            for cl in range(self.config['num_classes']):
-                pos_trg = np.reshape(test_labels, newshape=test_labels.shape[0]) == cl
-                percentage_pred.append(confusion_matrix[cl, cl] / float(np.sum(pos_trg)))
-                percentage_pred = np.array(percentage_pred)
-
-            logging.info("        Network_User:        Validating:    percentage Pred \n{}\n".format(percentage_pred))
-            
+                
             tolist =[aug, results_test['acc'], results_test['f1_weighted']]
-            
+            print(tolist)
+                
             #saving the list to csv for plotting
             with open('/data/nnair/icpr2024/augment_test/jitter_test.csv', 'w', newline='') as myfile:
                 wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
                 wr.writerow(tolist)
+
+        # Computing confusion matrix
+        confusion_matrix = np.zeros((self.config['num_classes'], self.config['num_classes']))
+        for cl in range(self.config['num_classes']):
+            pos_tg = test_labels == cl
+            pos_pred = predictions_labels[pos_tg]
+            bincount = np.bincount(pos_pred.astype(int), minlength=self.config['num_classes'])
+            confusion_matrix[cl, :] = bincount
+
+        logging.info("        Network_User:        Testing:    Confusion matrix \n{}\n".format(confusion_matrix.astype(int)))
+
+        percentage_pred = []
+        for cl in range(self.config['num_classes']):
+            pos_trg = np.reshape(test_labels, newshape=test_labels.shape[0]) == cl
+            percentage_pred.append(confusion_matrix[cl, cl] / float(np.sum(pos_trg)))
+            percentage_pred = np.array(percentage_pred)
+
+        logging.info("        Network_User:        Validating:    percentage Pred \n{}\n".format(percentage_pred))
+            
+            
+            
+            
         
         '''
         import pandas
