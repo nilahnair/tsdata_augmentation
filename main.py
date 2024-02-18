@@ -357,8 +357,8 @@ def setup_experiment_logger(logging_level=logging.DEBUG, filename=None):
 @ex.config
 def my_config():
     print("configuration function began")
-    config = configuration(dataset_idx=4,
-                           network_idx=1,
+    config = configuration(dataset_idx=1,
+                           network_idx=2,
                            output_idx=0,
                            usage_modus_idx=1,
                            #dataset_fine_tuning_idx=0,
