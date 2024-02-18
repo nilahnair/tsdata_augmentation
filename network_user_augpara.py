@@ -903,6 +903,7 @@ class Network_User(object):
                                 test_batch_l = harwindow_batched_test["label"]
                         
                         # Add augmentation here
+                        print(test_batch_v.shape)
                         factor = np.random.normal(loc=1., scale=aug, size=(test_batch_v.shape[0],test_batch_v.shape[2])) #TODO: check if indices are the right ones
                         test_batch_v = np.multiply(test_batch_v, factor[:,np.newaxis,:])
 
