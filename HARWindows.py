@@ -221,7 +221,7 @@ class HARWindows(Dataset):
     def _scaling(self, sample:np.ndarray):
         # https://arxiv.org/pdf/1706.00527.pdf
         sigma=0.1
-        factor = np.random.normal(loc=1., scale=sigma, size=(sample.shape[0],sample.shape[2])) #TODO: check if indices are the right ones
+        factor = np.random.normal(loc=1., scale=sigma, size=(test_batch_v.shape[0],test_batch_v.shape[2],test_batch_v.shape[3])) #TODO: check if indices are the right ones
         augmentedData = np.multiply(sample, factor[:,np.newaxis,:])
         return augmentedData
 
