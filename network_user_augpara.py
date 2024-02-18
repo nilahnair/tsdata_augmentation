@@ -845,7 +845,7 @@ class Network_User(object):
             network_obj = Network(self.config)
 
             #Loading the model
-            network_obj.load_state_dict(torch.load('/data/nnair/icpr2024/networks/cnnimu_lara_act.pt')['state_dict'])
+            network_obj.load_state_dict(torch.load('/data/nnair/icpr2024/networks/cnn_mobiact_act.pt')['state_dict'])
             network_obj.eval()
 
             logging.info('        Network_User:    Test:    setting device')
@@ -878,7 +878,7 @@ class Network_User(object):
         # loop for testing
         save_list=[]
         p=np.arange(0.01, 0.1, 0.01)
-        with open('/data/nnair/icpr2024/augment_test/jitter_cnnimu_lara.csv', 'a') as myfile:
+        with open('/data/nnair/icpr2024/augment_test/scale_cnn_mobiact.csv', 'a') as myfile:
             for aug in p:
                 print('augmentation value')
                 print(aug)
@@ -903,8 +903,8 @@ class Network_User(object):
                                 test_batch_l = harwindow_batched_test["label"]
                         
                         # Add augmentation here
-                        augment = np.random.normal(loc=0., scale=aug, size=test_batch_v.shape)
-                        test_batch_v = test_batch_v + augment
+                        factor = np.random.normal(loc=1., scale=aug, size=(test_batch_v.shape[0],test_batch_v.shape[2])) #TODO: check if indices are the right ones
+                        test_batch_v = np.multiply(test_batch_v, factor[:,np.newaxis,:])
 
                         # Sending to GPU
                         test_batch_v = test_batch_v.to(self.device, dtype=torch.float)
