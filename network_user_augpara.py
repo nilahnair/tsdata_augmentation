@@ -12,6 +12,7 @@ import numpy as np
 import time
 import math
 import csv
+from csv import writer
 
 import torch
 import torch.nn as nn
@@ -981,8 +982,8 @@ class Network_User(object):
                 print(tolist)
                 
                 #saving the list to csv for plotting
-                
-                myfile.write(tolist)
+                writer_object = writer(myfile)
+                writer_object.writerow(tolist)
                 #wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
                 #wr.writerow(tolist)
 
