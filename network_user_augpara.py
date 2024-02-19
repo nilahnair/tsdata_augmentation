@@ -927,7 +927,7 @@ class Network_User(object):
                             elif self.config["fully_convolutional"] == "FC":
                                 test_batch_l = harwindow_batched_test["label"]
                         
-                        test_batch_v=test_batch_v[:,:,::-1,:]
+                        test_batch_v=torch.flip(test_batch_v,2)
                         
                         # Sending to GPU
                         test_batch_v = test_batch_v.to(self.device, dtype=torch.float)
