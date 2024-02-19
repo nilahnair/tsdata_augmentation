@@ -902,7 +902,8 @@ class Network_User(object):
         start_time_test = time.time()
         # loop for testing
         save_list=[]
-        p=np.arange(0.01, 0.1, 0.01)
+        #p=np.arange(0.01, 0.1, 0.01)
+        p=np.arange(2, 20, 2)
         with open('/data/nnair/icpr2024/augment_test/permutation_cnntrans_laraimu.csv', 'a') as myfile:
             for aug in p:
                 print('augmentation value')
@@ -927,13 +928,15 @@ class Network_User(object):
                             elif self.config["fully_convolutional"] == "FC":
                                 test_batch_l = harwindow_batched_test["label"]
                         
-                        max_segments=5
+                        #max_segments=5
                         seg_mode="equal"
     
                         orig_steps = np.arange(test_batch_v.shape[1])
     
                         #num_segs = np.random.randint(1, max_segments, size=(x.shape[0]))
-                        num_segs = [max_segments]
+                        num_segs = [aug]
+                        print('num_segs')
+                        print(num_segs)
     
                         augmentedData = np.zeros_like(test_batch_v)
                         for i, pat in enumerate(test_batch_v):
