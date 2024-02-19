@@ -939,6 +939,8 @@ class Network_User(object):
                         #print(num_segs)
     
                         augmentedData = np.zeros_like(test_batch_v)
+                        print('intial shape')
+                        print(augmentedData.shape)
                         for i, pat in enumerate(test_batch_v):
                             print(i)
                             print(pat.shape)
