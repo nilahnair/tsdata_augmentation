@@ -870,7 +870,7 @@ class Network_User(object):
             network_obj = Network(self.config)
 
             #Loading the model
-            network_obj.load_state_dict(torch.load('/data/nnair/icpr2024/networks/cnnimu_laraimu_act.pt')['state_dict'])
+            network_obj.load_state_dict(torch.load('/data/nnair/icpr2024/networks/cnn_laraimu_act.pt')['state_dict'])
             network_obj.eval()
 
             logging.info('        Network_User:    Test:    setting device')
