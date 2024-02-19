@@ -974,7 +974,7 @@ class Network_User(object):
                         print(augmentedData.shape)
                         test_batch_v = augmentedData
                         print(test_batch_v.shape)
-                        torch.tensor(test_batch_v)
+                        test_batch_v = torch.from_numpy(test_batch_v)
                         # Sending to GPU
                         test_batch_v = test_batch_v.to(self.device, dtype=torch.float)
                         if self.config['output'] == 'softmax':
