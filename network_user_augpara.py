@@ -904,7 +904,7 @@ class Network_User(object):
                         
                         # Add augmentation here
                         print(test_batch_v[0])
-                        test_batch_v=test_batch_v[:,:,-1,:]
+                        test_batch_v=test_batch_v[:,:,::-1,:]
                         print(test_batch_v[0])
                         # Sending to GPU
                         test_batch_v = test_batch_v.to(self.device, dtype=torch.float)
