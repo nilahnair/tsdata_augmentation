@@ -13,6 +13,7 @@ import time
 import math
 import csv
 from csv import writer
+from scipy.interpolate import CubicSpline
 
 import torch
 import torch.nn as nn
@@ -75,6 +76,30 @@ class Network_User(object):
 
         att_rep = np.loadtxt(path, delimiter=',', skiprows=1)
         return att_rep
+    
+    
+    #####################################################
+    def _random_curve(self, window_len: int, sigma=0.05, knot=4):
+        """
+        Generates a random cubic spline with mean value 1.0.
+        This curve can be used for smooth, random distortions of the data, e.g., used for time warping.
+
+        Note: According to T. Um, a cubic splice is not the best approach to generate random curves.
+        Other aprroaches, e.g., Gaussian process regression, Bezier curve, etc. are also reasonable.
+
+        :param window_len: Length of the data window (for example, 100 frames), the curve will have this length
+        :param sigma: sigma of the curve, the spline deviates from a mean of 1.0 by +- sigma
+        :param knot: Number of anchor points
+        :return: A 1d cubic spline
+        """
+
+        random_generator = np.random.default_rng()
+
+        xx = (np.arange(0, window_len, (window_len - 1) / (knot + 1))).transpose()
+        yy = random_generator.normal(loc=1.0, scale=sigma, size=(knot + 2, 1))
+        x_range = np.arange(window_len)
+        cs_x = CubicSpline(xx, yy)
+        return cs_x(x_range).flatten()
 
 
     ##################################################
