@@ -942,6 +942,9 @@ class Network_User(object):
                         for i, pat in enumerate(test_batch_v):
                             print(i)
                             print(pat.shape)
+                            pat = pat.permute(1, 2, 0)
+                            pat = pat.view(pat.size()[0], pat.size()[1])
+                            print(pat.shape)
                             if num_segs > 1:
                                 print('num of segments')
                                 print(num_segs)
