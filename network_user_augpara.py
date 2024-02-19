@@ -878,7 +878,7 @@ class Network_User(object):
         # loop for testing
         save_list=[]
         p=np.arange(0.01, 0.1, 0.01)
-        with open('/data/nnair/icpr2024/augment_test/timeflip_cnntrans_laraimu.csv', 'a') as myfile:
+        with open('/data/nnair/icpr2024/augment_test/timewrap_cnntrans_laraimu.csv', 'a') as myfile:
             for aug in p:
                 print('augmentation value')
                 print(aug)
@@ -903,9 +903,31 @@ class Network_User(object):
                                 test_batch_l = harwindow_batched_test["label"]
                         
                         # Add augmentation here
-                        print(test_batch_v[0])
-                        test_batch_v=test_batch_v[:,:,::-1,:]
-                        print(test_batch_v[0])
+                        window_len = test_batch_v.shape[1]
+                        num_samples = test_batch_v.shape[2]
+
+                        time_warp_scale = aug
+
+                        #
+                        # Generate new time sampling values using a random curve
+                        # Generate curve, accumulate timestamps
+                        #
+                        timesteps = self._random_curve(window_len, sigma=time_warp_scale)
+                        tt_cum = np.cumsum(timesteps, axis=0)  # Add intervals to make a cumulative graph
+                        # Make the last value to have X.shape[0]
+                        t_scale = (window_len - 1) / tt_cum[-1]
+                        tt_cum = tt_cum * t_scale
+                        
+                        #
+                        # Resample
+                        #
+                        x_range = np.arange(window_len)
+                        resampled = np.zeros(test_batch_v.shape)
+                        for s_i in range(num_samples):
+                            resampled[0, :, s_i] = np.interp(x_range, tt_cum, test_batch_v[0, :, s_i].flatten())
+                            # Clamp first and last value
+                            resampled[0, 0, s_i] = resampled[0, 0, s_i]
+                            test_batch_v[0, -1, s_i] = resampled[0, -1, s_i]
                         # Sending to GPU
                         test_batch_v = test_batch_v.to(self.device, dtype=torch.float)
                         if self.config['output'] == 'softmax':
