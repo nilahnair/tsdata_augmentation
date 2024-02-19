@@ -934,19 +934,19 @@ class Network_User(object):
                         orig_steps = np.arange(test_batch_v.shape[1])
     
                         #num_segs = np.random.randint(1, max_segments, size=(x.shape[0]))
-                        num_segs = [aug]
+                        num_segs = aug
                         print('num_segs')
                         print(num_segs)
     
                         augmentedData = np.zeros_like(test_batch_v)
                         for i, pat in enumerate(test_batch_v):
-                            if num_segs[i] > 1:
+                            if num_segs > 1:
                                 if seg_mode == "random":
-                                    split_points = np.random.choice(test_batch_v.shape[1]-2, num_segs[i]-1, replace=False)
+                                    split_points = np.random.choice(test_batch_v.shape[1]-2, num_segs-1, replace=False)
                                     split_points.sort()
                                     splits = np.split(orig_steps, split_points)
                                 else:
-                                    splits = np.array_split(orig_steps, num_segs[i])
+                                    splits = np.array_split(orig_steps, num_segs)
                                 warp = np.concatenate(np.random.permutation(splits)).ravel()
                                 test_batch_v[i] = pat[warp]
                             else:
