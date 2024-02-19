@@ -931,7 +931,7 @@ class Network_User(object):
                         #max_segments=5
                         seg_mode="equal"
     
-                        orig_steps = np.arange(test_batch_v.shape[1])
+                        orig_steps = np.arange(test_batch_v.shape[2])
     
                         #num_segs = np.random.randint(1, max_segments, size=(x.shape[0]))
                         num_segs = aug
