@@ -878,7 +878,7 @@ class Network_User(object):
         # loop for testing
         save_list=[]
         p=np.arange(0.01, 0.1, 0.01)
-        with open('/data/nnair/icpr2024/augment_test/rotation_cnntrans_laraimu.csv', 'a') as myfile:
+        with open('/data/nnair/icpr2024/augment_test/timeflip_cnntrans_laraimu.csv', 'a') as myfile:
             for aug in p:
                 print('augmentation value')
                 print(aug)
@@ -903,12 +903,9 @@ class Network_User(object):
                                 test_batch_l = harwindow_batched_test["label"]
                         
                         # Add augmentation here
-                        print(test_batch_v.shape)
-                        flip = np.random.choice([-1, 1, 1], size=(test_batch_v.shape[0],test_batch_v.shape[2],test_batch_v.shape[3]))
-                        print(flip.shape)
-                        rotate_axis = np.arange(test_batch_v.shape[2])
-                        np.random.shuffle(rotate_axis)    
-                        test_batch_v= flip[:,np.newaxis,:] * test_batch_v[:,:,rotate_axis]
+                        print(test_batch_v[0])
+                        test_batch_v=test_batch_v[:,:,-1,:]
+                        print(test_batch_v[0])
                         # Sending to GPU
                         test_batch_v = test_batch_v.to(self.device, dtype=torch.float)
                         if self.config['output'] == 'softmax':
