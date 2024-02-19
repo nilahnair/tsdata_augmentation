@@ -941,7 +941,7 @@ class Network_User(object):
                         augmentedData = np.zeros_like(test_batch_v)
                         for i, pat in enumerate(test_batch_v):
                             print(i)
-                            print(pat)
+                            print(pat.shape)
                             if num_segs > 1:
                                 print('num of segments')
                                 print(num_segs)
@@ -955,7 +955,10 @@ class Network_User(object):
                                     split_points.sort()
                                     splits = np.split(orig_steps, split_points)
                                 else:
+                                    print('original steps')
+                                    print(orig_steps)
                                     splits = np.array_split(orig_steps, num_segs)
+                                    print(splits.shape)
                                 warp = np.concatenate(np.random.permutation(splits)).ravel()
                                 augmentedData[i] = pat[warp]
                             else:
