@@ -904,7 +904,7 @@ class Network_User(object):
         save_list=[]
         #p=np.arange(0.01, 0.1, 0.01)
         p=np.arange(2, 20, 2)
-        with open('/data/nnair/icpr2024/augment_test/permutation_cnntrans_laraimu.csv', 'a') as myfile:
+        with open('/data/nnair/icpr2024/augment_test/permutation_lstm_laraimu.csv', 'a') as myfile:
             for aug in p:
                 print('augmentation value')
                 print(aug)
@@ -935,8 +935,8 @@ class Network_User(object):
     
                         #num_segs = np.random.randint(1, max_segments, size=(x.shape[0]))
                         num_segs = aug
-                        print('num_segs')
-                        print(num_segs)
+                        #print('num_segs')
+                        #print(num_segs)
     
                         augmentedData = np.zeros_like(test_batch_v)
                         for i, pat in enumerate(test_batch_v):
