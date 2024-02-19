@@ -958,7 +958,7 @@ class Network_User(object):
                                     print('original steps')
                                     print(orig_steps)
                                     splits = np.array_split(orig_steps, num_segs)
-                                    print(splits.size)
+                                    print(len(splits))
                                 warp = np.concatenate(np.random.permutation(splits)).ravel()
                                 augmentedData[i] = pat[warp]
                             else:
