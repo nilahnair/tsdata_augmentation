@@ -939,42 +939,42 @@ class Network_User(object):
                         #print(num_segs)
     
                         augmentedData = np.zeros_like(test_batch_v)
-                        print('intial shape')
-                        print(augmentedData.shape)
+                        #print('intial shape')
+                        #print(augmentedData.shape)
                         for i, pat in enumerate(test_batch_v):
-                            print(i)
-                            print(pat.shape)
+                           # print(i)
+                            #print(pat.shape)
                             pat = pat.permute(1, 2, 0)
                             pat = pat.view(pat.size()[0], pat.size()[1])
-                            print(pat.shape)
+                            #print(pat.shape)
                             if num_segs > 1:
-                                print('num of segments')
-                                print(num_segs)
+                                #print('num of segments')
+                                #print(num_segs)
                                 if seg_mode == "random":
-                                    print('finer details')
-                                    print(test_batch_v.shape[1]-2)
-                                    print(num_segs-1)
+                                    #print('finer details')
+                                    #print(test_batch_v.shape[1]-2)
+                                    #print(num_segs-1)
                                     split_points = np.random.choice(test_batch_v.shape[1]-2, num_segs-1, replace=False)
-                                    print('split points')
-                                    print(split_points.shape)
+                                    #print('split points')
+                                    #print(split_points.shape)
                                     split_points.sort()
                                     splits = np.split(orig_steps, split_points)
                                 else:
-                                    print('original steps')
-                                    print(orig_steps)
+                                    #print('original steps')
+                                    #print(orig_steps)
                                     splits = np.array_split(orig_steps, num_segs)
-                                    print(len(splits))
-                                    print(splits)
+                                    #print(len(splits))
+                                    #print(splits)
                                 warp = np.concatenate(np.random.permutation(splits)).ravel()
                                 augmentedData[i] = pat[warp]
                             else:
                                 augmentedData[i] = pat
                             
-                        print('augmenteddata shape')
-                        print(augmentedData.shape)
+                        #print('augmenteddata shape')
+                        #print(augmentedData.shape)
                         test_batch_v = augmentedData
-                        print(test_batch_v.shape)
-                        test_batch_v = torch.from_numpy(test_batch_v)
+                        #print(test_batch_v.shape)
+                        test_batch_v = torch.as_tensor(test_batch_v)
                         # Sending to GPU
                         test_batch_v = test_batch_v.to(self.device, dtype=torch.float)
                         if self.config['output'] == 'softmax':
