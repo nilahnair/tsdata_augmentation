@@ -903,7 +903,7 @@ class Network_User(object):
         # loop for testing
         save_list=[]
         p=np.arange(0.01, 0.1, 0.01)
-        with open('/data/nnair/icpr2024/augment_test/timeflip_cnntrans_laraimu.csv', 'a') as myfile:
+        with open('/data/nnair/icpr2024/augment_test/permutation_cnntrans_laraimu.csv', 'a') as myfile:
             for aug in p:
                 print('augmentation value')
                 print(aug)
@@ -927,7 +927,28 @@ class Network_User(object):
                             elif self.config["fully_convolutional"] == "FC":
                                 test_batch_l = harwindow_batched_test["label"]
                         
-                        test_batch_v=torch.flip(test_batch_v,2)
+                        max_segments=5
+                        seg_mode="equal"
+    
+                        orig_steps = np.arange(test_batch_v.shape[1])
+    
+                        #num_segs = np.random.randint(1, max_segments, size=(x.shape[0]))
+                        num_segs = [max_segments]
+    
+                        augmentedData = np.zeros_like(test_batch_v)
+                        for i, pat in enumerate(test_batch_v):
+                            if num_segs[i] > 1:
+                                if seg_mode == "random":
+                                    split_points = np.random.choice(test_batch_v.shape[1]-2, num_segs[i]-1, replace=False)
+                                    split_points.sort()
+                                    splits = np.split(orig_steps, split_points)
+                                else:
+                                    splits = np.array_split(orig_steps, num_segs[i])
+                                warp = np.concatenate(np.random.permutation(splits)).ravel()
+                                test_batch_v[i] = pat[warp]
+                            else:
+                                test_batch_v[i] = pat
+    
                         
                         # Sending to GPU
                         test_batch_v = test_batch_v.to(self.device, dtype=torch.float)
