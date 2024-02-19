@@ -903,7 +903,7 @@ class Network_User(object):
         # loop for testing
         save_list=[]
         #p=np.arange(0.01, 0.1, 0.01)
-        p=np.arange(2, 20, 2)
+        p=range(2, 20, 2)
         with open('/data/nnair/icpr2024/augment_test/permutation_cnnimu_laraimu.csv', 'a') as myfile:
             for aug in p:
                 print('augmentation value')
@@ -950,6 +950,8 @@ class Network_User(object):
                                     print(test_batch_v.shape[1]-2)
                                     print(num_segs-1)
                                     split_points = np.random.choice(test_batch_v.shape[1]-2, num_segs-1, replace=False)
+                                    print('split points')
+                                    print(split_points.shape)
                                     split_points.sort()
                                     splits = np.split(orig_steps, split_points)
                                 else:
