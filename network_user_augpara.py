@@ -970,8 +970,8 @@ class Network_User(object):
                             
                         print('augmenteddata shape')
                         print(augmentedData.shape)
-                        test_batch_v = np.reshape(augmentedData, newshape = (augmentedData.shape[0],1, augmentedData.shape[1], augmentedData.shape[2]))
-                        print(test_batch_v)
+                        test_batch_v = augmentedData.shape
+                        print(test_batch_v.shape)
                         # Sending to GPU
                         test_batch_v = test_batch_v.to(self.device, dtype=torch.float)
                         if self.config['output'] == 'softmax':
