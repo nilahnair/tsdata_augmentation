@@ -940,19 +940,26 @@ class Network_User(object):
     
                         augmentedData = np.zeros_like(test_batch_v)
                         for i, pat in enumerate(test_batch_v):
+                            print(i)
+                            print(pat)
                             if num_segs > 1:
+                                print('num of segments')
+                                print(num_segs)
                                 if seg_mode == "random":
+                                    print('finer details')
+                                    print(test_batch_v.shape[1]-2)
+                                    print(num_segs-1)
                                     split_points = np.random.choice(test_batch_v.shape[1]-2, num_segs-1, replace=False)
                                     split_points.sort()
                                     splits = np.split(orig_steps, split_points)
                                 else:
                                     splits = np.array_split(orig_steps, num_segs)
                                 warp = np.concatenate(np.random.permutation(splits)).ravel()
-                                test_batch_v[i] = pat[warp]
+                                augmentedData[i] = pat[warp]
                             else:
-                                test_batch_v[i] = pat
-    
-                        
+                                augmentedData[i] = pat
+                                
+                        test_batch_v = augmentedData
                         # Sending to GPU
                         test_batch_v = test_batch_v.to(self.device, dtype=torch.float)
                         if self.config['output'] == 'softmax':
