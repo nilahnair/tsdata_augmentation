@@ -227,7 +227,7 @@ def configuration(dataset_idx, network_idx, output_idx, usage_modus_idx=0, datas
                     'mbientlab': "/data/nnair/icpr2024/lara_imu/results/trial2/",
                     'mobiact': "/data/nnair/icpr2024/mobiact/results/trial/",
                     'motionsense': "/data/nnair/icpr2024/motionsense/results/trial2/",
-                    'sisfall': "/data/nnair/icpr2024/sisfall/results/trial2/"
+                    'sisfall': "/data/nnair/icpr2024/sisfall/results/trial1/"
                     }
     elif output[output_idx] == 'attribute':
         labeltype = "attributes"
