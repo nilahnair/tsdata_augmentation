@@ -902,7 +902,7 @@ class Network_User(object):
         start_time_test = time.time()
         # loop for testing
         save_list=[]
-        p=np.arange(0.01, 0.5, 0.02)
+        p=np.arange(0.01, 2, 0.02)
         #p=range(2, 20, 2)
         with open('/data/nnair/icpr2024/augment_test/timewarp_cnntrans_sisfall.csv', 'a') as myfile:
             for aug in p:
