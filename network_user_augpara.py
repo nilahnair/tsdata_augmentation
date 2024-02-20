@@ -953,7 +953,7 @@ class Network_User(object):
                                 # Clamp first and last value
                                 resampled[i, 0, 0, s_i] = resampled[i, 0, 0, s_i]
                                 resampled[i, 0, -1, s_i] = resampled[i, 0, -1, s_i]
-                        test_batch_v=resampled
+                        test_batch_v=torch.as_tensor(resampled)
                         
                         # Sending to GPU
                         test_batch_v = test_batch_v.to(self.device, dtype=torch.float)
