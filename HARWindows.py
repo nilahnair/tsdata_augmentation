@@ -452,3 +452,29 @@ class HARWindows(Dataset):
                     print("There is only one pattern of class %d, skipping pattern average"%l[i])
                 ret[i,:] = pat
         return self.jittering(ret, sigma=sigma)
+
+    def permutation_revised(self, sample:np.ndarray):
+        seg_mode="equal"
+        orig_steps = np.arange(sample.shape[2])
+        num_segs = 3
+                       
+        augmentedData = np.zeros_like(sample)
+        for i, pat in enumerate(sample):
+            pat = pat.permute(1, 2, 0)
+            pat = pat.view(pat.size()[0], pat.size()[1])
+            if num_segs > 1:
+                if seg_mode == "random":
+                    split_points = np.random.choice(sample.shape[1]-2, num_segs-1, replace=False)
+                    split_points.sort()
+                    splits = np.split(orig_steps, split_points)
+                else:
+                    splits = np.array_split(orig_steps, num_segs)
+                    warp = np.concatenate(np.random.permutation(splits)).ravel()
+                augmentedData[i] = pat[warp]
+            else:
+                augmentedData[i] = pat
+                            
+            sample = augmentedData
+            #sample = torch.as_tensor(sample)
+            
+            return sample

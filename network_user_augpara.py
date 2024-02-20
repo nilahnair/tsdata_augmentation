@@ -904,7 +904,7 @@ class Network_User(object):
         save_list=[]
         #p=np.arange(0.01, 0.1, 0.01)
         p=range(2, 20, 2)
-        with open('/data/nnair/icpr2024/augment_test/permutation_cnntrans_sisfall.csv', 'a') as myfile:
+        with open('/data/nnair/icpr2024/augment_test/timewarp_cnntrans_sisfall.csv', 'a') as myfile:
             for aug in p:
                 print('augmentation value')
                 print(aug)
@@ -928,53 +928,33 @@ class Network_User(object):
                             elif self.config["fully_convolutional"] == "FC":
                                 test_batch_l = harwindow_batched_test["label"]
                         
-                        #max_segments=5
-                        seg_mode="equal"
-    
-                        orig_steps = np.arange(test_batch_v.shape[2])
-    
-                        #num_segs = np.random.randint(1, max_segments, size=(x.shape[0]))
-                        num_segs = aug
-                        #print('num_segs')
-                        #print(num_segs)
-    
-                        augmentedData = np.zeros_like(test_batch_v)
-                        #print('intial shape')
-                        #print(augmentedData.shape)
-                        for i, pat in enumerate(test_batch_v):
-                           # print(i)
-                            #print(pat.shape)
-                            pat = pat.permute(1, 2, 0)
-                            pat = pat.view(pat.size()[0], pat.size()[1])
-                            #print(pat.shape)
-                            if num_segs > 1:
-                                #print('num of segments')
-                                #print(num_segs)
-                                if seg_mode == "random":
-                                    #print('finer details')
-                                    #print(test_batch_v.shape[1]-2)
-                                    #print(num_segs-1)
-                                    split_points = np.random.choice(test_batch_v.shape[1]-2, num_segs-1, replace=False)
-                                    #print('split points')
-                                    #print(split_points.shape)
-                                    split_points.sort()
-                                    splits = np.split(orig_steps, split_points)
-                                else:
-                                    #print('original steps')
-                                    #print(orig_steps)
-                                    splits = np.array_split(orig_steps, num_segs)
-                                    #print(len(splits))
-                                    #print(splits)
-                                warp = np.concatenate(np.random.permutation(splits)).ravel()
-                                augmentedData[i] = pat[warp]
-                            else:
-                                augmentedData[i] = pat
-                            
-                        #print('augmenteddata shape')
-                        #print(augmentedData.shape)
-                        test_batch_v = augmentedData
-                        #print(test_batch_v.shape)
-                        test_batch_v = torch.as_tensor(test_batch_v)
+                        window_len = test_batch_v.shape[2]
+                        num_channels = test_batch_v.shape[3]
+
+                        time_warp_scale = aug
+
+                        #
+                        # Generate new time sampling values using a random curve
+                        # Generate curve, accumulate timestamps
+                        #
+                        timesteps = self._random_curve(window_len, sigma=time_warp_scale)
+                        tt_cum = np.cumsum(timesteps, axis=0)  # Add intervals to make a cumulative graph
+                        # Make the last value to have X.shape[0]
+                        t_scale = (window_len - 1) / tt_cum[-1]
+                        tt_cum = tt_cum * t_scale
+                        #
+                        # Resample
+                        #
+                        x_range = np.arange(window_len)
+                        resampled = np.zeros(test_batch_v.shape)
+                        for i in range(test_batch_v.shape[0]):
+                            for s_i in range(num_channels):
+                                resampled[i, 0, :, s_i] = np.interp(x_range, tt_cum, test_batch_v[i, 0, :, s_i].flatten())
+                                # Clamp first and last value
+                                resampled[i, 0, 0, s_i] = resampled[i, 0, 0, s_i]
+                                resampled[i, 0, -1, s_i] = resampled[i, 0, -1, s_i]
+                        test_batch_v=resampled
+                        
                         # Sending to GPU
                         test_batch_v = test_batch_v.to(self.device, dtype=torch.float)
                         if self.config['output'] == 'softmax':
