@@ -870,7 +870,7 @@ class Network_User(object):
             network_obj = Network(self.config)
 
             #Loading the model
-            network_obj.load_state_dict(torch.load('/data/nnair/icpr2024/networks/cnn_sisfall_act.pt')['state_dict'])
+            network_obj.load_state_dict(torch.load('/data/nnair/icpr2024/networks/cnn_motionsense_act.pt')['state_dict'])
             network_obj.eval()
 
             logging.info('        Network_User:    Test:    setting device')
@@ -904,7 +904,7 @@ class Network_User(object):
         save_list=[]
         #p=np.arange(0.01, 0.1, 0.01)
         p=range(2, 20, 2)
-        with open('/data/nnair/icpr2024/augment_test/permutation_cnn_sisfall.csv', 'a') as myfile:
+        with open('/data/nnair/icpr2024/augment_test/permutation_cnn_motionsense.csv', 'a') as myfile:
             for aug in p:
                 print('augmentation value')
                 print(aug)
