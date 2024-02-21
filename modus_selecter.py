@@ -234,14 +234,14 @@ class Modus_Selecter(object):
         """
         logging.info('    Network_selecter: Net modus: {}'.format(self.config['usage_modus']))
         if self.config['usage_modus'] == 'train':
-            self.train(itera=1, testing=True)
+            self.train(itera=self.config['repetitions'], testing=True)
         elif self.config['usage_modus'] == 'test':
             self.test()
         elif self.configig['usage_modus'] == 'evolution':
             # Not implementing here, see paper ICPR2018
             self.evolution()
         elif self.config['usage_modus'] == 'train_final':
-            self.train(itera=1,  testing=True)
+            self.train(itera=self.config['repetitions'],  testing=True)
         elif self.config['usage_modus'] == 'fine_tuning':
-            self.train(itera=5, testing=True)
+            self.train(itera=self.config['repetitions'], testing=True)
         return

@@ -92,7 +92,10 @@ def my_config():
     assert usage_modus in ['train', 'test',  'evolution',  'train_final',  'train_random',  'fine_tuning'], 'usage_mouds configured wrong'
 
     lr = 0.001
-    seed=41
+    seed=42
+
+    # Number of repeated trainings
+    repetitions = 1
     
     # Flags
     plotting = False
