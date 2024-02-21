@@ -184,9 +184,9 @@ class Modus_Selecter(object):
             self.exp.log_scalar("per_iter.f1_m_test",results_test['f1_mean'], iter_evl)
             
 
-        if self.config["usage_modus"] == "train":
-            logging.info('    Network_selecter:    Train:    eliminating network file')
-            os.remove(os.path.join(self.config['folder_exp'], 'network.pt'))
+        # if self.config["usage_modus"] == "train":
+        #     logging.info('    Network_selecter:    Train:    eliminating network file')
+        #     os.remove(os.path.join(self.config['folder_exp'], 'network.pt'))
 
         return
 

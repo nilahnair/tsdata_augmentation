@@ -26,7 +26,7 @@ from queue_assistant import load_credentials, configure_sacred
 configure_sacred()
 
 now = datetime.datetime.now()
-ex= Experiment('ICDAR 2024')
+ex= Experiment('ICPR 2024')
 
 if os.uname()[1] in ['rosenblatt', 'cameron']:
     user, pw, url, db_name = load_credentials(path='~/.mongodb_credentials')
@@ -98,6 +98,15 @@ def my_config():
     plotting = False
 
     # Options
+
+    dataset_root_defaults = {
+        'mocap':        "/vol/actrec/DFG_Project/2019/LARa_dataset/MoCap/LARa_dataset_mocap/",
+        'mbientlab':    "/vol/actrec/DFG_Project/2019/LARa_dataset/Mbientlab/LARa_dataset_mbientlab/",
+        'mobiact':      "/data/nnair/icpr2024/mobiact/prepros/", # TODO
+        'motionsense':  "/vol/actrec/motion-sense-master/data/A_DeviceMotion_data/A_DeviceMotion_data",
+        'sisfall':      "/vol/actrec/SisFall_dataset"
+        }
+    dataset_root = dataset_root_defaults[dataset]
 
     # Dataset Hyperparameters
     NB_sensor_channels_defaults = {'mocap': 126, 'mbientlab': 30, 'mobiact': 9, 'motionsense': 9, 'sisfall': 9}
@@ -299,15 +308,6 @@ def my_config():
         labeltype = "attributes"
         folder_exp = "/data/nnair/idnetwork/results/all/"
 
-    # Paths are given according to the ones created in *preprocessing.py for the datasets
-    
-    dataset_root_defaults = {'mocap': "/data/nnair/icpr2024/lara/prepros/",
-                    'mbientlab': "/data/nnair/icpr2024/lara_imu/prepros/",
-                    'mobiact': "/data/nnair/icpr2024/mobiact/prepros/",
-                    'motionsense': "/data/nnair/icpr2024/motionsense/prepros/",
-                    'sisfall': "/data/nnair/icpr2024/sisfall/prepros/"
-                    }
-    dataset_root = dataset_root_defaults[dataset]
 
     # GPU
     # os.environ["CUDA_VISIBLE_DEVICES"] = "5" # set via shell

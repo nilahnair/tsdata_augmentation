@@ -169,7 +169,7 @@ class Metrics(object):
             for c in range(self.config['num_classes']):
                 proportions[c] = torch.sum(targets == c).item() / float(targets.size()[0])
 
-        logging.info('            Metric:    \nPrecision: \n{}\nRecall\n{}'.format(precision, recall))
+        # logging.info('            Metric:    \nPrecision: \n{}\nRecall\n{}'.format(precision, recall))
 
         self.results['precision'] = precision
         self.results['recall'] = recall
