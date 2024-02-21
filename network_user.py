@@ -618,6 +618,10 @@ class Network_User(object):
         # Creating the dataloader
         dataLoader_train = DataLoader(harwindows_train, batch_size=self.config['batch_size_train'], shuffle=True)
 
+        # determine modulo value for logging
+        log_interval = (len(harwindows_train) // self.config['batch_size_train']) // self.config['log_per_epoch']
+        print(f'Logging every {log_interval} batches (every {100/self.config["log_per_epoch"]}\%)')
+
         # Setting the network
         logging.info('        Network_User:    Train:    creating network')
         if self.config['network'] == 'cnn' or self.config['network'] == 'cnn_imu':
@@ -776,7 +780,7 @@ class Network_User(object):
             #loop per batch:
             for b, harwindow_batched in enumerate(dataLoader_train):
                 start_time_batch = time.time()
-                if b % (self.config['train_show'] * self.config['log_freq_multiplier']) == 0:
+                if b % log_interval == 0:
                     print("Training: Epoch {}/{} Batch {}/{} and itera {}" \
                                      .format(ep,
                                         self.config['epochs'],
@@ -848,7 +852,7 @@ class Network_User(object):
 
 
                 # Computing metrics for current training batch
-                if (b) % self.config['train_show'] == 0:
+                if b % log_interval == 0:
                     # Metrics for training
                     results_train = metrics_obj.metric(targets=train_batch_l, predictions=feature_maps)
 
@@ -884,7 +888,7 @@ class Network_User(object):
                                   torch.argmax(feature_maps[0], dim=0).item())
 
                     # print statistics
-                    if b % (self.config['train_show'] * self.config['log_freq_multiplier']) == 0:
+                    if b % log_interval == 0:
                         logging.info('        Network_User:            Dataset {} network {} lr {} '
                                         'lr_optimizer {} Reshape {} '.format(self.config["dataset"], self.config["network"],
                                                                             self.config["lr"],
@@ -1053,6 +1057,7 @@ class Network_User(object):
 
         dataLoader_val = DataLoader(harwindows_val, batch_size=self.config['batch_size_val'])
 
+        log_interval = (len(harwindows_val) // self.config['batch_size_train']) // self.config['log_per_epoch']
 
         # Setting the network to eval mode
         network_obj.eval()
@@ -1130,7 +1135,7 @@ class Network_User(object):
                         test_labels_batch = harwindow_batched_val["label"]
                     test_labels = torch.cat((test_labels, test_labels_batch), dim=0)
 
-                if v % self.config['valid_show'] == 0:
+                if v % log_interval == 0:
                     sys.stdout.write("\rValidating: Batch  {}/{}".format(v, len(dataLoader_val)))
                     sys.stdout.flush()
 
@@ -1178,6 +1183,8 @@ class Network_User(object):
         )
 
         dataLoader_test = DataLoader(harwindows_test, batch_size=self.config['batch_size_train'], shuffle=False)
+        
+        log_interval = (len(harwindows_test) // self.config['batch_size_train']) // self.config['log_per_epoch']
 
         # Creating a network and loading the weights for testing
         # network is loaded from saved file in the folder of experiment
@@ -1286,8 +1293,9 @@ class Network_User(object):
                         test_labels_batch = harwindow_batched_test["label"]
                     test_labels = torch.cat((test_labels, test_labels_batch), dim=0)
 
-                sys.stdout.write("\rTesting: Batch  {}/{}".format(v, len(dataLoader_test)))
-                sys.stdout.flush()
+                if v % log_interval == 0:
+                    sys.stdout.write("\rTesting: Batch  {}/{}".format(v, len(dataLoader_test)))
+                    sys.stdout.flush()
 
         elapsed_time_test = time.time() - start_time_test
 

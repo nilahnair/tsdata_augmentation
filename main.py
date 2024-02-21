@@ -320,6 +320,7 @@ def my_config():
     percentages_names = ["001", "002", "005", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10"]
     percentages_dataset = [0.01, 0.02, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
 
+    #TODO not needed anymore; log_per_epoch handles the same
     #train_show_value = num_tr_inputs[dataset[dataset_idx]] * percentages_dataset[percentage_idx]
     train_show_value = num_tr_inputs / batch_size_train
     if dataset == "mbientlab" or dataset == "motionminers_real":
@@ -338,7 +339,7 @@ def my_config():
         train_show = train_show_defaults[network]
         valid_show = valid_show_defaults[network]
 
-    log_freq_multiplier = 10
+    log_per_epoch = 20
 
     file_suffix =  'results_yy{}mm{}dd{:02d}hh{:02d}mm{:02d}.xml'.format(now.year,
                                                                         now.month,
