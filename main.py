@@ -296,7 +296,7 @@ def my_config():
             'mbientlab':    str(Path(base_folder_exp) / "lara_imu/results/"),
             'mobiact':      str(Path(base_folder_exp) / "mobiact/results/"),
             'motionsense':  str(Path(base_folder_exp) / "motionsense/results/"),
-            'sisfall':      str(Path(base_folder_exp) / "sisfall/results/transt/")
+            'sisfall':      str(Path(base_folder_exp) / "sisfall/results/")
                     }
         if folder_exp is None: # if not set via cmd pick from defaults
             folder_exp =  _check_and_create_fldr(folder_exp_defaults[dataset])
@@ -337,6 +337,8 @@ def my_config():
         valid_show_defaults = {'cnn': int(train_show_value / 50), 'lstm': 50, 'cnn_imu': int(train_show_value / 50), 'cnn_transformer': int(train_show_value / 50)}
         train_show = train_show_defaults[network]
         valid_show = valid_show_defaults[network]
+
+    log_freq_multiplier = 10
 
     file_suffix =  'results_yy{}mm{}dd{:02d}hh{:02d}mm{:02d}.xml'.format(now.year,
                                                                         now.month,

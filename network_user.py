@@ -776,14 +776,13 @@ class Network_User(object):
             #loop per batch:
             for b, harwindow_batched in enumerate(dataLoader_train):
                 start_time_batch = time.time()
-                if b & self.config['train_show'] == 0:
-                    sys.stdout.write("\rTraining: Epoch {}/{} Batch {}/{} and itera {}" \
+                if b % (self.config['train_show'] * self.config['log_freq_multiplier']) == 0:
+                    print("Training: Epoch {}/{} Batch {}/{} and itera {}" \
                                      .format(ep,
                                         self.config['epochs'],
                                         b,
                                         len(dataLoader_train),
                                         itera))
-                sys.stdout.flush()
 
                 #Setting the network to train mode
                 network_obj.train(mode=True)
@@ -847,83 +846,9 @@ class Network_User(object):
 
                 elapsed_time_batch = time.time() - start_time_batch
 
-                ################################## Validating ##################################################
-
-                if (itera + 1) % self.config['valid_show'] == 0 or \
-                        (itera + 1) == (self.config['epochs'] * harwindow_batched["data"].shape[0]):
-                    logging.info('\n')
-                    logging.info('        Network_User:        Validating')
-                    start_time_val = time.time()
-
-                    #Setting the network to eval mode
-                    network_obj.eval()
-
-                    # Metrics for training for keeping the same number of metrics for val and training
-                    # Metrics return a dict with the metrics.
-                    results_train = metrics_obj.metric(targets=train_batch_l, predictions=feature_maps)
-                    loss_train_val.append(loss_train)
-                    accs_train_val.append(results_train['acc'])
-                    f1w_train_val.append(results_train['f1_weighted'])
-                    f1m_train_val.append(results_train['f1_mean'])
-
-                    # Validation
-                    # Calling the val() function with the current network and criterion
-                    del train_batch_v, noise
-                    results_val, loss_val = self.validate(network_obj, criterion)
-                    self.exp.log_scalar(f"iter_{ea_itera}.loss_val_int", loss_val, itera)
-                    scheduler.step(loss_val)
-
-                    elapsed_time_val = time.time() - start_time_val
-
-                    # Appending the val metrics
-                    losses_val.append(loss_val)
-                    accs_val.append(results_val['acc'])
-                    f1w_val.append(results_val['f1_weighted'])
-                    f1m_val.append(results_val['f1_mean'])
-                    
-                    self.exp.log_scalar(f"iter_{ea_itera}.accuracy_val_int",    results_val['acc'], itera)
-                    self.exp.log_scalar(f"iter_{ea_itera}.f1_w_val_int",        results_val['f1_weighted'], itera)
-                    self.exp.log_scalar(f"iter_{ea_itera}.f1_m_val_int",        results_val['f1_mean'], itera)
-
-
-                    # print statistics
-                    logging.info('\n')
-                    logging.info(
-                        '        Network_User:        Validating:    '
-                        'epoch {} batch {} itera {} elapsed time {}, best itera {}'.format(ep, b, itera,
-                                                                                           elapsed_time_val,
-                                                                                           best_itera))
-                    logging.info(
-                        '        Network_User:        Validating:    '
-                        'acc {}, f1_weighted {}, f1_mean {}'.format(results_val['acc'], results_val['f1_weighted'],
-                                                                    results_val['f1_mean']))
-                    # Saving the network for the best iteration accuracy
-                    if results_val['acc'] > best_acc_val:
-                        network_config = {
-                            'NB_sensor_channels': self.config['NB_sensor_channels'],
-                            'sliding_window_length': self.config['sliding_window_length'],
-                            'filter_size': self.config['filter_size'],
-                            'num_filters': self.config['num_filters'],
-                            'reshape_input': self.config['reshape_input'],
-                            'network': self.config['network'],
-                            'output': self.config['output'],
-                            'num_classes': self.config['num_classes'],
-                            #'num_attributes': self.config['num_attributes'],
-                            'fully_convolutional': self.config['fully_convolutional'],
-                            'labeltype': self.config['labeltype']
-                        }
-
-                        logging.info('        Network_User:            Saving the network')
-
-                        torch.save({'state_dict': network_obj.state_dict(),
-                                    'network_config': network_config,
-                                    'att_rep': self.attr_representation},
-                                   os.path.join(self.config['folder_exp'], 'network.pt'))
-                        best_acc_val = results_val['acc']
-                        best_itera = itera
 
                 # Computing metrics for current training batch
-                if (itera) % self.config['train_show'] == 0:
+                if (b) % self.config['train_show'] == 0:
                     # Metrics for training
                     results_train = metrics_obj.metric(targets=train_batch_l, predictions=feature_maps)
 
@@ -959,31 +884,109 @@ class Network_User(object):
                                   torch.argmax(feature_maps[0], dim=0).item())
 
                     # print statistics
-                    logging.info('        Network_User:            Dataset {} network {} lr {} '
-                                 'lr_optimizer {} Reshape {} '.format(self.config["dataset"], self.config["network"],
-                                                                      self.config["lr"],
-                                                                      optimizer.param_groups[0]['lr'],
-                                                                      self.config["reshape_input"]))
-                    logging.info(
-                        '        Network_User:    Train:    epoch {}/{} batch {}/{} itera {} '
-                        'elapsed time {} best itera {}'.format(ep, self.config['epochs'], b, len(dataLoader_train),
-                                                               itera, elapsed_time_batch, best_itera))
-                    logging.info('        Network_User:    Train:    loss {}'.format(loss))
-                    logging.info(
-                        '        Network_User:    Train:    acc {}, '
-                        'f1_weighted {}, f1_mean {}'.format(results_train['acc'], results_train['f1_weighted'],
-                                                            results_train['f1_mean']))
-                    logging.info(
-                        '        Network_User:    Train:    '
-                        'Allocated {} GB Cached {} GB'.format(round(torch.cuda.memory_allocated(0)/1024**3, 1),
-                                                              round(torch.cuda.memory_cached(0)/1024**3, 1)))
-                    logging.info('\n\n--------------------------')
+                    if b % (self.config['train_show'] * self.config['log_freq_multiplier']) == 0:
+                        logging.info('        Network_User:            Dataset {} network {} lr {} '
+                                        'lr_optimizer {} Reshape {} '.format(self.config["dataset"], self.config["network"],
+                                                                            self.config["lr"],
+                                                                            optimizer.param_groups[0]['lr'],
+                                                                            self.config["reshape_input"]))
+                        logging.info(
+                            '        Network_User:    Train:    epoch {}/{} batch {}/{} itera {} '
+                            'elapsed time {} best itera {}'.format(ep, self.config['epochs'], b, len(dataLoader_train),
+                                                                    itera, elapsed_time_batch, best_itera))
+                        logging.info('        Network_User:    Train:    loss {}'.format(loss))
+                        logging.info(
+                            '        Network_User:    Train:    acc {}, '
+                            'f1_weighted {}, f1_mean {}'.format(results_train['acc'], results_train['f1_weighted'],
+                                                                results_train['f1_mean']))
+                        logging.info(
+                            '        Network_User:    Train:    '
+                            'Allocated {} GB Cached {} GB'.format(round(torch.cuda.memory_allocated(0)/1024**3, 1),
+                                                                    round(torch.cuda.memory_cached(0)/1024**3, 1)))
+                        logging.info('\n\n--------------------------')
                     
                     if self.config["sacred"]==True:
                         self.exp.log_scalar(f"iter_{ea_itera}.accuracy_train_int",results_train['acc'], itera)
                         self.exp.log_scalar(f"iter_{ea_itera}.f1_w_train_int",results_train['f1_weighted'], itera)
                         self.exp.log_scalar(f"iter_{ea_itera}.f1_m_train_int", results_train['f1_mean'], itera)
                         self.exp.log_scalar(f"iter_{ea_itera}.loss_train_int", loss_train, itera)
+
+            ################################## Validating ##################################################
+
+            # if (itera + 1) % self.config['valid_show'] == 0 or \
+            #         (itera + 1) == (self.config['epochs'] * harwindow_batched["data"].shape[0]):
+            # always validate at the end
+            logging.info('\n')
+            logging.info('        Network_User:        Validating')
+            start_time_val = time.time()
+
+            #Setting the network to eval mode
+            network_obj.eval()
+
+            # Metrics for training for keeping the same number of metrics for val and training
+            # Metrics return a dict with the metrics.
+            results_train = metrics_obj.metric(targets=train_batch_l, predictions=feature_maps)
+            loss_train_val.append(loss_train)
+            accs_train_val.append(results_train['acc'])
+            f1w_train_val.append(results_train['f1_weighted'])
+            f1m_train_val.append(results_train['f1_mean'])
+
+            # Validation
+            # Calling the val() function with the current network and criterion
+            del train_batch_v, noise
+            results_val, loss_val = self.validate(network_obj, criterion)
+            self.exp.log_scalar(f"iter_{ea_itera}.loss_val_int", loss_val, itera)
+            scheduler.step(loss_val)
+
+            elapsed_time_val = time.time() - start_time_val
+
+            # Appending the val metrics
+            losses_val.append(loss_val)
+            accs_val.append(results_val['acc'])
+            f1w_val.append(results_val['f1_weighted'])
+            f1m_val.append(results_val['f1_mean'])
+            
+            if self.config['sacred']:
+                self.exp.log_scalar(f"iter_{ea_itera}.accuracy_val_int",    results_val['acc'], itera)
+                self.exp.log_scalar(f"iter_{ea_itera}.f1_w_val_int",        results_val['f1_weighted'], itera)
+                self.exp.log_scalar(f"iter_{ea_itera}.f1_m_val_int",        results_val['f1_mean'], itera)
+
+
+            # print statistics
+            logging.info('\n')
+            logging.info(
+                '        Network_User:        Validating:    '
+                'epoch {} batch {} itera {} elapsed time {}, best itera {}'.format(ep, b, itera,
+                                                                                    elapsed_time_val,
+                                                                                    best_itera))
+            logging.info(
+                '        Network_User:        Validating:    '
+                'acc {}, f1_weighted {}, f1_mean {}'.format(results_val['acc'], results_val['f1_weighted'],
+                                                            results_val['f1_mean']))
+            # Saving the network for the best iteration accuracy
+            if results_val['acc'] > best_acc_val:
+                network_config = {
+                    'NB_sensor_channels': self.config['NB_sensor_channels'],
+                    'sliding_window_length': self.config['sliding_window_length'],
+                    'filter_size': self.config['filter_size'],
+                    'num_filters': self.config['num_filters'],
+                    'reshape_input': self.config['reshape_input'],
+                    'network': self.config['network'],
+                    'output': self.config['output'],
+                    'num_classes': self.config['num_classes'],
+                    #'num_attributes': self.config['num_attributes'],
+                    'fully_convolutional': self.config['fully_convolutional'],
+                    'labeltype': self.config['labeltype']
+                }
+
+                logging.info('        Network_User:            Saving the network')
+
+                torch.save({'state_dict': network_obj.state_dict(),
+                            'network_config': network_config,
+                            'att_rep': self.attr_representation},
+                            os.path.join(self.config['folder_exp'], 'network.pt'))
+                best_acc_val = results_val['acc']
+                best_itera = itera
                     
             #Step of the scheduler
             scheduler.step()
@@ -1127,7 +1130,7 @@ class Network_User(object):
                         test_labels_batch = harwindow_batched_val["label"]
                     test_labels = torch.cat((test_labels, test_labels_batch), dim=0)
 
-                if v % self.config['val_show'] == 0:
+                if v % self.config['valid_show'] == 0:
                     sys.stdout.write("\rValidating: Batch  {}/{}".format(v, len(dataLoader_val)))
                     sys.stdout.flush()
 
@@ -1174,7 +1177,7 @@ class Network_User(object):
             split='test'
         )
 
-        dataloader_test = DataLoader(harwindows_test, batch_size=self.config['batch_size_train'], shuffle=False)
+        dataLoader_test = DataLoader(harwindows_test, batch_size=self.config['batch_size_train'], shuffle=False)
 
         # Creating a network and loading the weights for testing
         # network is loaded from saved file in the folder of experiment
