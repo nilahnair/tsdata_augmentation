@@ -942,7 +942,7 @@ class Network_User(object):
             del train_batch_v, noise
             results_val, loss_val = self.validate(network_obj, criterion)
             self.exp.log_scalar(f"iter_{ea_itera}.loss_val_int", loss_val, itera)
-            scheduler.step(loss_val)
+            scheduler.step()
 
             elapsed_time_val = time.time() - start_time_val
 
