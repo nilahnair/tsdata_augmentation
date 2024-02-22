@@ -904,7 +904,7 @@ class Network_User(object):
         save_list=[]
         p=np.arange(0.01, 2, 0.02)
         #p=range(2, 20, 2)
-        with open('/data/nnair/icpr2024/augment_test/timewarp_cnn_sisfall.csv', 'a') as myfile:
+        with open('/data/nnair/icpr2024/augment_test/timewarp_lstm_sisfall.csv', 'a') as myfile:
             for aug in p:
                 print('augmentation value')
                 print(aug)
