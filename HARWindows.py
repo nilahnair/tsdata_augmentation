@@ -224,7 +224,7 @@ class HARWindows(Dataset):
 
     # Working
     def flipping(self, sample:np.ndarray):
-        return sample[:, :, ::-1]
+        return sample[:, :, ::-1] [:,:,::-1,:]
 
     # Working
     def magnitude_warping(self, sample:np.ndarray):

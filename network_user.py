@@ -684,8 +684,8 @@ class Network_User(object):
         # Setting optimizer
         if self.config['network']=='cnn_transformer':
             optimizer = optim.Adam(network_obj.parameters(), lr=self.config['lr'], eps= 1e-10, weight_decay=1e-4)
-            #scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=5, gamma=0.5)
-            scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.1, patience=2, threshold=0.001, threshold_mode='rel', cooldown=0, min_lr=0, eps=1e-08, verbose=False)
+            scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=5, gamma=0.5)
+            #scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.1, patience=2, threshold=0.001, threshold_mode='rel', cooldown=0, min_lr=0, eps=1e-08, verbose=False)
         else:  
             optimizer = optim.RMSprop(network_obj.parameters(), lr=self.config['lr'], alpha=0.95)
             # Setting scheduler
@@ -1073,22 +1073,24 @@ class Network_User(object):
             for v, harwindow_batched_val in enumerate(dataLoader_val):
                 # Selecting batch
                 test_batch_v = harwindow_batched_val["data"]
-                if self.config['output'] == 'softmax':
-                    if self.config["fully_convolutional"] == "FCN":
-                        test_batch_l = harwindow_batched_val["labels"][:, 0]
-                        test_batch_l = test_batch_l.reshape(-1)
-                    elif self.config["fully_convolutional"] == "FC":
-                        if self.config['NB_sensor_channels']==9:
-                            test_batch_l = harwindow_batched_val["label"]
-                        else:
-                            test_batch_l = harwindow_batched_val["label"][:, 0]
-                            test_batch_l = test_batch_l.reshape(-1)
-                elif self.config['output'] == 'attribute':
-                    if self.config["fully_convolutional"] == "FCN":
-                        test_batch_l = harwindow_batched_val["labels"][:, 0]
-                        test_batch_l = test_batch_l.reshape(-1)
-                    elif self.config["fully_convolutional"] == "FC":
-                        test_batch_l = harwindow_batched_val["label"]
+                #if self.config['output'] == 'softmax':
+                #    if self.config["fully_convolutional"] == "FCN":
+                #        test_batch_l = harwindow_batched_val["labels"][:, 0]
+                #        test_batch_l = test_batch_l.reshape(-1)
+                #    elif self.config["fully_convolutional"] == "FC":
+                #        if self.config['NB_sensor_channels']==9:
+                #            test_batch_l = harwindow_batched_val["label"]
+                #        else:
+                #            test_batch_l = harwindow_batched_val["label"][:, 0]
+                #            test_batch_l = test_batch_l.reshape(-1)
+                #elif self.config['output'] == 'attribute':
+                #    if self.config["fully_convolutional"] == "FCN":
+                #        test_batch_l = harwindow_batched_val["labels"][:, 0]
+                #        test_batch_l = test_batch_l.reshape(-1)
+                #    elif self.config["fully_convolutional"] == "FC":
+                #        test_batch_l = harwindow_batched_val["label"]
+                        
+                test_batch_l = harwindow_batched_val["label"]
 
                 # Creating torch tensors
                 # test_batch_v = torch.from_numpy(test_batch_v)
@@ -1118,23 +1120,25 @@ class Network_User(object):
                 if v == 0:
                     predictions_val = predictions
                     if self.config['output'] == 'softmax':
-                        if self.config['NB_sensor_channels']==9:
-                            test_labels = harwindow_batched_val["label"]
-                        else:
-                            test_labels = harwindow_batched_val["label"][:, 0]
-                            test_labels = test_labels.reshape(-1)
-                    elif self.config['output'] == 'attribute':
                         test_labels = harwindow_batched_val["label"]
+                        #if self.config['NB_sensor_channels']==9:
+                        #    test_labels = harwindow_batched_val["label"]
+                        #else:
+                        #    test_labels = harwindow_batched_val["label"][:, 0]
+                        #    test_labels = test_labels.reshape(-1)
+                    #elif self.config['output'] == 'attribute':
+                        #test_labels = harwindow_batched_val["label"]
                 else:
                     predictions_val = torch.cat((predictions_val, predictions), dim=0)
                     if self.config['output'] == 'softmax':
-                        if self.config['NB_sensor_channels']==9:
-                            test_labels_batch = harwindow_batched_val["label"]
-                        else:
-                            test_labels_batch = harwindow_batched_val["label"][:, 0]
-                            test_labels_batch = test_labels_batch.reshape(-1)
-                    elif self.config['output'] == 'attribute':
                         test_labels_batch = harwindow_batched_val["label"]
+                        #if self.config['NB_sensor_channels']==9:
+                        #    test_labels_batch = harwindow_batched_val["label"]
+                        #else:
+                        #    test_labels_batch = harwindow_batched_val["label"][:, 0]
+                        #    test_labels_batch = test_labels_batch.reshape(-1)
+                    #elif self.config['output'] == 'attribute':
+                        #test_labels_batch = harwindow_batched_val["label"]
                     test_labels = torch.cat((test_labels, test_labels_batch), dim=0)
 
                 if v % log_interval == 0:
@@ -1230,21 +1234,22 @@ class Network_User(object):
             for v, harwindow_batched_test in enumerate(dataLoader_test):
                 #Selecting batch
                 test_batch_v = harwindow_batched_test["data"]
-                if self.config['output'] == 'softmax':
-                    if self.config["fully_convolutional"] == "FCN":
-                        test_batch_l = harwindow_batched_test["labels"][:, 0]
-                        test_batch_l = test_batch_l.reshape(-1)
-                    elif self.config["fully_convolutional"] == "FC":
-                        if self.config['NB_sensor_channels']==9:
-                            test_batch_l= harwindow_batched_test["label"]
-                        else:
-                            test_batch_l = harwindow_batched_test["label"][:, 0]
-                            test_batch_l = test_batch_l.reshape(-1)
-                elif self.config['output'] == 'attribute':
-                    if self.config["fully_convolutional"] == "FCN":
-                        test_batch_l = harwindow_batched_test["labels"]
-                    elif self.config["fully_convolutional"] == "FC":
-                        test_batch_l = harwindow_batched_test["label"]
+                #if self.config['output'] == 'softmax':
+                #    if self.config["fully_convolutional"] == "FCN":
+                #        test_batch_l = harwindow_batched_test["labels"][:, 0]
+                #        test_batch_l = test_batch_l.reshape(-1)
+                #    elif self.config["fully_convolutional"] == "FC":
+                #        if self.config['NB_sensor_channels']==9:
+                #            test_batch_l= harwindow_batched_test["label"]
+                #        else:
+                #            test_batch_l = harwindow_batched_test["label"][:, 0]
+                #            test_batch_l = test_batch_l.reshape(-1)
+                #elif self.config['output'] == 'attribute':
+                #    if self.config["fully_convolutional"] == "FCN":
+                #        test_batch_l = harwindow_batched_test["labels"]
+                #    elif self.config["fully_convolutional"] == "FC":
+                #        test_batch_l = harwindow_batched_test["label"]
+                test_batch_l= harwindow_batched_test["label"]
 
                 # Sending to GPU
                 test_batch_v = test_batch_v.to(self.device, dtype=torch.float)
@@ -1275,24 +1280,26 @@ class Network_User(object):
                 # As creating an empty tensor and sending to device and then concatenating isnt working
                 if v == 0:
                     predictions_test = predictions
-                    if self.config['output'] == 'softmax':
-                        if self.config['NB_sensor_channels']==9:
-                            test_labels = harwindow_batched_test["label"]
-                        else:
-                            test_labels = harwindow_batched_test["label"][:, 0]
-                            test_labels = test_labels.reshape(-1)
-                    elif self.config['output'] == 'attribute':
-                        test_labels = harwindow_batched_test["label"]
+                    #if self.config['output'] == 'softmax':
+                    #    if self.config['NB_sensor_channels']==9:
+                    #        test_labels = harwindow_batched_test["label"]
+                    #    else:
+                    #        test_labels = harwindow_batched_test["label"][:, 0]
+                    #        test_labels = test_labels.reshape(-1)
+                    #elif self.config['output'] == 'attribute':
+                    #    test_labels = harwindow_batched_test["label"]
+                    test_labels = harwindow_batched_test["label"]
                 else:
                     predictions_test = torch.cat((predictions_test, predictions), dim=0)
-                    if self.config['output'] == 'softmax':
-                        if self.config['NB_sensor_channels']==9:
-                            test_labels_batch = harwindow_batched_test["label"]
-                        else:
-                            test_labels_batch = harwindow_batched_test["label"][:, 0]
-                            test_labels_batch = test_labels_batch.reshape(-1)
-                    elif self.config['output'] == 'attribute':
-                        test_labels_batch = harwindow_batched_test["label"]
+                    #if self.config['output'] == 'softmax':
+                    #    if self.config['NB_sensor_channels']==9:
+                    #        test_labels_batch = harwindow_batched_test["label"]
+                    #    else:
+                    #        test_labels_batch = harwindow_batched_test["label"][:, 0]
+                    #        test_labels_batch = test_labels_batch.reshape(-1)
+                    #elif self.config['output'] == 'attribute':
+                    #    test_labels_batch = harwindow_batched_test["label"]
+                    test_labels_batch = harwindow_batched_test["label"]
                     test_labels = torch.cat((test_labels, test_labels_batch), dim=0)
 
                 if v % log_interval == 0:
