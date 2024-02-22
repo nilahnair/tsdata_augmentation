@@ -631,7 +631,7 @@ def __prepare_sisfall__(path, split):
     all_files = sorted(Path(path).glob('S*/D*.txt'))
 
     #some filtering required D06, D13, D18, D19 #TODO keep D11 or not?
-    all_files = list(filter(lambda p: not any(discard_activity in str(p) for discard_activity in ['D06','D13', 'D18', 'D19']) , all_files))
+    all_files = list(filter(lambda p: not any(discard_activity in str(p) for discard_activity in ['D06','D11', 'D13', 'D18', 'D19']) , all_files))
 
     # TODO keep, remove or fix?
     #all_files = list(filter(lambda p: 'SA15/D17_SE15' not in str(p), all_files)) 
