@@ -310,7 +310,9 @@ class QAssistant(object):
                             ]
             
                 if 'env' in exp['config']:
-                    cmd_list = ['/home/amatei/.local/bin/miniconda3/bin/conda', 'run','-n', exp['config']['env']] + cmd_list #TODO: find better way to specify path of conda
+                    conda_path = os.join(os.environ['CONDA_PATH'], 'bin') if 'CONDA_PATH' in os.environ \
+                        else os.path.join(os.environ['HOME'], 'miniconda3/bin/conda')
+                    cmd_list = [conda_path, 'run','-n', exp['config']['env']] + cmd_list #TODO: find better way to specify path of conda
                     # cmd_list = ['conda', 'run','-n', exp['config']['env']] + cmd_list
                     
                 logger.info('Starting Subprocess...')
