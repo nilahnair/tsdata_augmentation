@@ -310,7 +310,7 @@ class QAssistant(object):
                             ]
             
                 if 'env' in exp['config']:
-                    conda_path = os.join(os.environ['CONDA_PATH'], 'bin') if 'CONDA_PATH' in os.environ \
+                    conda_path = os.join(os.environ['CONDA_PATH'], 'bin/conda') if 'CONDA_PATH' in os.environ \
                         else os.path.join(os.environ['HOME'], 'miniconda3/bin/conda')
                     cmd_list = [conda_path, 'run','-n', exp['config']['env']] + cmd_list #TODO: find better way to specify path of conda
                     # cmd_list = ['conda', 'run','-n', exp['config']['env']] + cmd_list
