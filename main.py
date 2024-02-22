@@ -26,13 +26,13 @@ def load_credentials(path='~/.mongodb_credentials'):
     logger = logging.getLogger('::load_credentials')
     logger.info(f'Loading credientials from {path}')
     with io.open(path) as f:
-        user, pw = f.read().strip().split(',')
+        user, pw, pc, db = f.read().strip().split(',')
  
-    return user, pw
+    return user, pw, pc, db
 
 
-user, pw = load_credentials(path='~/.mongodb_credentials')
-
+user, pw, pc, db = load_credentials(path='~/.mongodb_credentials')
+#nnair,Germany2018,curtiz,nnair_sacred
 ex= Experiment('jitter aug test')
 
 
