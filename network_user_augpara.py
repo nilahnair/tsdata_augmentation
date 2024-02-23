@@ -870,7 +870,7 @@ class Network_User(object):
             network_obj = Network(self.config)
 
             #Loading the model
-            network_obj.load_state_dict(torch.load('/data/nnair/icpr2024/networks/cnn_laraimu_act.pt')['state_dict'])
+            network_obj.load_state_dict(torch.load('/data/nnair/icpr2024/networks/cnntrans_laraimu_act.pt')['state_dict'])
             network_obj.eval()
 
             logging.info('        Network_User:    Test:    setting device')
@@ -904,7 +904,7 @@ class Network_User(object):
         save_list=[]
         #p=np.arange(0.01, 2, 0.02)
         p=range(0, 2, 1)
-        with open('/data/nnair/icpr2024/augment_test/flipping_cnn_laraimu.csv', 'a') as myfile:
+        with open('/data/nnair/icpr2024/augment_test/flipping_cnntrans_laraimu.csv', 'a') as myfile:
             for aug in p:
                 print('augmentation value')
                 print(aug)
@@ -928,15 +928,15 @@ class Network_User(object):
                             elif self.config["fully_convolutional"] == "FC":
                                 test_batch_l = harwindow_batched_test["label"]
                         
-                        print(test_batch_v.shape)
-                        print(test_batch_v.dtype)
-                        print(test_batch_v[0,:,0,3])
-                        print(test_batch_v[-1,:,-1,3])
+                        #print(test_batch_v.shape)
+                        #print(test_batch_v.dtype)
+                        #print(test_batch_v[0,:,0,3])
+                        #print(test_batch_v[-1,:,-1,3])
                         rand_val=torch.flip(test_batch_v,dims=[2])
                         
-                        print(rand_val.shape)
-                        print(rand_val[0,:,0,3])
-                        print(rand_val[-1,:,-1,3])
+                        #print(rand_val.shape)
+                        #print(rand_val[0,:,0,3])
+                        #print(rand_val[-1,:,-1,3])
                         
                         test_batch_v=torch.as_tensor(rand_val)
                         
