@@ -478,3 +478,31 @@ class HARWindows(Dataset):
             #sample = torch.as_tensor(sample)
             
             return sample
+    
+    def timewarp_revised(self, test_batch_v:np.ndarray):
+        window_len = test_batch_v.shape[2]
+        num_channels = test_batch_v.shape[3]
+
+        time_warp_scale = 0.05
+
+        #
+        # Generate new time sampling values using a random curve
+        # Generate curve, accumulate timestamps
+        #
+        timesteps = self._random_curve(window_len, sigma=time_warp_scale)
+        tt_cum = np.cumsum(timesteps, axis=0)  # Add intervals to make a cumulative graph
+        # Make the last value to have X.shape[0]
+        t_scale = (window_len - 1) / tt_cum[-1]
+        tt_cum = tt_cum * t_scale
+        #
+        # Resample
+        #
+        x_range = np.arange(window_len)
+        resampled = np.zeros(test_batch_v.shape)
+        for i in range(test_batch_v.shape[0]):
+            for s_i in range(num_channels):
+                resampled[i, 0, :, s_i] = np.interp(x_range, tt_cum, test_batch_v[i, 0, :, s_i].flatten())
+                # Clamp first and last value
+                resampled[i, 0, 0, s_i] = resampled[i, 0, 0, s_i]
+                resampled[i, 0, -1, s_i] = resampled[i, 0, -1, s_i]
+        return resampled

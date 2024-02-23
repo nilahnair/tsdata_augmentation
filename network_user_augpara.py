@@ -902,9 +902,9 @@ class Network_User(object):
         start_time_test = time.time()
         # loop for testing
         save_list=[]
-        p=np.arange(0.01, 2, 0.02)
-        #p=range(2, 20, 2)
-        with open('/data/nnair/icpr2024/augment_test/timewarp_lstm_laraimu.csv', 'a') as myfile:
+        #p=np.arange(0.01, 2, 0.02)
+        p=range(0, 2, 1)
+        with open('/data/nnair/icpr2024/augment_test/flipping_lstm_laraimu.csv', 'a') as myfile:
             for aug in p:
                 print('augmentation value')
                 print(aug)
@@ -928,31 +928,10 @@ class Network_User(object):
                             elif self.config["fully_convolutional"] == "FC":
                                 test_batch_l = harwindow_batched_test["label"]
                         
-                        window_len = test_batch_v.shape[2]
-                        num_channels = test_batch_v.shape[3]
-
-                        time_warp_scale = aug
-
-                        #
-                        # Generate new time sampling values using a random curve
-                        # Generate curve, accumulate timestamps
-                        #
-                        timesteps = self._random_curve(window_len, sigma=time_warp_scale)
-                        tt_cum = np.cumsum(timesteps, axis=0)  # Add intervals to make a cumulative graph
-                        # Make the last value to have X.shape[0]
-                        t_scale = (window_len - 1) / tt_cum[-1]
-                        tt_cum = tt_cum * t_scale
-                        #
-                        # Resample
-                        #
-                        x_range = np.arange(window_len)
-                        resampled = np.zeros(test_batch_v.shape)
+                        resampled=test_batch_v.shape()
                         for i in range(test_batch_v.shape[0]):
-                            for s_i in range(num_channels):
-                                resampled[i, 0, :, s_i] = np.interp(x_range, tt_cum, test_batch_v[i, 0, :, s_i].flatten())
-                                # Clamp first and last value
-                                resampled[i, 0, 0, s_i] = resampled[i, 0, 0, s_i]
-                                resampled[i, 0, -1, s_i] = resampled[i, 0, -1, s_i]
+                            resampled[i] = test_batch_v[i, :, ::-1, :]
+                            
                         test_batch_v=torch.as_tensor(resampled)
                         
                         # Sending to GPU
