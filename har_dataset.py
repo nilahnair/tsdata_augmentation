@@ -70,6 +70,8 @@ def __get_separating_cols__(dataset_name):
             return None # for motionsense, index is built on the whole dataframe
         case 'sisfall':
             return ['class', 'subject']
+        case 'mobiact':
+            return ['class', 'subject']
         case _:
             raise ValueError(f'Unique column names for {dataset_name=} not defined.')
 
@@ -271,6 +273,17 @@ def __get_data_col_names__(dataset_name):
                     'accel_mma_y',
                     'accel_mma_z'
                     ]
+        case 'mobiact':
+            return [
+                'acc_x',
+                'acc_y',
+                'acc_z',
+                'gyro_x',
+                'gyro_y',
+                'gyro_z',
+                'azimuth',
+                'pitch',
+                'roll']
         case _:
             raise ValueError(f'Unique column names for {dataset_name=} not defined.')
 
@@ -286,7 +299,7 @@ def __prepare_dataframe__(path, dataset_name, split):
         case 'sisfall':
             return __prepare_sisfall__(path, split)
         case 'mobiact':
-            return #__prepare_mobiact__(path) #TODO
+            return __prepare_mobiact__(path, split)
         case _:
             raise ValueError(f'DataFrame preparations for {dataset_name=} not implemented.')
         
@@ -721,6 +734,84 @@ def __prepare_sisfall__(path, split):
 
     return recordings
 
+def __prepare_mobiact__(path, split):
+    print(f'Preparing DataFrame for MobiAct {split}')
+    # All data directories start with S
+    # Don't consider falling classes
+    all_files = sorted(Path(path).glob('**/*.csv'))
+
+    # keep only:
+    all_activities = ['STD', 'WAL', 'JOG', 'JUM', 'STU', 'STN', 'SCH', 'CSI', 'CSO']
+    all_files = filter(lambda p: any(activity in str(p.parent) for activity in all_activities), all_files)
+
+    # remove subjects
+    all_files = list(filter(lambda p: not any(str(identity) in p.name.split('_')[1] for identity in [13, 14, 15, 17, 28, 30, 31, 34, 57]), all_files))
+
+
+    mean_values = pl.DataFrame([
+        0.265079537, 7.13106528, 0.387973281,
+        -0.0225606363, -0.00302826137,  0.0131514254,
+        178.629895, -67.8435738, 2.02923485]).transpose(column_names=__get_data_col_names__('mobiact'))
+    std_values  = pl.DataFrame([
+        3.49444826, 6.70119943, 3.31003981,
+        1.1238746, 1.12533643, 0.72129725,
+        105.81241608, 58.62837783, 17.58456297]).transpose(column_names=__get_data_col_names__('mobiact'))
+
+    min_df = mean_values.with_columns(
+        [pl.col(c) - 2 * std_values[c] for c in set(mean_values.columns).intersection(std_values.columns)]
+    )
+    max_df = mean_values.with_columns(
+        [pl.col(c) + 2 * std_values[c] for c in set(mean_values.columns).intersection(std_values.columns)]
+    )
+
+    print(f'Parsing {len(all_files)} files...')
+    recordings = []
+    for i, file in enumerate(all_files):
+        class_name, subject, recording, _ = file.name.split('_')
+
+        df = pl.read_csv(file)
+        df = df.with_columns([
+            pl.lit(class_name).alias('class_name'),
+            pl.lit(subject).alias('subject').cast(pl.UInt16),
+            pl.lit(recording).alias('recording').cast(pl.UInt16)
+        ])
+
+        # subselect split first 70% for train, next 15% for val, next 15% for test
+        total_rows = df.shape[0]
+        val_start_row = int(total_rows * 0.7)
+        test_start_row = int(total_rows * 0.85)
+
+        match split:
+            case 'train':
+                df = df[0:val_start_row]
+            case 'val':
+                df = df[val_start_row:test_start_row]
+            case 'test':
+                df = df[test_start_row:]
+
+        # normalzation
+        df = df.with_columns(
+            [(pl.col(c) -  min_df[c]) / (max_df[c] - min_df[c])  for c in set(df.columns).intersection(min_df.columns)]
+        )
+
+        df = df.with_columns(
+            pl.col(__get_data_col_names__('mobiact')).clip(0.0, 1)
+        )
+
+        recordings.append(df)
+    
+    recordings = pl.concat(recordings, how='vertical')
+    
+    # pick label == class per row or class_name == class per folder
+    class_col_name = 'class_name'
+    #all_activities = recordings[class_col_name].unique().sort() # don't query, defined above, preserve order
+    activities_map = {a: i for i, a in enumerate(all_activities)}
+    recordings = recordings.with_columns(
+        pl.col(class_col_name).map_dict(activities_map).alias('class').cast(pl.Int16)
+    )
+
+    return recordings
+        
 
 def __check_ragged_cols__(path='/vol/actrec/DFG_Project/2019/LARa_dataset/MoCap/LARa_dataset_mocap/'):
     import csv

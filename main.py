@@ -93,6 +93,8 @@ def my_config():
 
     lr = 0.001
     seed=42
+    polars_max_threads = 4
+    os.environ['POLARS_MAX_THREADS'] = str(polars_max_threads)
 
     # Number of repeated trainings
     repetitions = 1
@@ -105,7 +107,7 @@ def my_config():
     dataset_root_defaults = {
         'mocap':        "/vol/actrec/DFG_Project/2019/LARa_dataset/MoCap/LARa_dataset_mocap/",
         'mbientlab':    "/vol/actrec/DFG_Project/2019/LARa_dataset/Mbientlab/LARa_dataset_mbientlab/",
-        'mobiact':      "/data/nnair/icpr2024/mobiact/prepros/", # TODO
+        'mobiact':      "/vol/actrec/MobiAct_Dataset/",
         'motionsense':  "/vol/actrec/motion-sense-master/data/A_DeviceMotion_data/A_DeviceMotion_data",
         'sisfall':      "/vol/actrec/SisFall_dataset"
         }
