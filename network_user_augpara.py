@@ -955,9 +955,9 @@ class Network_User(object):
                                 warper = np.array([CubicSpline(warp_steps[:,dim], random_warps[i,:,dim])(orig_steps) for dim in range(test_batch_v.shape[3])]).T
                                 ret[i] = pat * warper
                             ret_b[b]=ret
-                            print('overalllshape')
-                            print(ret.shape)
-                            print(ret_b.shape)
+                            #print('overalllshape')
+                            #print(ret.shape)
+                            #print(ret_b.shape)
                         test_batch_v=torch.as_tensor(ret_b)
                         
                         # Sending to GPU
