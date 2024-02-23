@@ -941,16 +941,21 @@ class Network_User(object):
                         print(warp_steps.shape)
                         ret_b=np.zeros_like(test_batch_v)
                         for b in range(test_batch_v.shape[0]):
+                            print('batch number')
                             print(b)
                             ret = np.zeros_like(test_batch_v[b, :, :, : ])
                             print(ret.shape)
+                            print('batch sub shape')
                             print(test_batch_v[b].shape)
+        
                             for i, pat in enumerate(test_batch_v[b]):
+                                print('inforloop')
                                 print(i)
                                 print(pat.shape)
                                 warper = np.array([CubicSpline(warp_steps[:,dim], random_warps[i,:,dim])(orig_steps) for dim in range(test_batch_v.shape[3])]).T
                                 ret[i] = pat * warper
                             ret_b[b]=ret
+                            print('overalllshape')
                             print(ret.shape)
                         test_batch_v=torch.as_tensor(ret_b)
                         
