@@ -934,7 +934,7 @@ class Network_User(object):
                         for i in range(test_batch_v.shape[0]):
                             print('in batch')
                             print(i)
-                            resampled[i] = test_batch_v[i, :, ::-1, :]
+                            resampled[i+1] = test_batch_v[i+1, :, ::-1, :]
                             
                         print(resampled.shape)
                         test_batch_v=torch.as_tensor(resampled)
