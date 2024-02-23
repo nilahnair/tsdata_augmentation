@@ -93,6 +93,8 @@ def my_config():
 
     lr = 0.001
     seed=42
+    polars_max_threads = 4
+    os.environ['POLARS_MAX_THREADS'] = str(polars_max_threads)
 
     # Number of repeated trainings
     repetitions = 1

@@ -616,7 +616,10 @@ class Network_User(object):
             )
 # 
         # Creating the dataloader
-        dataLoader_train = DataLoader(harwindows_train, batch_size=self.config['batch_size_train'], shuffle=True)
+        dataLoader_train = DataLoader(
+            harwindows_train,
+            batch_size=self.config['batch_size_train'],
+            shuffle=True)
 
         # determine modulo value for logging
         log_interval = (len(harwindows_train) // self.config['batch_size_train']) // self.config['log_per_epoch']
@@ -1057,7 +1060,10 @@ class Network_User(object):
             split='val'
         )
 
-        dataLoader_val = DataLoader(harwindows_val, batch_size=self.config['batch_size_val'])
+        dataLoader_val = DataLoader(
+            harwindows_val,
+            batch_size=self.config['batch_size_val'],
+            )
 
         log_interval = (len(harwindows_val) // self.config['batch_size_train']) // self.config['log_per_epoch']
 
@@ -1188,7 +1194,10 @@ class Network_User(object):
             split='test'
         )
 
-        dataLoader_test = DataLoader(harwindows_test, batch_size=self.config['batch_size_train'], shuffle=False)
+        dataLoader_test = DataLoader(
+            harwindows_test,
+            batch_size=self.config['batch_size_train'],
+            shuffle=False)
         
         log_interval = (len(harwindows_test) // self.config['batch_size_train']) // self.config['log_per_epoch']
 
