@@ -931,9 +931,9 @@ class Network_User(object):
                         print(test_batch_v.shape)
                         print(test_batch_v[0,0,0,0])
                         print(test_batch_v[-1,-1,-1,-1])
-                        test_batch_v=np.flip(test_batch_v,2)
-                        print(test_batch_v[0,0,0,0])
-                        print(test_batch_v[-1,-1,-1,-1])
+                        rand_val=np.flip(test_batch_v,2)
+                        print(rand_val[0,0,0,0])
+                        print(rand_val[-1,-1,-1,-1])
                         
                         #test_batch_v=torch.as_tensor(resampled)
                         
