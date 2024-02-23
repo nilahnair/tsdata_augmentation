@@ -929,12 +929,12 @@ class Network_User(object):
                                 test_batch_l = harwindow_batched_test["label"]
                         
                         print(test_batch_v.shape)
-                        print(test_batch_v[0,0,0,0])
-                        print(test_batch_v[-1,-1,-1,-1])
-                        rand_val=test_batch_v[:, :, ::-1,:]#np.flip(test_batch_v,axis=2)
+                        print(test_batch_v[0,:,0,3])
+                        print(test_batch_v[-1,:,-1,3])
+                        rand_val=test_batch_v[:, :,:, ::-1]#np.flip(test_batch_v,axis=2)
                         print(test_batch_v.shape)
-                        print(rand_val[0,0,0,0])
-                        print(rand_val[-1,-1,-1,-1])
+                        print(test_batch_v[0,:,0,3])
+                        print(test_batch_v[-1,:,-1,3])
                         
                         #test_batch_v=torch.as_tensor(resampled)
                         
