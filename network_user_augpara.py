@@ -933,30 +933,31 @@ class Network_User(object):
                         sigma = aug
                         knot = 4
                         orig_steps = np.arange(test_batch_v.shape[2])
-                        print('orig steps')
-                        print(orig_steps.shape)
+                        #print('orig steps')
+                        #print(orig_steps.shape)
                         random_warps = np.random.normal(loc=1.0, scale=sigma, size=(test_batch_v.shape[1], knot+2, test_batch_v.shape[3]))
-                        print(random_warps.shape)
+                        #print(random_warps.shape)
                         warp_steps = (np.ones((test_batch_v.shape[3],1))*(np.linspace(0, test_batch_v.shape[2]-1., num=knot+2))).T
-                        print(warp_steps.shape)
+                        #print(warp_steps.shape)
                         ret_b=np.zeros_like(test_batch_v)
                         for b in range(test_batch_v.shape[0]):
-                            print('batch number')
-                            print(b)
+                            #print('batch number')
+                            #print(b)
                             ret = np.zeros_like(test_batch_v[b, :, :, : ])
-                            print(ret.shape)
-                            print('batch sub shape')
-                            print(test_batch_v[b].shape)
+                            #print(ret.shape)
+                            #print('batch sub shape')
+                            #print(test_batch_v[b].shape)
         
                             for i, pat in enumerate(test_batch_v[b]):
-                                print('inforloop')
-                                print(i)
-                                print(pat.shape)
+                                #print('inforloop')
+                                #print(i)
+                                #print(pat.shape)
                                 warper = np.array([CubicSpline(warp_steps[:,dim], random_warps[i,:,dim])(orig_steps) for dim in range(test_batch_v.shape[3])]).T
                                 ret[i] = pat * warper
                             ret_b[b]=ret
                             print('overalllshape')
                             print(ret.shape)
+                            print(ret_b.shape)
                         test_batch_v=torch.as_tensor(ret_b)
                         
                         # Sending to GPU
