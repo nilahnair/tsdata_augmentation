@@ -928,10 +928,15 @@ class Network_User(object):
                             elif self.config["fully_convolutional"] == "FC":
                                 test_batch_l = harwindow_batched_test["label"]
                         
-                        resampled=test_batch_v.shape()
+                        print(test_batch_v.shape)
+                        resampled= np.zeros(test_batch_v.shape)
+                        print(resampled.shape)
                         for i in range(test_batch_v.shape[0]):
+                            print('in batch')
+                            print(i)
                             resampled[i] = test_batch_v[i, :, ::-1, :]
                             
+                        print(resampled.shape)
                         test_batch_v=torch.as_tensor(resampled)
                         
                         # Sending to GPU
