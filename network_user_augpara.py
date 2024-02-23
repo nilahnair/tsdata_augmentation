@@ -929,15 +929,13 @@ class Network_User(object):
                                 test_batch_l = harwindow_batched_test["label"]
                         
                         print(test_batch_v.shape)
-                        resampled= np.zeros(test_batch_v.shape)
-                        print(resampled.shape)
-                        for i in range(test_batch_v.shape[0]):
-                            print('in batch')
-                            print(i)
-                            resampled[i+1] = test_batch_v[i+1, :, ::-1, :]
-                            
-                        print(resampled.shape)
-                        test_batch_v=torch.as_tensor(resampled)
+                        print(test_batch_v[0,0,0,0])
+                        print(test_batch_v[-1,-1,-1,-1])
+                        test_batch_v=np.flip(test_batch_v,2)
+                        print(test_batch_v[0,0,0,0])
+                        print(test_batch_v[-1,-1,-1,-1])
+                        
+                        #test_batch_v=torch.as_tensor(resampled)
                         
                         # Sending to GPU
                         test_batch_v = test_batch_v.to(self.device, dtype=torch.float)
