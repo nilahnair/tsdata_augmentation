@@ -936,7 +936,7 @@ class Network_User(object):
                         print('orig steps')
                         print(orig_steps.shape)
                         random_warps = np.random.normal(loc=1.0, scale=sigma, size=(test_batch_v.shape[0],test_batch_v.shape[1], knot+2, test_batch_v.shape[3]))
-                        print(random_wraps.shape)
+                        print(random_warps.shape)
                         warp_steps = (np.ones((test_batch_v.shape[3],1))*(np.linspace(0, test_batch_v.shape[2]-1., num=knot+2))).T
                         print(warp_steps.shape)
                         ret_b=np.zeros_like(test_batch_v)
