@@ -934,11 +934,11 @@ class Network_User(object):
                         print(test_batch_v[-1,:,-1,3])
                         rand_val=torch.flip(test_batch_v,dims=[2])
                         
-                        print(test_batch_v.shape)
-                        print(test_batch_v[0,:,0,3])
-                        print(test_batch_v[-1,:,-1,3])
+                        print(rand_val.shape)
+                        print(rand_val[0,:,0,3])
+                        print(rand_val[-1,:,-1,3])
                         
-                        #test_batch_v=torch.as_tensor(resampled)
+                        test_batch_v=torch.as_tensor(rand_val)
                         
                         # Sending to GPU
                         test_batch_v = test_batch_v.to(self.device, dtype=torch.float)
