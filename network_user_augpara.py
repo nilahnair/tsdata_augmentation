@@ -931,7 +931,7 @@ class Network_User(object):
                         print(test_batch_v.shape)
                         print(test_batch_v[0,0,0,0])
                         print(test_batch_v[-1,-1,-1,-1])
-                        rand_val=np.flip(test_batch_v,axis=2)
+                        rand_val=test_batch_v[:, :, ::-1,:]#np.flip(test_batch_v,axis=2)
                         print(rand_val[0,0,0,0])
                         print(rand_val[-1,-1,-1,-1])
                         
