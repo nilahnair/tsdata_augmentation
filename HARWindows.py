@@ -227,7 +227,9 @@ class HARWindows(Dataset):
 
     # Working
     def flipping(self, sample:np.ndarray):
+        #rand_val=torch.flip(test_batch_v,dims=[2])
         return sample[:, :, ::-1]
+    
 
     # Working
     def magnitude_warping(self, sample:np.ndarray):

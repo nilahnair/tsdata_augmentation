@@ -19,6 +19,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
+from scipy.interpolate import CubicSpline
 
 from hdfs.config import catch
 
@@ -902,9 +903,9 @@ class Network_User(object):
         start_time_test = time.time()
         # loop for testing
         save_list=[]
-        #p=np.arange(0.01, 2, 0.02)
-        p=range(0, 2, 1)
-        with open('/data/nnair/icpr2024/augment_test/flipping_cnntrans_sisfall.csv', 'a') as myfile:
+        p=np.arange(0.01, 2, 0.02)
+        #p=range(0, 2, 1)
+        with open('/data/nnair/icpr2024/augment_test/magnitudewrap_cnntrans_sisfall.csv', 'a') as myfile:
             for aug in p:
                 print('augmentation value')
                 print(aug)
@@ -927,18 +928,30 @@ class Network_User(object):
                                 test_batch_l = harwindow_batched_test["labels"]
                             elif self.config["fully_convolutional"] == "FC":
                                 test_batch_l = harwindow_batched_test["label"]
+
                         
-                        #print(test_batch_v.shape)
-                        #print(test_batch_v.dtype)
-                        #print(test_batch_v[0,:,0,3])
-                        #print(test_batch_v[-1,:,-1,3])
-                        rand_val=torch.flip(test_batch_v,dims=[2])
-                        
-                        #print(rand_val.shape)
-                        #print(rand_val[0,:,0,3])
-                        #print(rand_val[-1,:,-1,3])
-                        
-                        test_batch_v=torch.as_tensor(rand_val)
+                        sigma = aug
+                        knot = 4
+                        orig_steps = np.arange(test_batch_v.shape[2])
+                        print('orig steps')
+                        print(orig_steps.shape)
+                        random_warps = np.random.normal(loc=1.0, scale=sigma, size=(test_batch_v.shape[0],test_batch_v.shape[1], knot+2, test_batch_v.shape[3]))
+                        print(random_wraps.shape)
+                        warp_steps = (np.ones((test_batch_v.shape[3],1))*(np.linspace(0, test_batch_v.shape[2]-1., num=knot+2))).T
+                        print(warp_steps.shape)
+                        ret_b=np.zeros_like(test_batch_v)
+                        for b in range(test_batch_v.shape[0]):
+                            print(b)
+                            ret = np.zeros_like(test_batch_v[b, :, :, : ])
+                            print(ret.shape)
+                            for i, pat in enumerate(test_batch_v[b]):
+                                print(i)
+                                print(pat.shape)
+                                warper = np.array([CubicSpline(warp_steps[:,dim], random_warps[i,:,dim])(orig_steps) for dim in range(test_batch_v.shape[3])]).T
+                                ret[i] = pat * warper
+                            ret_b[b]=ret
+                            print(ret.shape)
+                        test_batch_v=torch.as_tensor(ret_b)
                         
                         # Sending to GPU
                         test_batch_v = test_batch_v.to(self.device, dtype=torch.float)
