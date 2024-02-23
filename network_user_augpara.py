@@ -944,6 +944,7 @@ class Network_User(object):
                             print(b)
                             ret = np.zeros_like(test_batch_v[b, :, :, : ])
                             print(ret.shape)
+                            print(test_batch_v[b].shape)
                             for i, pat in enumerate(test_batch_v[b]):
                                 print(i)
                                 print(pat.shape)
