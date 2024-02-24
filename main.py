@@ -245,7 +245,7 @@ def configuration(dataset_idx, network_idx, output_idx, usage_modus_idx=0, datas
                     }
 
     # GPU
-    os.environ["CUDA_VISIBLE_DEVICES"] = "5"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "6"
     GPU = 0
 
     # Labels position on the segmented window
@@ -358,7 +358,7 @@ def setup_experiment_logger(logging_level=logging.DEBUG, filename=None):
 def my_config():
     print("configuration function began")
     config = configuration(dataset_idx=4,
-                           network_idx=0,
+                           network_idx=1,
                            output_idx=0,
                            usage_modus_idx=1,
                            #dataset_fine_tuning_idx=0,
