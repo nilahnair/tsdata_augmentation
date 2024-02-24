@@ -880,7 +880,7 @@ class Network_User(object):
             network_obj = Network(self.config)
 
             #Loading the model
-            network_obj.load_state_dict(torch.load('/data/nnair/icpr2024/networks/lstm_motionsense_act.pt')['state_dict'])
+            network_obj.load_state_dict(torch.load('/data/nnair/icpr2024/networks/lstm_mobiact_act.pt')['state_dict'])
             network_obj.eval()
 
             logging.info('        Network_User:    Test:    setting device')
@@ -905,7 +905,7 @@ class Network_User(object):
         save_list=[]
         p=np.arange(0.01, 0.1, 0.02)
         #p=range(0, 2, 1)
-        with open('/data/nnair/icpr2024/augment_test/magnitudewrap_lstm_motionsense.csv', 'a') as myfile:
+        with open('/data/nnair/icpr2024/augment_test/magnitudewrap_lstm_mobiact.csv', 'a') as myfile:
             for aug in p:
                 print('augmentation value')
                 print(aug)
