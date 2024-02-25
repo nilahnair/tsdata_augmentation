@@ -903,9 +903,9 @@ class Network_User(object):
         start_time_test = time.time()
         # loop for testing
         save_list=[]
-        p=np.arange(0.01, 0.1, 0.02)
+        p=np.arange(0.1, 1.5, 0.2)
         #p=range(0, 2, 1)
-        with open('/data/nnair/icpr2024/augment_test/magnitudewrap_lstm_laraimu.csv', 'a') as myfile:
+        with open('/data/nnair/icpr2024/augment_test/windowslice_lstm_laraimu.csv', 'a') as myfile:
             for aug in p:
                 print('augmentation value')
                 print(aug)
@@ -929,36 +929,29 @@ class Network_User(object):
                             elif self.config["fully_convolutional"] == "FC":
                                 test_batch_l = harwindow_batched_test["label"]
 
+                        reduce_ratio=aug
+                        target_len = np.ceil(reduce_ratio*test_batch_v.shape[2]).astype(int)
+                        if target_len >= test_batch_v.shape[2]:
+                            break
+                        else: 
+                            starts = np.random.randint(low=0, high=test_batch_v.shape[2]-target_len, size=(test_batch_v.shape[1])).astype(int)
+                            ends = (target_len + starts).astype(int)
+    
+                            ret = np.zeros_like(test_batch_v)
+                            for i, pat in enumerate(test_batch_v):
+                                print('batch loop')
+                                print(pat.shape)
+                                print(i)
+                                let = np.zeros_like(pat)
+                                for j, jat in enumerate(pat):
+                                    print('i loop')
+                                    print(j)
+                                    print(jat.shape)
+                                    for dim in range(test_batch_v.shape[3]):
+                                        pat[j,:,dim] = np.interp(np.linspace(0, target_len, num=test_batch_v.shape[2]), np.arange(target_len), jat[starts[i]:ends[i],dim]).T
+                                    ret[i,j,:,:] = pat               
                         
-                        sigma = aug
-                        knot = 4
-                        orig_steps = np.arange(test_batch_v.shape[2])
-                        #print('orig steps')
-                        #print(orig_steps.shape)
-                        random_warps = np.random.normal(loc=1.0, scale=sigma, size=(test_batch_v.shape[1], knot+2, test_batch_v.shape[3]))
-                        #print(random_warps.shape)
-                        warp_steps = (np.ones((test_batch_v.shape[3],1))*(np.linspace(0, test_batch_v.shape[2]-1., num=knot+2))).T
-                        #print(warp_steps.shape)
-                        ret_b=np.zeros_like(test_batch_v)
-                        for b in range(test_batch_v.shape[0]):
-                            #print('batch number')
-                            #print(b)
-                            ret = np.zeros_like(test_batch_v[b, :, :, : ])
-                            #print(ret.shape)
-                            #print('batch sub shape')
-                            #print(test_batch_v[b].shape)
-        
-                            for i, pat in enumerate(test_batch_v[b]):
-                                #print('inforloop')
-                                #print(i)
-                                #print(pat.shape)
-                                warper = np.array([CubicSpline(warp_steps[:,dim], random_warps[i,:,dim])(orig_steps) for dim in range(test_batch_v.shape[3])]).T
-                                ret[i] = pat * warper
-                            ret_b[b]=ret
-                            #print('overalllshape')
-                            #print(ret.shape)
-                            #print(ret_b.shape)
-                        test_batch_v=torch.as_tensor(ret_b)
+                        test_batch_v=torch.as_tensor(ret)
                         
                         # Sending to GPU
                         test_batch_v = test_batch_v.to(self.device, dtype=torch.float)
