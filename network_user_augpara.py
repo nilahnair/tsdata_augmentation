@@ -929,8 +929,11 @@ class Network_User(object):
                             elif self.config["fully_convolutional"] == "FC":
                                 test_batch_l = harwindow_batched_test["label"]
                         print(test_batch_v.dtype)
+                        print(test_batch_v.shape)
                         test_batch_v=test_batch_v.numpy()
                         print(test_batch_v.dtype)
+                        print(test_batch_v.shape)
+                        
                         reduce_ratio=aug
                         target_len = np.ceil(reduce_ratio*test_batch_v.shape[2]).astype(int)
                         if target_len >= test_batch_v.shape[2]:
