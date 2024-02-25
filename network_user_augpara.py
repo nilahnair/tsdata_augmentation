@@ -903,7 +903,7 @@ class Network_User(object):
         start_time_test = time.time()
         # loop for testing
         save_list=[]
-        p=np.arange(0.1, 1.5, 0.2)
+        p=np.arange(0.1, 1, 0.2)
         #p=range(0, 2, 1)
         with open('/data/nnair/icpr2024/augment_test/windowslice_lstm_laraimu.csv', 'a') as myfile:
             for aug in p:
@@ -928,11 +928,11 @@ class Network_User(object):
                                 test_batch_l = harwindow_batched_test["labels"]
                             elif self.config["fully_convolutional"] == "FC":
                                 test_batch_l = harwindow_batched_test["label"]
-                        print(test_batch_v.dtype)
-                        print(test_batch_v.shape)
+                        #print(test_batch_v.dtype)
+                        #print(test_batch_v.shape)
                         test_batch_v=test_batch_v.numpy()
-                        print(test_batch_v.dtype)
-                        print(test_batch_v.shape)
+                        #print(test_batch_v.dtype)
+                        #print(test_batch_v.shape)
                         
                         slice_fraction=aug
 
