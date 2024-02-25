@@ -953,8 +953,8 @@ class Network_User(object):
                                     print(j)
                                     print(jat.shape)
                                     for dim in range(test_batch_v.shape[3]):
-                                        pat[j,:,dim] = np.interp(np.linspace(0, target_len, num=test_batch_v.shape[2]), np.arange(target_len), jat[starts[i]:ends[i],dim]).T
-                                    ret[i,j,:,:] = pat               
+                                        pat[:,dim] = np.interp(np.linspace(0, target_len, num=test_batch_v.shape[2]), np.arange(target_len), jat[starts[i]:ends[i],dim]).T
+                                        ret[i,j,:,:] = pat               
                         
                         test_batch_v=torch.as_tensor(ret)
                         
