@@ -934,29 +934,56 @@ class Network_User(object):
                         print(test_batch_v.dtype)
                         print(test_batch_v.shape)
                         
-                        reduce_ratio=aug
-                        target_len = np.ceil(reduce_ratio*test_batch_v.shape[2]).astype(int)
-                        if target_len >= test_batch_v.shape[2]:
-                            break
-                        else: 
-                            starts = np.random.randint(low=0, high=test_batch_v.shape[2]-target_len, size=(test_batch_v.shape[1])).astype(int)
-                            ends = (target_len + starts).astype(int)
-    
-                            ret = np.zeros_like(test_batch_v)
-                            for i, pat in enumerate(test_batch_v):
-                                print('batch loop')
-                                print(pat.shape)
-                                print(i)
-                                let = np.zeros_like(pat)
-                                for j, jat in enumerate(pat):
-                                    print('i loop')
-                                    print(j)
-                                    print(jat.shape)
-                                    for dim in range(test_batch_v.shape[3]):
-                                        pat[:,dim] = np.interp(np.linspace(0, target_len, num=test_batch_v.shape[2]), np.arange(target_len), jat[starts[i]:ends[i],dim]).T
-                                        ret[i,j,:,:] = pat               
+                        slice_fraction=aug
+
+                        # # Validate the shape of the data
+                        # if data.shape != (1, 200, 126):
+                        #     raise ValueError("Data must be of shape (1, 200, 126)")
+
+                        # Validate slice_fraction
+                        if slice_fraction <= 0 or slice_fraction >= 1:
+                            raise ValueError("slice_fraction must be between 0 and 1, exclusive.")
+
+                        # Determine slice size
+                        time_points = test_batch_v.shape[2]
+                        sensor_amount = test_batch_v.shape[3]
+                        slice_size = int(time_points * slice_fraction)
                         
-                        test_batch_v=torch.as_tensor(ret)
+                        ret_b=np.zeros_like(test_batch_v)
+                        for i, pat in enumerate(test_batch_v):
+                            # Randomly select the start index for slicing
+                            start_idx = np.random.randint(0, time_points - slice_size)
+
+                            # Extract slice
+                            sliced_data = pat[:, start_idx:start_idx + slice_size, :]
+
+                            # Stretch the slice to original time-series length
+                            stretched_data = np.zeros((1, time_points, sensor_amount))
+
+                            for sensor in range(sensor_amount):
+                                stretched_data[0, :, sensor] = np.interp(
+                                    np.linspace(0, slice_size - 1, time_points),
+                                    np.arange(slice_size),
+                                    sliced_data[0, :, sensor])
+
+                            # Initialize an array to store the normalized time-series
+                            normalized_array = np.zeros_like(stretched_data)
+
+                            # Normalize each time-series
+                            for j in range(test_batch_v.shape[2]):
+                                min_val = np.min(stretched_data[0, j, :])
+                                max_val = np.max(stretched_data[0, j, :])
+        
+                            # Check for the case where all values are the same (max_val = min_val)
+                            if max_val == min_val:
+                                normalized_array[0, j, :] = 0  # or any constant value in [0, 1]
+                            else:
+                                normalized_array[0, j, :] = (stretched_data[0, j, :] - min_val) / (max_val - min_val)
+
+                            # `normalized_array` now contains the normalized time-series.
+                            ret_b[i]=normalized_array 
+                        
+                        test_batch_v=torch.as_tensor(ret_b)
                         
                         # Sending to GPU
                         test_batch_v = test_batch_v.to(self.device, dtype=torch.float)
