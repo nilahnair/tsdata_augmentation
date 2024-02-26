@@ -980,8 +980,10 @@ class Network_User(object):
                                     normalized_array[0, j, :] = 0  # or any constant value in [0, 1]
                                 else:
                                     normalized_array[0, j, :] = (rotated_array[0, j, :] - min_val) / (max_val - min_val)
-
-                                # `normalized_array` now contains the normalized time-series.
+                                    
+                            print('normalised shape')
+                            print(normalized_array.shape)
+                            # `normalized_array` now contains the normalized time-series.
                             ret_b[i]= normalized_array.reshape((1,test_batch_v.shape[2],test_batch_v.shape[3]))
                         
                         test_batch_v=torch.as_tensor(ret_b)
