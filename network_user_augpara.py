@@ -936,9 +936,11 @@ class Network_User(object):
                         ret_b=np.zeros_like(test_batch_v)
                         for i, pat in enumerate(test_batch_v):
                             x = pat.reshape((1,test_batch_v.shape[3],test_batch_v.shape[2]))
+                            print(x.shape)
 
                             # Generate time points
                             time_points = np.linspace(0, test_batch_v.shape[2]-1, test_batch_v.shape[2])
+                            print(time_points.shape)
 
                             # Define the angle of rotation in degrees
                             angle_degrees = aug  # Replace with the desired angle
@@ -956,8 +958,8 @@ class Network_User(object):
                                 for i in range(test_batch_v.shape[2]):
                                     print('in loop')
                                     print(time_points.shape)
-                                    print(pat[0, j, i].shape)
-                                    point = np.array([time_points[i], pat[0, j, i]])
+                                    print(x[0, j, i].shape)
+                                    point = np.array([time_points[i], x[0, j, i]])
                                     rotated_point = np.dot(rotation_matrix, point)
                                     rotated_array[0, j, i] = rotated_point[1]
 
