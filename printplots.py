@@ -32,7 +32,7 @@ def aug_plot(file):
     # print(len(toplot))
     final= np.array(toplot)
     #print(final.shape)
-    print(final)
+    #print(final)
     x=[]
     acc=[]
     f1=[]
@@ -41,9 +41,9 @@ def aug_plot(file):
         acc.append(final[i][1])
         f1.append(final[i][2])
         
-    print(x)
-    print(acc)
-    print(f1)
+    #print(x)
+    #print(acc)
+    #print(f1)
      
     plt.plot(x,acc, 'r', label='acc')
     plt.plot(x, f1, 'b', label='wf1')
@@ -56,6 +56,11 @@ def aug_plot(file):
     plt.close()  
     
     return
+
+def groupby(groupname):
+    if groupname == 'networks':
+        
+    elif groupname ==
 
 def main():
     for root,dirs,files in os.walk(folder_base):
