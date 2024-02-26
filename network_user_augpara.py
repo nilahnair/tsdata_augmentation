@@ -936,7 +936,7 @@ class Network_User(object):
                         ret_b=np.zeros_like(test_batch_v)
                         print('ret_b shape')
                         print(ret_b.shape)
-                        for i, pat in enumerate(test_batch_v):
+                        for k, pat in enumerate(test_batch_v):
                             x = pat.reshape((1,test_batch_v.shape[3],test_batch_v.shape[2]))
                             print(x.shape)
 
@@ -988,7 +988,7 @@ class Network_User(object):
                             # `normalized_array` now contains the normalized time-series.
                             p= normalized_array.reshape((1,test_batch_v.shape[2],test_batch_v.shape[3]))
                             print(p.shape)
-                            ret_b[i] = p
+                            ret_b[k] = p
                         
                         test_batch_v=torch.as_tensor(ret_b)
                         
