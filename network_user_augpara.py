@@ -941,7 +941,7 @@ class Network_User(object):
                             print(x.shape)
 
                             # Generate time points
-                            time_points = np.linspace(0, test_batch_v.shape[2]-1, test_batch_v.shape[2])
+                            time_points = np.linspace(0, test_batch_v.shape[2], test_batch_v.shape[2])
                             print(time_points.shape)
 
                             # Define the angle of rotation in degrees
