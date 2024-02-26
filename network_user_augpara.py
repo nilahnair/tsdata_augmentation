@@ -958,7 +958,7 @@ class Network_User(object):
                                 for i in range(test_batch_v.shape[2]):
                                     print('in loop')
                                     #print(time_points.shape)
-                                    print(x[0, j, i].shape)
+                                    print(point.shape)
                                     point = np.array([time_points[i], x[0, j, i]])
                                     rotated_point = np.dot(rotation_matrix, point)
                                     rotated_array[0, j, i] = rotated_point[1]
