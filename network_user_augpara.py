@@ -903,7 +903,7 @@ class Network_User(object):
         start_time_test = time.time()
         # loop for testing
         save_list=[]
-        p=np.arange(0.1, 1, 0.2)
+        p=np.arange(0.01, 0.1, 0.2)
         #p=range(0, 2, 1)
         with open('/data/nnair/icpr2024/augment_test/tilt_cnntrans_sisfall.csv', 'a') as myfile:
             for aug in p:
@@ -941,7 +941,7 @@ class Network_User(object):
                             time_points = np.linspace(0, test_batch_v.shape[2]-1, test_batch_v.shape[2])
 
                             # Define the angle of rotation in degrees
-                            angle_degrees = 0.05  # Replace with the desired angle
+                            angle_degrees = aug  # Replace with the desired angle
                             angle_radians = np.radians(angle_degrees)
 
                             # Create the rotation matrix
