@@ -986,7 +986,8 @@ class Network_User(object):
                             print('normalised shape')
                             print(normalized_array.shape)
                             # `normalized_array` now contains the normalized time-series.
-                            ret_b[i]= normalized_array.reshape((1,test_batch_v.shape[2],test_batch_v.shape[3]))
+                            p= normalized_array.reshape((1,test_batch_v.shape[2],test_batch_v.shape[3]))
+                            ret_b[i] = p
                         
                         test_batch_v=torch.as_tensor(ret_b)
                         
