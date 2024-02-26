@@ -958,11 +958,11 @@ class Network_User(object):
                             # Rotate each time-series
                             for j in range(test_batch_v.shape[3]):
                                 for i in range(test_batch_v.shape[2]):
-                                    print('in loop')
+                                    #print('in loop')
                                     #print(time_points.shape)
                                     
                                     point = np.array([time_points[i], x[0, j, i]])
-                                    print(point.shape)
+                                    #print(point.shape)
                                     rotated_point = np.dot(rotation_matrix, point)
                                     rotated_array[0, j, i] = rotated_point[1]
 
@@ -987,6 +987,7 @@ class Network_User(object):
                             print(normalized_array.shape)
                             # `normalized_array` now contains the normalized time-series.
                             p= normalized_array.reshape((1,test_batch_v.shape[2],test_batch_v.shape[3]))
+                            print(p.shape)
                             ret_b[i] = p
                         
                         test_batch_v=torch.as_tensor(ret_b)
