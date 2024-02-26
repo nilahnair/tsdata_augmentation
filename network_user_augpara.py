@@ -905,7 +905,7 @@ class Network_User(object):
         save_list=[]
         p=np.arange(0.1, 1, 0.2)
         #p=range(0, 2, 1)
-        with open('/data/nnair/icpr2024/augment_test/windowslice_cnntrans_sisfall.csv', 'a') as myfile:
+        with open('/data/nnair/icpr2024/augment_test/tilt_cnntrans_sisfall.csv', 'a') as myfile:
             for aug in p:
                 print('augmentation value')
                 print(aug)
@@ -933,8 +933,50 @@ class Network_User(object):
                         test_batch_v=test_batch_v.numpy()
                         #print(test_batch_v.dtype)
                         #print(test_batch_v.shape)
-                        
-                        
+                        ret_b=np.zeros_like(test_batch_v)
+                        for i, pat in enumerate(test_batch_v):
+                            x = pat.reshape((1,test_batch_v.shape[3],test_batch_v.shape[2]))
+
+                            # Generate time points
+                            time_points = np.linspace(0, test_batch_v.shape[2]-1, test_batch_v.shape[2])
+
+                            # Define the angle of rotation in degrees
+                            angle_degrees = 0.05  # Replace with the desired angle
+                            angle_radians = np.radians(angle_degrees)
+
+                            # Create the rotation matrix
+                            rotation_matrix = np.array([[np.cos(angle_radians), -np.sin(angle_radians)],
+                                                        	[np.sin(angle_radians), np.cos(angle_radians)]])
+
+                            # Initialize an array to store the rotated time-series
+                            rotated_array = np.zeros_like(x)
+
+                            # Rotate each time-series
+                            for j in range(test_batch_v.shape[3]):
+                                for i in range(test_batch_v.shape[2]):
+                                    point = np.array([time_points[i], pat[0, j, i]])
+                                    rotated_point = np.dot(rotation_matrix, point)
+                                    rotated_array[0, j, i] = rotated_point[1]
+
+                            # `rotated_array` now contains the rotated time-series.
+                            #return rotated_array
+
+                            # Initialize an array to store the normalized time-series
+                            normalized_array = np.zeros_like(rotated_array)
+
+                            # Normalize each time-series
+                            for j in range(126):
+                                min_val = np.min(rotated_array[0, j, :])
+                                max_val = np.max(rotated_array[0, j, :])
+        
+                                # Check for the case where all values are the same (max_val = min_val)
+                                if max_val == min_val:
+                                    normalized_array[0, j, :] = 0  # or any constant value in [0, 1]
+                                else:
+                                    normalized_array[0, j, :] = (rotated_array[0, j, :] - min_val) / (max_val - min_val)
+
+                                # `normalized_array` now contains the normalized time-series.
+                            ret_b[i]= normalized_array.reshape((1,test_batch_v.shape[2],test_batch_v.shape[3]))
                         
                         test_batch_v=torch.as_tensor(ret_b)
                         
