@@ -934,15 +934,15 @@ class Network_User(object):
                         #print(test_batch_v.dtype)
                         #print(test_batch_v.shape)
                         ret_b=np.zeros_like(test_batch_v)
-                        print('ret_b shape')
-                        print(ret_b.shape)
+                        #print('ret_b shape')
+                        #print(ret_b.shape)
                         for k, pat in enumerate(test_batch_v):
                             x = pat.reshape((1,test_batch_v.shape[3],test_batch_v.shape[2]))
-                            print(x.shape)
+                            #print(x.shape)
 
                             # Generate time points
                             time_points = np.linspace(0, test_batch_v.shape[2], test_batch_v.shape[2])
-                            print(time_points.shape)
+                            #print(time_points.shape)
 
                             # Define the angle of rotation in degrees
                             angle_degrees = aug  # Replace with the desired angle
@@ -983,11 +983,11 @@ class Network_User(object):
                                 else:
                                     normalized_array[0, j, :] = (rotated_array[0, j, :] - min_val) / (max_val - min_val)
                                     
-                            print('normalised shape')
-                            print(normalized_array.shape)
+                            #print('normalised shape')
+                            #print(normalized_array.shape)
                             # `normalized_array` now contains the normalized time-series.
                             p= normalized_array.reshape((1,test_batch_v.shape[2],test_batch_v.shape[3]))
-                            print(p.shape)
+                            #print(p.shape)
                             ret_b[k] = p
                         
                         test_batch_v=torch.as_tensor(ret_b)
