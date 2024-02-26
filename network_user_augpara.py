@@ -958,8 +958,9 @@ class Network_User(object):
                                 for i in range(test_batch_v.shape[2]):
                                     print('in loop')
                                     #print(time_points.shape)
-                                    print(point.shape)
+                                    
                                     point = np.array([time_points[i], x[0, j, i]])
+                                    print(point.shape)
                                     rotated_point = np.dot(rotation_matrix, point)
                                     rotated_array[0, j, i] = rotated_point[1]
 
@@ -970,7 +971,7 @@ class Network_User(object):
                             normalized_array = np.zeros_like(rotated_array)
 
                             # Normalize each time-series
-                            for j in range(126):
+                            for j in range(test_batch_v.shape[3]):
                                 min_val = np.min(rotated_array[0, j, :])
                                 max_val = np.max(rotated_array[0, j, :])
         
