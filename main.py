@@ -203,8 +203,8 @@ def my_config():
     epochs = epochs_defaults[dataset][network][output]
 
     augmentations =  None
-    assert augmentations in [None,  'time_warp',  'time_warp_seed',  'jittering',  'scaling',  'flipping',  'magnitude_warping',
-                      'permutation',  'slicing',  'window_warping', 'tilt', 'spawner'], 'augmentation configured wrong' # TODO can directly infer list by sys.module[transforms]
+    # assert augmentations in [None,  'time_warp',  'time_warp_seed',  'jittering',  'scaling',  'flipping',  'magnitude_warping',
+    #                   'permutation',  'slicing',  'window_warping', 'tilt', 'spawner'], 'augmentation configured wrong' # TODO can directly infer list by sys.module[transforms]
     
     division_epochs_defaults = {'mocap': 2, 'mbientlab': 1, 'mobiact': 1, 'motionsense': 1, 'sisfall': 1}
     division_epochs = division_epochs_defaults[dataset]
