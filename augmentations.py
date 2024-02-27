@@ -1,5 +1,15 @@
+import sys
 import numpy as np
 from tqdm import tqdm
+
+def get_augmentation(augmentation):
+    if isinstance(augmentation, str):
+        return getattr(sys.modules[__name__], augmentation)
+    elif isinstance(augmentation, list):
+        transforms = []
+        for t in augmentation:
+            augmentation.append(getattr(sys.modules[__name__], augmentation))
+        return # TODO is there a Compose without torchvision?!
 
 # Augmentations start here
 
