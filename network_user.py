@@ -612,6 +612,7 @@ class Network_User(object):
             dataset_name=self.config['dataset'],
             window_length=self.config['sliding_window_length'],
             window_stride=self.config['sliding_window_step'],
+            transform=self.config['augmentations'],
             split='train'
             )
 # 

@@ -30,14 +30,15 @@ class HARDataset(Dataset):
         label = sub_frame['class'].value_counts(sort=True)[0]['class'][0]
         sub_frame = sub_frame.select(__get_data_col_names__(self.dataset_name))
         sub_frame = sub_frame.to_numpy()
-        
+        sub_frame = sub_frame[None,:] # add dummy dimension for code compatibility 
+
         if self.transform:
             sub_frame = self.transform(sub_frame) # TODO: rn, applied on window, not implemented as intended on whole sequence
         if self.target_transform:
             label = self.target_transform(label)
 
         return {
-            'data': sub_frame[None,:], # add dummy dimension for code compatibility
+            'data': sub_frame,
             'label': label,
             'labels': labels.to_numpy()}
 
