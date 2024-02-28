@@ -614,6 +614,7 @@ class Network_User(object):
             window_length=self.config['sliding_window_length'],
             window_stride=self.config['sliding_window_step'],
             transform=get_augmentation(self.config['augmentations']),
+            augmenation_probability=self.config['augmentation_probability'],
             split='train'
             )
 # 

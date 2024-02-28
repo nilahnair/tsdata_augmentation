@@ -2,9 +2,10 @@ from torch.utils.data import Dataset
 import polars as pl
 from pathlib import Path
 from collections import OrderedDict
+import random
 
 class HARDataset(Dataset):
-    def __init__(self, path, dataset_name = 'mbientlab', window_length = 200, window_stride = 25, split = 'train', transform = None, target_transform = None):
+    def __init__(self, path, dataset_name = 'mbientlab', window_length = 200, window_stride = 25, split = 'train', transform = None, target_transform = None, augmenation_probability = 0):
         self.path = path
         self.dataset_name = dataset_name
         self.window_length = window_length
@@ -12,6 +13,7 @@ class HARDataset(Dataset):
         self.split = split # TODO: sample by split, different per dataset, look at individual preporccessing
         self.transform = transform
         self.target_transform = target_transform
+        self.augmentation_probabiblity = augmenation_probability
 
         self.recordings = __prepare_dataframe__(self.path, self.dataset_name, self.split).with_row_count()
 
@@ -33,9 +35,10 @@ class HARDataset(Dataset):
         sub_frame = sub_frame[None,:] # add dummy dimension for code compatibility 
 
         if self.transform:
-            sub_frame = self.transform(sub_frame) # TODO: rn, applied on window, not implemented as intended on whole sequence
-        if self.target_transform:
-            label = self.target_transform(label)
+            if random.choices(population=[True, False], weights=[self.augmentation_probabiblity, 1-self.augmentation_probabiblity])[0]:
+                sub_frame = self.transform(sub_frame) # TODO: rn, applied on window, not implemented as intended on whole sequence
+        # if self.target_transform:
+        #     label = self.target_transform(label)
 
         return {
             'data': sub_frame,
