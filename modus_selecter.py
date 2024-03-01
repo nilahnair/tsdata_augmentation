@@ -174,14 +174,15 @@ class Modus_Selecter(object):
 
                 time_test = time.time() - start_time_test
 
+                self.exp.log_scalar("per_iter.accuracy_test",results_test['acc'], iter_evl)
+                self.exp.log_scalar("per_iter.f1_w_test",results_test['f1_weighted'], iter_evl)
+                self.exp.log_scalar("per_iter.f1_m_test",results_test['f1_mean'], iter_evl)
+
         if testing:
             self.save(acc_test_ac, f1_weighted_test_ac, f1_mean_test_ac, ea_iter=iter_evl, type_simple='testing',
                       confusion_matrix=confusion_matrix_test, time_iter=time_test, precisions=np.array(precisions_test),
                       recalls=np.array(recalls_test))
             
-            self.exp.log_scalar("per_iter.accuracy_test",results_test['acc'], iter_evl)
-            self.exp.log_scalar("per_iter.f1_w_test",results_test['f1_weighted'], iter_evl)
-            self.exp.log_scalar("per_iter.f1_m_test",results_test['f1_mean'], iter_evl)
             
 
         # if self.config["usage_modus"] == "train":

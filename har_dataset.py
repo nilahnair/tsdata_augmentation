@@ -602,8 +602,8 @@ def __prepare_motionsense__(path, split):
         ])
         # subselect split first 70% for train, next 15% for val, next 15% for test
         total_rows = df.shape[0]
-        val_start_row = int(total_rows * 0.7)
-        test_start_row = int(total_rows * 0.85)
+        val_start_row = round(total_rows * 0.7)
+        test_start_row = round(total_rows * 0.85)
 
         match split:
             case 'train':
@@ -648,7 +648,7 @@ def __prepare_sisfall__(path, split):
     all_files = sorted(Path(path).glob('S*/D*.txt'))
 
     #some filtering required D06, D13, D18, D19 #TODO keep D11 or not?
-    all_files = list(filter(lambda p: not any(discard_activity in str(p) for discard_activity in ['D06','D11', 'D13', 'D18', 'D19']) , all_files))
+    all_files = list(filter(lambda p: not any(discard_activity in str(p) for discard_activity in ['D06','D13', 'D18', 'D19']) , all_files))
 
     # TODO keep, remove or fix?
     #all_files = list(filter(lambda p: 'SA15/D17_SE15' not in str(p), all_files)) 
@@ -690,15 +690,21 @@ def __prepare_sisfall__(path, split):
                 ('accel_mma_x',  pl.String),
                 ('accel_mma_y',  pl.String),
                 ('accel_mma_z',  pl.String)
-                ])).drop_nulls()
+                ])).fill_null(strategy='forward')
         df = df.with_columns(pl.col('accel_mma_z').str.strip_chars(';').alias('accel_mma_z')) # remove ; from last col
         df = df.select(pl.all().map_batches(lambda col: col.str.strip_chars(' '))) # remove spaces
-        df = df.cast(pl.Int32)
+        if df[-1]['accel_adxl_x'][0] == '':
+            df[-1, 'accel_adxl_x'] = df[-2, 'accel_adxl_x'] 
+        # df = df.cast(pl.Int32)
+        try:
+            df = df.cast(pl.Int32)
+        except:
+            print(df)
 
         # subselect split first 70% for train, next 15% for val, next 15% for test
         total_rows = df.shape[0]
-        val_start_row = int(total_rows * 0.7)
-        test_start_row = int(total_rows * 0.85)
+        val_start_row = round(total_rows * 0.7)
+        test_start_row = round(total_rows * 0.85)
 
         match split:
             case 'train':
@@ -782,8 +788,8 @@ def __prepare_mobiact__(path, split):
 
         # subselect split first 70% for train, next 15% for val, next 15% for test
         total_rows = df.shape[0]
-        val_start_row = int(total_rows * 0.7)
-        test_start_row = int(total_rows * 0.85)
+        val_start_row = round(total_rows * 0.7)
+        test_start_row = round(total_rows * 0.85)
 
         match split:
             case 'train':
