@@ -2,9 +2,10 @@ from torch.utils.data import Dataset
 import polars as pl
 from pathlib import Path
 from collections import OrderedDict
+import random
 
 class HARDataset(Dataset):
-    def __init__(self, path, dataset_name = 'mbientlab', window_length = 200, window_stride = 25, split = 'train', transform = None, target_transform = None):
+    def __init__(self, path, dataset_name = 'mbientlab', window_length = 200, window_stride = 25, split = 'train', transform = None, target_transform = None, augmenation_probability = 0):
         self.path = path
         self.dataset_name = dataset_name
         self.window_length = window_length
@@ -12,6 +13,7 @@ class HARDataset(Dataset):
         self.split = split # TODO: sample by split, different per dataset, look at individual preporccessing
         self.transform = transform
         self.target_transform = target_transform
+        self.augmentation_probabiblity = augmenation_probability
 
         self.recordings = __prepare_dataframe__(self.path, self.dataset_name, self.split).with_row_count()
 
@@ -30,14 +32,16 @@ class HARDataset(Dataset):
         label = sub_frame['class'].value_counts(sort=True)[0]['class'][0]
         sub_frame = sub_frame.select(__get_data_col_names__(self.dataset_name))
         sub_frame = sub_frame.to_numpy()
-        
+        sub_frame = sub_frame[None,:] # add dummy dimension for code compatibility 
+
         if self.transform:
-            sub_frame = self.transform(sub_frame) # TODO: rn, applied on window, not implemented as intended on whole sequence
-        if self.target_transform:
-            label = self.target_transform(label)
+            if random.choices(population=[True, False], weights=[self.augmentation_probabiblity, 1-self.augmentation_probabiblity])[0]:
+                sub_frame = self.transform(sub_frame) # TODO: rn, applied on window, not implemented as intended on whole sequence
+        # if self.target_transform:
+        #     label = self.target_transform(label)
 
         return {
-            'data': sub_frame[None,:], # add dummy dimension for code compatibility
+            'data': sub_frame,
             'label': label,
             'labels': labels.to_numpy()}
 
@@ -598,8 +602,8 @@ def __prepare_motionsense__(path, split):
         ])
         # subselect split first 70% for train, next 15% for val, next 15% for test
         total_rows = df.shape[0]
-        val_start_row = int(total_rows * 0.7)
-        test_start_row = int(total_rows * 0.85)
+        val_start_row = round(total_rows * 0.7)
+        test_start_row = round(total_rows * 0.85)
 
         match split:
             case 'train':
@@ -686,15 +690,21 @@ def __prepare_sisfall__(path, split):
                 ('accel_mma_x',  pl.String),
                 ('accel_mma_y',  pl.String),
                 ('accel_mma_z',  pl.String)
-                ])).drop_nulls()
+                ])).fill_null(strategy='forward')
         df = df.with_columns(pl.col('accel_mma_z').str.strip_chars(';').alias('accel_mma_z')) # remove ; from last col
         df = df.select(pl.all().map_batches(lambda col: col.str.strip_chars(' '))) # remove spaces
-        df = df.cast(pl.Int32)
+        if df[-1]['accel_adxl_x'][0] == '':
+            df[-1, 'accel_adxl_x'] = df[-2, 'accel_adxl_x'] 
+        # df = df.cast(pl.Int32)
+        try:
+            df = df.cast(pl.Int32)
+        except:
+            print(df)
 
         # subselect split first 70% for train, next 15% for val, next 15% for test
         total_rows = df.shape[0]
-        val_start_row = int(total_rows * 0.7)
-        test_start_row = int(total_rows * 0.85)
+        val_start_row = round(total_rows * 0.7)
+        test_start_row = round(total_rows * 0.85)
 
         match split:
             case 'train':
@@ -778,8 +788,8 @@ def __prepare_mobiact__(path, split):
 
         # subselect split first 70% for train, next 15% for val, next 15% for test
         total_rows = df.shape[0]
-        val_start_row = int(total_rows * 0.7)
-        test_start_row = int(total_rows * 0.85)
+        val_start_row = round(total_rows * 0.7)
+        test_start_row = round(total_rows * 0.85)
 
         match split:
             case 'train':
