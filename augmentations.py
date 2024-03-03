@@ -1,6 +1,7 @@
 import sys
 import numpy as np
 from tqdm import tqdm
+import torch
 
 def get_augmentation(augmentation):
     if isinstance(augmentation, str):
@@ -28,7 +29,8 @@ def scaling(x):
 
 # Working
 def flipping(x):
-    return x[:, ::-1, : ]
+    rand_val=torch.flip(x,dims=[1])
+    return rand_val
 
 # Working
 def magnitude_warping(x):
@@ -81,7 +83,7 @@ def slicing(data):
     Returns:
     - numpy.ndarray: The augmented data array of shape (1, 200, 126).
     """
-    slice_fraction=0.02
+    slice_fraction=0.5
 
     # # Validate the shape of the data
     # if data.shape != (1, 200, 126):
