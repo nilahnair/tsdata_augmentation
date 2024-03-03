@@ -173,8 +173,9 @@ def window_warping(x):
     # https://halshs.archives-ouvertes.fr/halshs-01357973/document
     window_ratio=0.2
     scales=[0.5, 2.]
-
-    x.reshape((126,200))
+    channel=x.shape[2]
+    length=x.shape[1]
+    x.reshape((1,channel,length))
 
     warp_scales = np.random.choice(scales, x.shape[0])
     warp_size = np.ceil(window_ratio*x.shape[1]).astype(int)
@@ -191,16 +192,18 @@ def window_warping(x):
             end_seg = pat[window_ends[i]:,dim]
             warped = np.concatenate((start_seg, window_seg, end_seg))                
             ret[i,:,dim] = np.interp(np.arange(x.shape[1]), np.linspace(0, x.shape[1]-1., num=warped.size), warped).T
-    return ret.reshape((1,200,126))
+    return ret.reshape((1,length,channel))
 
 def tilt(x):
-    x = x.reshape((1,126,200))
+    channel=x.shape[2]
+    length=x.shape[1]
+    x = x.reshape((1,channel,length))
 
     # Generate time points
-    time_points = np.linspace(0, 199, 200)
+    time_points = np.linspace(0, 199, length)
 
     # Define the angle of rotation in degrees
-    angle_degrees = 0.06  # Replace with the desired angle
+    angle_degrees = 0.02  # Replace with the desired angle
     angle_radians = np.radians(angle_degrees)
 
     # Create the rotation matrix
@@ -211,8 +214,8 @@ def tilt(x):
     rotated_array = np.zeros_like(x)
 
     # Rotate each time-series
-    for j in range(126):
-        for i in range(200):
+    for j in range(channel):
+        for i in range(length):
             point = np.array([time_points[i], x[0, j, i]])
             rotated_point = np.dot(rotation_matrix, point)
             rotated_array[0, j, i] = rotated_point[1]
@@ -224,7 +227,7 @@ def tilt(x):
     normalized_array = np.zeros_like(rotated_array)
 
     # Normalize each time-series
-    for j in range(126):
+    for j in range(channel):
         min_val = np.min(rotated_array[0, j, :])
         max_val = np.max(rotated_array[0, j, :])
         
@@ -235,7 +238,7 @@ def tilt(x):
             normalized_array[0, j, :] = (rotated_array[0, j, :] - min_val) / (max_val - min_val)
 
     # `normalized_array` now contains the normalized time-series.
-    return normalized_array.reshape((1,200,126))
+    return normalized_array.reshape((1,length,channel))
 
 #working
 def spawner(x, labels, sigma=0.05, verbose=0):
