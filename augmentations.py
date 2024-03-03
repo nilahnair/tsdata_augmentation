@@ -29,7 +29,7 @@ def scaling(x):
 
 # Working
 def flipping(x):
-    rand_val=torch.flip(x,dims=[1])
+    rand_val=np.flip(x,1)
     return rand_val
 
 # Working
