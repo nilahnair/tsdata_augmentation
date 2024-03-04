@@ -360,7 +360,7 @@ def my_config():
     config = configuration(dataset_idx=0,
                            network_idx=1,
                            output_idx=0,
-                           usage_modus_idx=1,
+                           usage_modus_idx=0,
                            #dataset_fine_tuning_idx=0,
                            reshape_input=False,
                            learning_rates_idx=0,
