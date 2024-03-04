@@ -33,7 +33,7 @@ def load_credentials(path='~/.mongodb_credentials'):
 
 user, pw, pc, db = load_credentials(path='~/.mongodb_credentials')
 #nnair,Germany2018,curtiz,nnair_sacred
-ex= Experiment('jitter aug test')
+ex= Experiment('mocap lstm frnorm test')
 
 
 
@@ -237,7 +237,7 @@ def configuration(dataset_idx, network_idx, output_idx, usage_modus_idx=0, datas
     
     # Paths are given according to the ones created in *preprocessing.py for the datasets
     
-    dataset_root = {'mocap': "/data/nnair/icpr2024/lara/prepros/",
+    dataset_root = {'mocap': "/data/nnair/icpr2024/lara/prepros_frnorm/",
                     'mbientlab': "/data/nnair/icpr2024/lara_imu/prepros/",
                     'mobiact': "/data/nnair/icpr2024/mobiact/prepros/",
                     'motionsense': "/data/nnair/icpr2024/motionsense/prepros/",
@@ -245,7 +245,7 @@ def configuration(dataset_idx, network_idx, output_idx, usage_modus_idx=0, datas
                     }
 
     # GPU
-    os.environ["CUDA_VISIBLE_DEVICES"] = "5"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "6"
     GPU = 0
 
     # Labels position on the segmented window
@@ -357,7 +357,7 @@ def setup_experiment_logger(logging_level=logging.DEBUG, filename=None):
 @ex.config
 def my_config():
     print("configuration function began")
-    config = configuration(dataset_idx=3,
+    config = configuration(dataset_idx=0,
                            network_idx=1,
                            output_idx=0,
                            usage_modus_idx=1,
