@@ -30,8 +30,8 @@ def scaling(x):
 # Working
 def flipping(x):
     rand_val=np.flip(x,1)
-    return rand_val
-
+    x=torch.as_tensor(rand_val)
+    return x
 # Working
 def magnitude_warping(x):
     from scipy.interpolate import CubicSpline
@@ -118,7 +118,7 @@ def slicing(data):
     normalized_array = np.zeros_like(stretched_data)
 
     # Normalize each time-series
-    for j in range(126):
+    for j in range(sensor_amount):
         min_val = np.min(stretched_data[0, j, :])
         max_val = np.max(stretched_data[0, j, :])
         
@@ -281,6 +281,7 @@ def spawner(x, labels, sigma=0.05, verbose=0):
     return jittering(ret, sigma=sigma)
 
 def windowslicing(x):
+        #for 4 dimensional input - including batch
         slice_fraction=0.5
 
         # # Validate the shape of the data
