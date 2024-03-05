@@ -648,10 +648,10 @@ def __prepare_sisfall__(path, split):
     all_files = sorted(Path(path).glob('S*/D*.txt'))
 
     #some filtering required D06, D13, D18, D19 #TODO keep D11 or not?
-    all_files = list(filter(lambda p: not any(discard_activity in str(p) for discard_activity in ['D06','D13', 'D18', 'D19']) , all_files))
+    all_files = list(filter(lambda p: not any(discard_activity in str(p) for discard_activity in ['D06', 'D13', 'D18', 'D19']) , all_files))
 
     # TODO keep, remove or fix?
-    #all_files = list(filter(lambda p: 'SA15/D17_SE15' not in str(p), all_files)) 
+    # all_files = list(filter(lambda p: 'SA15/D17_SE15' not in str(p), all_files)) 
 
     mean_values = pl.DataFrame([3.16212380, -220.821147, -37.2032848, -4.97325388, 34.9530823, -7.05977257, -0.394311490, -864.960077, -98.0097123]).transpose(column_names=__get_data_col_names__('sisfall'))
     std_values  = pl.DataFrame([76.42413571, 133.73065249, 108.80401481, 664.20882435, 503.17930668, 417.85844231, 296.16101639, 517.27540723, 443.30238268]).transpose(column_names=__get_data_col_names__('sisfall'))
@@ -701,34 +701,12 @@ def __prepare_sisfall__(path, split):
         except:
             print(df)
 
-        # subselect split first 70% for train, next 15% for val, next 15% for test
-        total_rows = df.shape[0]
-        val_start_row = round(total_rows * 0.7)
-        test_start_row = round(total_rows * 0.85)
-
-        match split:
-            case 'train':
-                df = df[0:val_start_row]
-            case 'val':
-                df = df[val_start_row:test_start_row]
-            case 'test':
-                df = df[test_start_row:]
-
         df = df.with_columns([
             # pl.lit(cls).alias('class'),
             pl.lit(class_name).alias('class_name'),
             pl.lit(subject).alias('subject'),
             pl.lit(recording).alias('recording')
         ])
-
-        # normalzation
-        df = df.with_columns(
-            [(pl.col(c) -  min_df[c]) / (max_df[c] - min_df[c])  for c in set(df.columns).intersection(min_df.columns)]
-        )
-
-        df = df.with_columns(
-            pl.col(__get_data_col_names__('sisfall')).clip(0.0, 1)
-        )
 
         recordings.append(df)
 
@@ -740,6 +718,32 @@ def __prepare_sisfall__(path, split):
     activities_map = {a: i for i, a in enumerate(all_activities)}
     recordings = recordings.with_columns(
         pl.col('class_name').map_dict(activities_map).alias('class').cast(pl.Int32)
+    )
+
+    dfs_by_split = []
+    for group_name, data in recordings.group_by(__get_separating_cols__(dataset_name='sisfall'), maintain_order=True):
+        # subselect split first 70% for train, next 15% for val, next 15% for test
+        total_rows = data.shape[0]
+        val_start_row = round(total_rows * 0.7)
+        test_start_row = round(total_rows * 0.85)
+
+        match split:
+            case 'train':
+                dfs_by_split.append(data[0:val_start_row])
+            case 'val':
+                dfs_by_split.append(data[val_start_row:test_start_row])
+            case 'test':
+                dfs_by_split.append(data[test_start_row:])
+
+    recordings = pl.concat(dfs_by_split, how='vertical')
+
+    # normalzation
+    df = df.with_columns(
+        [(pl.col(c) -  min_df[c]) / (max_df[c] - min_df[c])  for c in set(df.columns).intersection(min_df.columns)]
+    )
+
+    df = df.with_columns(
+        pl.col(__get_data_col_names__('sisfall')).clip(0.0, 1)
     )
 
     return recordings
@@ -786,28 +790,6 @@ def __prepare_mobiact__(path, split):
             pl.lit(recording).alias('recording').cast(pl.UInt16)
         ])
 
-        # subselect split first 70% for train, next 15% for val, next 15% for test
-        total_rows = df.shape[0]
-        val_start_row = round(total_rows * 0.7)
-        test_start_row = round(total_rows * 0.85)
-
-        match split:
-            case 'train':
-                df = df[0:val_start_row]
-            case 'val':
-                df = df[val_start_row:test_start_row]
-            case 'test':
-                df = df[test_start_row:]
-
-        # normalzation
-        df = df.with_columns(
-            [(pl.col(c) -  min_df[c]) / (max_df[c] - min_df[c])  for c in set(df.columns).intersection(min_df.columns)]
-        )
-
-        df = df.with_columns(
-            pl.col(__get_data_col_names__('mobiact')).clip(0.0, 1)
-        )
-
         recordings.append(df)
     
     recordings = pl.concat(recordings, how='vertical')
@@ -818,6 +800,32 @@ def __prepare_mobiact__(path, split):
     activities_map = {a: i for i, a in enumerate(all_activities)}
     recordings = recordings.with_columns(
         pl.col(class_col_name).map_dict(activities_map).alias('class').cast(pl.Int16)
+    )
+
+    dfs_by_split = []
+    for group_name, data in recordings.group_by(__get_separating_cols__(dataset_name='sisfall'), maintain_order=True):
+        # subselect split first 70% for train, next 15% for val, next 15% for test
+        total_rows = data.shape[0]
+        val_start_row = round(total_rows * 0.7)
+        test_start_row = round(total_rows * 0.85)
+
+        match split:
+            case 'train':
+                dfs_by_split.append(data[0:val_start_row])
+            case 'val':
+                dfs_by_split.append(data[val_start_row:test_start_row])
+            case 'test':
+                dfs_by_split.append(data[test_start_row:])
+
+    recordings = pl.concat(dfs_by_split, how='vertical')
+
+    # normalzation
+    df = df.with_columns(
+        [(pl.col(c) -  min_df[c]) / (max_df[c] - min_df[c])  for c in set(df.columns).intersection(min_df.columns)]
+    )
+
+    df = df.with_columns(
+        pl.col(__get_data_col_names__('mobiact')).clip(0.0, 1)
     )
 
     return recordings
