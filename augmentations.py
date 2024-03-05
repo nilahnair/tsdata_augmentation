@@ -30,7 +30,7 @@ def scaling(x):
 # Working
 def flipping(x):
     rand_val=np.flip(x,1)
-    x=torch.as_tensor(rand_val)
+    x=np.array(rand_val)
     return x
 # Working
 def magnitude_warping(x):
@@ -118,7 +118,7 @@ def slicing(data):
     normalized_array = np.zeros_like(stretched_data)
 
     # Normalize each time-series
-    for j in range(sensor_amount):
+    for j in range(time_points):
         min_val = np.min(stretched_data[0, j, :])
         max_val = np.max(stretched_data[0, j, :])
         
