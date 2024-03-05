@@ -1,6 +1,7 @@
 import sys
 import numpy as np
 from tqdm import tqdm
+import torch
 
 def get_augmentation(augmentation):
     if isinstance(augmentation, str):
@@ -14,26 +15,27 @@ def get_augmentation(augmentation):
 # Augmentations start here
 
 # Working
-def jittering(x, sigma = 0.05):
+def jittering(x, sigma = 0.03):
     # https://arxiv.org/pdf/1706.00527.pdf
     return x + np.random.normal(loc=0., scale=sigma, size=x.shape)
 
 # Working
 def scaling(x):
     # https://arxiv.org/pdf/1706.00527.pdf
-    sigma=0.1
+    sigma=0.04
     factor = np.random.normal(loc=1., scale=sigma, size=(x.shape[0],x.shape[2])) #TODO: check if indices are the right ones
     augmentedData = np.multiply(x, factor[:,np.newaxis,:])
     return augmentedData
 
 # Working
 def flipping(x):
-    return x[:, :, ::-1]
-
+    rand_val=np.flip(x,1)
+    x=np.array(rand_val)
+    return x
 # Working
 def magnitude_warping(x):
     from scipy.interpolate import CubicSpline
-    sigma = 0.2
+    sigma = 0.1
     knot = 4
     orig_steps = np.arange(x.shape[1])
     
@@ -81,7 +83,7 @@ def slicing(data):
     Returns:
     - numpy.ndarray: The augmented data array of shape (1, 200, 126).
     """
-    slice_fraction=0.2
+    slice_fraction=0.5
 
     # # Validate the shape of the data
     # if data.shape != (1, 200, 126):
@@ -116,7 +118,7 @@ def slicing(data):
     normalized_array = np.zeros_like(stretched_data)
 
     # Normalize each time-series
-    for j in range(126):
+    for j in range(time_points):
         min_val = np.min(stretched_data[0, j, :])
         max_val = np.max(stretched_data[0, j, :])
         
@@ -152,7 +154,7 @@ def slicing(data):
 # Working
 def time_warping(x):
     from scipy.interpolate import CubicSpline
-    sigma = 0.2
+    sigma = 0.06
     knot = 4
     orig_steps = np.arange(x.shape[1])
     
@@ -173,8 +175,9 @@ def window_warping(x):
     # https://halshs.archives-ouvertes.fr/halshs-01357973/document
     window_ratio=0.2
     scales=[0.5, 2.]
-
-    x.reshape((126,200))
+    channel=x.shape[2]
+    length=x.shape[1]
+    x.reshape((1,channel,length))
 
     warp_scales = np.random.choice(scales, x.shape[0])
     warp_size = np.ceil(window_ratio*x.shape[1]).astype(int)
@@ -191,16 +194,18 @@ def window_warping(x):
             end_seg = pat[window_ends[i]:,dim]
             warped = np.concatenate((start_seg, window_seg, end_seg))                
             ret[i,:,dim] = np.interp(np.arange(x.shape[1]), np.linspace(0, x.shape[1]-1., num=warped.size), warped).T
-    return ret.reshape((1,200,126))
+    return ret.reshape((1,length,channel))
 
 def tilt(x):
-    x = x.reshape((1,126,200))
+    channel=x.shape[2]
+    length=x.shape[1]
+    x = x.reshape((1,channel,length))
 
     # Generate time points
-    time_points = np.linspace(0, 199, 200)
+    time_points = np.linspace(0, 199, length)
 
     # Define the angle of rotation in degrees
-    angle_degrees = 0.05  # Replace with the desired angle
+    angle_degrees = 0.02  # Replace with the desired angle
     angle_radians = np.radians(angle_degrees)
 
     # Create the rotation matrix
@@ -211,8 +216,8 @@ def tilt(x):
     rotated_array = np.zeros_like(x)
 
     # Rotate each time-series
-    for j in range(126):
-        for i in range(200):
+    for j in range(channel):
+        for i in range(length):
             point = np.array([time_points[i], x[0, j, i]])
             rotated_point = np.dot(rotation_matrix, point)
             rotated_array[0, j, i] = rotated_point[1]
@@ -224,7 +229,7 @@ def tilt(x):
     normalized_array = np.zeros_like(rotated_array)
 
     # Normalize each time-series
-    for j in range(126):
+    for j in range(channel):
         min_val = np.min(rotated_array[0, j, :])
         max_val = np.max(rotated_array[0, j, :])
         
@@ -235,7 +240,7 @@ def tilt(x):
             normalized_array[0, j, :] = (rotated_array[0, j, :] - min_val) / (max_val - min_val)
 
     # `normalized_array` now contains the normalized time-series.
-    return normalized_array.reshape((1,200,126))
+    return normalized_array.reshape((1,length,channel))
 
 #working
 def spawner(x, labels, sigma=0.05, verbose=0):
@@ -274,3 +279,252 @@ def spawner(x, labels, sigma=0.05, verbose=0):
                 print("There is only one pattern of class %d, skipping pattern average"%l[i])
             ret[i,:] = pat
     return jittering(ret, sigma=sigma)
+
+def windowslicing(x):
+        #for 4 dimensional input - including batch
+        slice_fraction=0.5
+
+        # # Validate the shape of the data
+        # if data.shape != (1, 200, 126):
+        #     raise ValueError("Data must be of shape (1, 200, 126)")
+
+        # Validate slice_fraction
+        if slice_fraction <= 0 or slice_fraction >= 1:
+            raise ValueError("slice_fraction must be between 0 and 1, exclusive.")
+
+        # Determine slice size
+        time_points = x.shape[1]
+        sensor_amount = x.shape[2]
+        slice_size = int(time_points * slice_fraction)
+                        
+        ret_b=np.zeros_like(x)
+        for i, pat in enumerate(x):
+            # Randomly select the start index for slicing
+            start_idx = np.random.randint(0, time_points - slice_size)
+
+            # Extract slice
+            sliced_data = pat[:, start_idx:start_idx + slice_size, :]
+
+            # Stretch the slice to original time-series length
+            stretched_data = np.zeros((1, time_points, sensor_amount))
+
+            for sensor in range(sensor_amount):
+                stretched_data[0, :, sensor] = np.interp(
+                    np.linspace(0, slice_size - 1, time_points),
+                    np.arange(slice_size),
+                    sliced_data[0, :, sensor])
+
+                # Initialize an array to store the normalized time-series
+                normalized_array = np.zeros_like(stretched_data)
+
+                # Normalize each time-series
+                for j in range(x[1]):
+                    min_val = np.min(stretched_data[0, j, :])
+                    max_val = np.max(stretched_data[0, j, :])
+        
+                # Check for the case where all values are the same (max_val = min_val)
+                if max_val == min_val:
+                    normalized_array[0, j, :] = 0  # or any constant value in [0, 1]
+                else:
+                    normalized_array[0, j, :] = (stretched_data[0, j, :] - min_val) / (max_val - min_val)
+
+                # `normalized_array` now contains the normalized time-series.
+                ret_b[i]=normalized_array 
+        return ret_b
+
+def wdba(x, labels, batch_size=6, slope_constraint="symmetric", use_window=True, verbose=0):
+    # https://ieeexplore.ieee.org/document/8215569
+    # use verbose = -1 to turn off warnings    
+    # slope_constraint is for DTW. "symmetric" or "asymmetric"
+    
+    import utils.dtw as dtw
+    
+    if use_window:
+        window = np.ceil(x.shape[1] / 10.).astype(int)
+    else:
+        window = None
+    orig_steps = np.arange(x.shape[1])
+    l = np.argmax(labels, axis=1) if labels.ndim > 1 else labels
+        
+    ret = np.zeros_like(x)
+    for i in tqdm(range(ret.shape[0])):
+        # get the same class as i
+        choices = np.where(l == l[i])[0]
+        if choices.size > 0:        
+            # pick random intra-class pattern
+            k = min(choices.size, batch_size)
+            random_prototypes = x[np.random.choice(choices, k, replace=False)]
+            
+            # calculate dtw between all
+            dtw_matrix = np.zeros((k, k))
+            for p, prototype in enumerate(random_prototypes):
+                for s, sample in enumerate(random_prototypes):
+                    if p == s:
+                        dtw_matrix[p, s] = 0.
+                    else:
+                        dtw_matrix[p, s] = dtw.dtw(prototype, sample, dtw.RETURN_VALUE, slope_constraint=slope_constraint, window=window)
+                        
+            # get medoid
+            medoid_id = np.argsort(np.sum(dtw_matrix, axis=1))[0]
+            nearest_order = np.argsort(dtw_matrix[medoid_id])
+            medoid_pattern = random_prototypes[medoid_id]
+            
+            # start weighted DBA
+            average_pattern = np.zeros_like(medoid_pattern)
+            weighted_sums = np.zeros((medoid_pattern.shape[0]))
+            for nid in nearest_order:
+                if nid == medoid_id or dtw_matrix[medoid_id, nearest_order[1]] == 0.:
+                    average_pattern += medoid_pattern 
+                    weighted_sums += np.ones_like(weighted_sums) 
+                else:
+                    path = dtw.dtw(medoid_pattern, random_prototypes[nid], dtw.RETURN_PATH, slope_constraint=slope_constraint, window=window)
+                    dtw_value = dtw_matrix[medoid_id, nid]
+                    warped = random_prototypes[nid, path[1]]
+                    weight = np.exp(np.log(0.5)*dtw_value/dtw_matrix[medoid_id, nearest_order[1]])
+                    average_pattern[path[0]] += weight * warped
+                    weighted_sums[path[0]] += weight 
+            
+            ret[i,:] = average_pattern / weighted_sums[:,np.newaxis]
+        else:
+            if verbose > -1:
+                print("There is only one pattern of class %d, skipping pattern average"%l[i])
+            ret[i,:] = x[i]
+    return ret
+
+# Proposed
+
+def random_guided_warp(x, labels, slope_constraint="symmetric", use_window=True, dtw_type="normal", verbose=0):
+    # use verbose = -1 to turn off warnings
+    # slope_constraint is for DTW. "symmetric" or "asymmetric"
+    # dtw_type is for shapeDTW or DTW. "normal" or "shape"
+    
+    import utils.dtw as dtw
+    
+    if use_window:
+        window = np.ceil(x.shape[1] / 10.).astype(int)
+    else:
+        window = None
+    orig_steps = np.arange(x.shape[1])
+    l = np.argmax(labels, axis=1) if labels.ndim > 1 else labels
+    
+    ret = np.zeros_like(x)
+    for i, pat in enumerate(tqdm(x)):
+        # guarentees that same one isnt selected
+        choices = np.delete(np.arange(x.shape[0]), i)
+        # remove ones of different classes
+        choices = np.where(l[choices] == l[i])[0]
+        if choices.size > 0:        
+            # pick random intra-class pattern
+            random_prototype = x[np.random.choice(choices)]
+            
+            if dtw_type == "shape":
+                path = dtw.shape_dtw(random_prototype, pat, dtw.RETURN_PATH, slope_constraint=slope_constraint, window=window)
+            else:
+                path = dtw.dtw(random_prototype, pat, dtw.RETURN_PATH, slope_constraint=slope_constraint, window=window)
+                            
+            # Time warp
+            warped = pat[path[1]]
+            for dim in range(x.shape[2]):
+                ret[i,:,dim] = np.interp(orig_steps, np.linspace(0, x.shape[1]-1., num=warped.shape[0]), warped[:,dim]).T
+        else:
+            if verbose > -1:
+                print("There is only one pattern of class %d, skipping timewarping"%l[i])
+            ret[i,:] = pat
+    return ret
+
+def random_guided_warp_shape(x, labels, slope_constraint="symmetric", use_window=True):
+    return random_guided_warp(x, labels, slope_constraint, use_window, dtw_type="shape")
+
+def discriminative_guided_warp(x, labels, batch_size=6, slope_constraint="symmetric", use_window=True, dtw_type="normal", use_variable_slice=True, verbose=0):
+    # use verbose = -1 to turn off warnings
+    # slope_constraint is for DTW. "symmetric" or "asymmetric"
+    # dtw_type is for shapeDTW or DTW. "normal" or "shape"
+    
+    import utils.dtw as dtw
+    
+    if use_window:
+        window = np.ceil(x.shape[1] / 10.).astype(int)
+    else:
+        window = None
+    orig_steps = np.arange(x.shape[1])
+    l = np.argmax(labels, axis=1) if labels.ndim > 1 else labels
+    
+    positive_batch = np.ceil(batch_size / 2).astype(int)
+    negative_batch = np.floor(batch_size / 2).astype(int)
+        
+    ret = np.zeros_like(x)
+    warp_amount = np.zeros(x.shape[0])
+    for i, pat in enumerate(tqdm(x)):
+        # guarentees that same one isnt selected
+        choices = np.delete(np.arange(x.shape[0]), i)
+        
+        # remove ones of different classes
+        positive = np.where(l[choices] == l[i])[0]
+        negative = np.where(l[choices] != l[i])[0]
+        
+        if positive.size > 0 and negative.size > 0:
+            pos_k = min(positive.size, positive_batch)
+            neg_k = min(negative.size, negative_batch)
+            positive_prototypes = x[np.random.choice(positive, pos_k, replace=False)]
+            negative_prototypes = x[np.random.choice(negative, neg_k, replace=False)]
+                        
+            # vector embedding and nearest prototype in one
+            pos_aves = np.zeros((pos_k))
+            neg_aves = np.zeros((pos_k))
+            if dtw_type == "shape":
+                for p, pos_prot in enumerate(positive_prototypes):
+                    for ps, pos_samp in enumerate(positive_prototypes):
+                        if p != ps:
+                            pos_aves[p] += (1./(pos_k-1.))*dtw.shape_dtw(pos_prot, pos_samp, dtw.RETURN_VALUE, slope_constraint=slope_constraint, window=window)
+                    for ns, neg_samp in enumerate(negative_prototypes):
+                        neg_aves[p] += (1./neg_k)*dtw.shape_dtw(pos_prot, neg_samp, dtw.RETURN_VALUE, slope_constraint=slope_constraint, window=window)
+                selected_id = np.argmax(neg_aves - pos_aves)
+                path = dtw.shape_dtw(positive_prototypes[selected_id], pat, dtw.RETURN_PATH, slope_constraint=slope_constraint, window=window)
+            else:
+                for p, pos_prot in enumerate(positive_prototypes):
+                    for ps, pos_samp in enumerate(positive_prototypes):
+                        if p != ps:
+                            pos_aves[p] += (1./(pos_k-1.))*dtw.dtw(pos_prot, pos_samp, dtw.RETURN_VALUE, slope_constraint=slope_constraint, window=window)
+                    for ns, neg_samp in enumerate(negative_prototypes):
+                        neg_aves[p] += (1./neg_k)*dtw.dtw(pos_prot, neg_samp, dtw.RETURN_VALUE, slope_constraint=slope_constraint, window=window)
+                selected_id = np.argmax(neg_aves - pos_aves)
+                path = dtw.dtw(positive_prototypes[selected_id], pat, dtw.RETURN_PATH, slope_constraint=slope_constraint, window=window)
+                   
+            # Time warp
+            warped = pat[path[1]]
+            warp_path_interp = np.interp(orig_steps, np.linspace(0, x.shape[1]-1., num=warped.shape[0]), path[1])
+            warp_amount[i] = np.sum(np.abs(orig_steps-warp_path_interp))
+            for dim in range(x.shape[2]):
+                ret[i,:,dim] = np.interp(orig_steps, np.linspace(0, x.shape[1]-1., num=warped.shape[0]), warped[:,dim]).T
+        else:
+            if verbose > -1:
+                print("There is only one pattern of class %d"%l[i])
+            ret[i,:] = pat
+            warp_amount[i] = 0.
+    if use_variable_slice:
+        max_warp = np.max(warp_amount)
+        if max_warp == 0:
+            # unchanged
+            ret = window_slice(ret, reduce_ratio=0.9)
+        else:
+            for i, pat in enumerate(ret):
+                # Variable Sllicing
+                ret[i] = window_slice(pat[np.newaxis,:,:], reduce_ratio=0.9+0.1*warp_amount[i]/max_warp)[0]
+    return ret
+
+def discriminative_guided_warp_shape(x, labels, batch_size=6, slope_constraint="symmetric", use_window=True):
+    return discriminative_guided_warp(x, labels, batch_size, slope_constraint, use_window, dtw_type="shape")
+
+def window_slice(x, reduce_ratio=0.9):
+    # https://halshs.archives-ouvertes.fr/halshs-01357973/document
+    target_len = np.ceil(reduce_ratio*x.shape[1]).astype(int)
+    if target_len >= x.shape[1]:
+        return x
+    starts = np.random.randint(low=0, high=x.shape[1]-target_len, size=(x.shape[0])).astype(int)
+    ends = (target_len + starts).astype(int)
+    
+    ret = np.zeros_like(x)
+    for i, pat in enumerate(x):
+        for dim in range(x.shape[2]):
+            ret[i,:,dim] = np.interp(np.linspace(0, target_len, num=x.shape[1]), np.arange(target_len), pat[starts[i]:ends[i],dim]).T
+    return ret
