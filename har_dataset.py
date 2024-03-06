@@ -575,7 +575,7 @@ def __prepare_mocap__(path, split):
 def __prepare_motionsense__(path, split):
     print(f'Preparing DataFrame for MotionSense {split}')
     all_files = sorted(Path(path).glob('**/*.csv'))
-
+    '''
     mean_values = pl.DataFrame([
         0.04213359,  0.75472223, -0.13882479,
         0.00532117,  0.01458119,  0.01276031,
@@ -586,6 +586,13 @@ def __prepare_motionsense__(path, split):
         1.29291558, 1.22646988, 0.80804086,
         0.32820886, 0.52756613, 0.37621195]). \
         transpose(column_names=__get_data_col_names__('motionsense'))
+    '''
+    mean_values = pl.DataFrame([0.98075318, 0.18328575, 0.99292009,
+                                0.59533219, 0.59871923, 0.65080072,
+                                0.4997794,  0.48942474, 0.49554215]).transpose(column_names=__get_data_col_names__('motionsense'))
+    std_values = pl.DataFrame([0.04484587, 0.10159578, 0.01879438, 
+                               0.04119698, 0.04039789, 0.05996744,
+                               0.18559804, 0.18338014, 0.18613415]).transpose(column_names=__get_data_col_names__('motionsense'))
 
     min_df = mean_values.with_columns(
         [pl.col(c) - 2 * std_values[c] 
