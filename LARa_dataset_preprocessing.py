@@ -376,8 +376,6 @@ def compute_min_num_samples(ids, boolean_classes=True, attr=0):
                 # these will include all of the recordings for the subjects
                 if P in ["S01", "S02", "S03", "S04", "S05", "S06"]:
                     S = "L01"
-                elif P in ["S15", "S16"]:
-                    S = SCENARIO2[r]
                 else:
                     S = SCENARIO[r]
                 for N in repetition:
