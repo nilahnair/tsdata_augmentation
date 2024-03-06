@@ -430,6 +430,7 @@ def __prepare_mocap__(path, split):
     }
 
     # for normalization later
+    '''
     max_df = pl.DataFrame([392.85,    345.05,    311.295,    460.544,   465.25,    474.5,     392.85,
                         345.05,    311.295,   574.258,   575.08,    589.5,     395.81,    503.798,
                         405.9174,  322.9,     331.81,    338.4,     551.829,   598.326,   490.63,
@@ -472,7 +473,17 @@ def __prepare_mocap__(path, split):
                         -417.297, -495.1, -565.544, -990.83, -991.36, -803.9,
                         -351.1281, -290.558, -269.311, -159.9403, -153.482, -162.718]) \
                         .transpose(column_names=__get_data_col_names__('mocap'))
-
+    '''
+    max_df = pl.DataFrame([
+        
+        ]) \
+                        .transpose(column_names=__get_data_col_names__('mocap'))
+    min_df = pl.DataFrame([
+        
+        ]) \
+                        .transpose(column_names=__get_data_col_names__('mocap'))
+                        
+                        
     recordings = []
     for sfile, lfile in files:
         logistic_scenario, subject, recording_number, annotator, execution = sfile.stem.split('_')[:-2]
