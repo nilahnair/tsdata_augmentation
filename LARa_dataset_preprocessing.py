@@ -369,7 +369,7 @@ def compute_min_num_samples(ids, boolean_classes=True, attr=0):
     hist_classes_all = np.zeros((NUM_CLASSES))
     for P in persons:
         if P in ids:
-            for r, R in enumerate(recordings):
+            for R in enumerate(recordings):
                 # All of these if-cases are coming due to the naming of the recordings in the data.
                 # Not all the subjects have the same
                 # annotated recordings, nor annotators, nor annotations runs, nor scenarios.
@@ -377,7 +377,7 @@ def compute_min_num_samples(ids, boolean_classes=True, attr=0):
                 if P in ["S01", "S02", "S03", "S04", "S05", "S06"]:
                     S = "L01"
                 else:
-                    S = SCENARIO[r]
+                    S = SCENARIO[R]
                 for N in repetition:
                     annotator_file = annotator[P]
                     if P == 'S07' and SCENARIO[r] == 'L01':
