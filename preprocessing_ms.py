@@ -20,6 +20,22 @@ NUM_CLASSES = 24
 ws = 200
 ss = 25
 
+#use this
+'''
+Max values
+[1.         0.68399539 1.         1.         1.         1.
+ 1.         1.         1.        ]
+Min values
+[0. 0. 0. 0. 0. 0. 0. 0. 0.]
+Mean values
+[0.76639554 0.33924385 0.78441527 0.53088344 0.5315443  0.54900857
+ 0.62962032 0.55816487 0.58608871]
+std values
+[0.25867806 0.21371301 0.25959621 0.13331802 0.12606953 0.13749548
+ 0.21065503 0.14886348 0.17937903]
+
+'''
+
 def norm_ms(data):
     """
     Normalizes all sensor channels
@@ -448,16 +464,8 @@ def get_max_min(ids, act_labels, trial_codes, dt_list, mode="raw", labeled=True)
                         #vals + lbls ='gravity.x', 'gravity.y', 'gravity.z', 'rotationRate.x', 'rotationRate.y', 'rotationRate.z', 'userAcceleration.x', 'userAcceleration.y', 'userAcceleration.z', 'act', 'id', 'weight', 'height', 'age', 'gender', 'trial'
                         #vals = np.concatenate((vals, lbls), axis=1)
                         
-                        if frames != 0:
-                            train_no=round(0.70*frames)
-                            
-                            '''
-                            if usage_modus=='trainval':
-                                yl_train= np.concatenate([yl_train, vals[0:train_no:]])
-                                yl_val=  np.concatenate([yl_val, vals[train_no:tv,0]])
-                            elif usage_modus=='test':
-                                yl_test= np.concatenate([yl_test, vals[tv:frames,0]])
-                            '''
+                    if frames != 0:
+                        train_no=round(0.70*frames)
                         print('Xtrain before {}'.format(X_train.shape))
                         print('Xtrain before {}'.format(vals[0:train_no,:].shape))
                         X_train = np.vstack((X_train, vals[0:train_no,:]))
