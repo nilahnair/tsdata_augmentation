@@ -772,7 +772,7 @@ def __prepare_mobiact__(path, split):
     # remove subjects
     all_files = list(filter(lambda p: not any(str(identity) in p.name.split('_')[1] for identity in [13, 14, 15, 17, 28, 30, 31, 34, 57]), all_files))
 
-
+    '''
     mean_values = pl.DataFrame([
         0.265079537, 7.13106528, 0.387973281,
         -0.0225606363, -0.00302826137,  0.0131514254,
@@ -781,6 +781,14 @@ def __prepare_mobiact__(path, split):
         3.49444826, 6.70119943, 3.31003981,
         1.1238746, 1.12533643, 0.72129725,
         105.81241608, 58.62837783, 17.58456297]).transpose(column_names=__get_data_col_names__('mobiact'))
+    '''
+    mean_values = pl.DataFrame([0.49754024, 0.51163896, 0.49568849, 
+                                0.50152986, 0.50009648, 0.49993277, 
+                                0.50209062, 0.48269266, 0.49570778]).transpose(column_names=__get_data_col_names__('mobiact'))
+    std_values  = pl.DataFrame([0.21741833, 0.21943885, 0.21258983, 
+                                0.21520634, 0.20116301, 0.2078448,
+                                0.24957102, 0.20147778, 0.21548381]]).transpose(column_names=__get_data_col_names__('mobiact'))
+
 
     min_df = mean_values.with_columns(
         [pl.col(c) - 2 * std_values[c] for c in set(mean_values.columns).intersection(std_values.columns)]
