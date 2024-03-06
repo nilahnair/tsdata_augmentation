@@ -41,7 +41,6 @@ act_record={'STD':1, 'WAL':1, 'JOG':3, 'JUM':3, 'STU':6, 'STN':6, 'SCH':6, 'CSI'
 #use this
 '''
 
-Max values
 [1.         0.96496009 1.         1.         1.         1.
  0.92851801 1.         1.        ]
 Min values

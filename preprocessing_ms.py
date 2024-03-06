@@ -403,6 +403,89 @@ def generate_CSV(csv_dir, data_dir):
     
     return
 
+def get_max_min(ids, act_labels, trial_codes, dt_list, mode="raw", labeled=True):
+    ds_list = get_ds_infos()
+    
+    num_data_cols = len(dt_list) if mode == "mag" else len(dt_list*3)
+
+    if labeled:
+        dataset = np.zeros((0,num_data_cols+7)) # "7" --> [act, code, weight, height, age, gender, trial] 
+    else:
+        dataset = np.zeros((0,num_data_cols))
+    
+    X_train = np.empty((0, NB_SENSOR_CHANNELS))
+   
+    print("[INFO] -- Creating Time-Series")
+    for sub_id in ds_list[:,0]:
+        if sub_id in ids:
+           
+            for act_id, act in enumerate(act_labels):
+                for trial in trial_codes[act_id]:
+                    fname = location+act+'_'+str(trial)+'/sub_'+str(int(sub_id))+'.csv'
+                    raw_data = pd.read_csv(fname)
+                    raw_data = raw_data.drop(['Unnamed: 0'], axis=1)
+                    vals = np.zeros((len(raw_data), num_data_cols))
+                    for x_id, axes in enumerate(dt_list):
+                        if mode == "mag":
+                            vals[:,x_id] = (raw_data[axes]**2).sum(axis=1)**0.5        
+                        else:
+                            vals[:,x_id*3:(x_id+1)*3] = raw_data[axes].values
+                        vals = vals[:,:num_data_cols]
+                        vals = norm_ms(vals)
+                    
+                        frames=vals.shape[0]
+                        
+                        if labeled:
+                            lbls = np.array([[act_id,
+                            sub_id-1,
+                            ds_list[int(sub_id-1)][1],
+                            ds_list[int(sub_id-1)][2],
+                            ds_list[int(sub_id-1)][3],
+                            ds_list[int(sub_id-1)][4],
+                            trial          
+                           ]]*len(raw_data))
+                         
+                        #vals + lbls ='gravity.x', 'gravity.y', 'gravity.z', 'rotationRate.x', 'rotationRate.y', 'rotationRate.z', 'userAcceleration.x', 'userAcceleration.y', 'userAcceleration.z', 'act', 'id', 'weight', 'height', 'age', 'gender', 'trial'
+                        #vals = np.concatenate((vals, lbls), axis=1)
+                        
+                        if frames != 0:
+                            train_no=round(0.70*frames)
+                            
+                            '''
+                            if usage_modus=='trainval':
+                                yl_train= np.concatenate([yl_train, vals[0:train_no:]])
+                                yl_val=  np.concatenate([yl_val, vals[train_no:tv,0]])
+                            elif usage_modus=='test':
+                                yl_test= np.concatenate([yl_test, vals[tv:frames,0]])
+                            '''
+                        print('Xtrain before {}'.format(X_train.shape))
+                        print('Xtrain before {}'.format(vals[0:train_no,:].shape))
+                        X_train = np.vstack((X_train, vals[0:train_no,:]))
+                        print('Xtrain after {}'.format(X_train.shape))
+                        
+    try:
+        max_values = np.max(X_train, axis=0)
+        print("Max values")
+        print(max_values)
+        min_values = np.min(X_train, axis=0)
+        print("Min values")
+        print(min_values)
+        mean_values = np.mean(X_train, axis=0)
+        print("Mean values")
+        print(mean_values)
+        std_values = np.std(X_train, axis=0)
+        print("std values")
+        print(std_values)
+    except:
+        max_values = 0
+        min_values = 0
+        mean_values = 0
+        std_values = 0
+        print("Error computing statistics")
+                        
+    
+    return
+
 def generate_CSV_final(csv_dir, data_dir1, data_dir2):
     '''
     Generate CSV file with path to all (Training and Validation) of the segmented sequences
@@ -450,8 +533,9 @@ if __name__ == '__main__':
     base_directory = '/data/nnair/icpr2024/motionsense/prepros/'
     
     sel_subjects_train=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24]
-    sel_subjects_test=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24]
+    #sel_subjects_test=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24]
     
+    '''
     creat_time_series(dt_list, act_labels, trial_codes, base_directory=base_directory, subjects=sel_subjects_train, mode="raw", labeled=True, usage_modus='trainval')
     creat_time_series(dt_list, act_labels, trial_codes, base_directory=base_directory, subjects=sel_subjects_test, mode="raw", labeled=True, usage_modus='test')
     
@@ -468,6 +552,8 @@ if __name__ == '__main__':
     
     #dataset = creat_time_series(dt_list, act_labels, trial_codes, mode="raw", labeled=True, usage_modus)
     #print("[INFO] -- Shape of time-Series dataset:"+str(dataset.shape))
+    '''
+    get_max_min(sel_subjects_train, act_labels, trial_codes, dt_list, mode="raw", labeled=True)
    
     
     
