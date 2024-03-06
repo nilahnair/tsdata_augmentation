@@ -380,11 +380,11 @@ def compute_min_num_samples(ids, boolean_classes=True, attr=0):
                     S = SCENARIO[R]
                 for N in repetition:
                     annotator_file = annotator[P]
-                    if P == 'S07' and SCENARIO[r] == 'L01':
+                    if P == 'S07' and SCENARIO[R] == 'L01':
                         annotator_file = "A03"
-                    if P == 'S14' and SCENARIO[r] == 'L03':
+                    if P == 'S14' and SCENARIO[R] == 'L03':
                         annotator_file = "A19"
-                    if P == 'S11' and SCENARIO[r] == 'L01':
+                    if P == 'S11' and SCENARIO[R] == 'L01':
                         annotator_file = "A03"
                     if P == 'S11' and R in ['R04', 'R08', 'R09', 'R10', 'R11', 'R12', 'R13', 'R15']:
                         annotator_file = "A02"
