@@ -424,6 +424,71 @@ def generate_CSV_final(csv_dir, data_dir1, data_dir2):
 
     return f
 
+def get_max_min(ids):
+    activities = ['STD', 'WAL', 'JOG', 'JUM', 'STU', 'STN', 'SCH', 'CSI', 'CSO']
+    
+    X_train = np.empty((0, 9))
+   
+    for act in activities:
+        print(act)
+        for sub in ids:
+            print(sub)
+            all_segments = np.empty((0, 9))
+            for recordings in range(1,act_record[act]+1):
+                print(recordings)
+            
+                file_name_data = "{}/{}_{}_{}_annotated.csv".format(act, act, sub, recordings)
+                print("\n{}".format(file_name_data))
+                try:
+                    # getting data
+                    print(FOLDER_PATH + file_name_data)
+                    data = reader_data(FOLDER_PATH + file_name_data)
+                    print("\nFiles loaded {}".format(file_name_data))
+                    
+                    IMU=np.array(data['IMU'])
+                    all_segments = np.vstack((all_segments, IMU))
+                    
+                    print("\nFiles loaded")
+                    
+                except:
+                    print("\n1 In loading data,  in file {}".format(FOLDER_PATH + file_name_data))
+                    continue
+            all_segments = norm_mobi(all_segments)
+            print("\nFiles loaded and normalised")
+            frames = all_segments.shape[0]
+            if frames != 0:
+                train_no=round(0.70*frames)
+                
+                print('train and val labels split')
+            
+                X_train = np.vstack((X_train, all_segments[0:train_no,:]))
+                print('done train')
+           
+            else:
+                continue
+            
+    try:
+        max_values = np.max(X_train, axis=0)
+        print("Max values")
+        print(max_values)
+        min_values = np.min(X_train, axis=0)
+        print("Min values")
+        print(min_values)
+        mean_values = np.mean(X_train, axis=0)
+        print("Mean values")
+        print(mean_values)
+        std_values = np.std(X_train, axis=0)
+        print("std values")
+        print(std_values)
+    except:
+        max_values = 0
+        min_values = 0
+        mean_values = 0
+        std_values = 0
+        print("Error computing statistics")
+    return
+
+
 
 def create_dataset(identity_bool = False):
     '''
@@ -442,11 +507,11 @@ def create_dataset(identity_bool = False):
             '51', '52', '53', '54', '55', '56', '58', '59', '60',
             '61', '62', '63', '64', '65', '66', '67']
     
-    test_ids=train_ids
+    #test_ids=train_ids
     
-    base_directory = '/data/nnair/icpr2024/mobiact/prepros/'
+    #base_directory = '/data/nnair/icpr2024/mobiact/prepros/'
     
-    
+    '''
     print("Reading subject info...")
     start_time = time.time()
     subject_info = read_subject_info(SUBJECT_INFO_FILE)
@@ -463,7 +528,8 @@ def create_dataset(identity_bool = False):
     generate_CSV(base_directory, "val.csv", data_dir_val)
     generate_CSV(base_directory, "test.csv", data_dir_test)
     generate_CSV_final(base_directory + "train_final.csv", data_dir_train, data_dir_val)
-
+    '''
+    get_max_min(train_ids)
     return
     
 
@@ -515,5 +581,6 @@ if __name__ == '__main__':
     # mbientlab/sequences_test
 
     create_dataset()
+    
     # statistics_measurements()
     print("Done")
