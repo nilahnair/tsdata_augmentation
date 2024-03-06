@@ -23,7 +23,7 @@ Subject_id= {'SA01':0, 'SA02':1, 'SA03':2, 'SA04':3, 'SA05':4, 'SA06':5, 'SA07':
                'SA13':12, 'SA14':13, 'SA15':14, 'SA16':15, 'SA17':16, 'SA18':17, 'SA19':18, 'SA20':19, 'SA21':20, 'SA22':21, 'SA23':22, 'SE01':23, 'SE02':24,
                'SE03':25, 'SE04':26, 'SE05':27, 'SE06':28, 'SE07':29, 'SE08':30, 'SE09':31, 'SE10':32, 'SE11':33, 'SE12':34, 'SE13':35, 'SE14':36, 'SE15':37}
 activities_id= {'D01':0, 'D02':1, 'D03':2, 'D04':3, 'D05':4, 'D07':5, 'D08':6, 'D09':7, 
-                 'D10':8, 'D011':9, 'D12':10, 'D14':11, 'D15':12, 'D16':13, 'D17':14}
+                 'D10':8, 'D11':9, 'D12':10, 'D14':11, 'D15':12, 'D16':13, 'D17':14}
 NUM_ACT_CLASSES= 15
 NUM_CLASSES = 37
 ws = 200 #WINDOW_SIZE
@@ -35,6 +35,7 @@ sensor_cols = ['ADXL345_x', 'ADXL345_y', 'ADXL345_z', 'ITG3200_x', 'ITG3200_y', 
 def find_stats(ids, activities, data_dir=None):
     recordings= ['R01', 'R02', 'R03', 'R04', 'R05', 'R06']
     all_segments = np.empty((0, 9))
+    X_train = np.empty((0, 9))
     for subject_id in ids:
        print('Processing subject', subject_id)
        subject_dir = os.path.join(DATA_DIR, subject_id)
@@ -59,6 +60,10 @@ def find_stats(ids, activities, data_dir=None):
                    
                except: 
                    print('no file path with name', file_name)
+           frames=all_segments.shape[0]
+           if frames != 0:
+               train_no=round(0.70*frames)
+               X_train = np.vstack((X_train, all_segments[0:train_no,:]))
                    #if segments is not None:
                     #   all_segments.extend(segments)
                     
@@ -461,8 +466,9 @@ def main():
                 'SE06', 'SE07', 'SE08', 'SE09', 'SE10', 'SE11', 'SE12', 'SE13', 'SE14', 'SE15']
    
     activities= ['D01', 'D02', 'D03', 'D04', 'D05', 'D07', 'D08', 'D09', 
-                 'D10', 'D011', 'D12', 'D14', 'D15', 'D16', 'D17']
+                 'D10', 'D11', 'D12', 'D14', 'D15', 'D16', 'D17']
     
+    '''
     base_directory ='/data/nnair/icpr2024/sisfall/prepros/'
     data_dir_train = base_directory + 'sequences_train/'
     data_dir_val = base_directory + 'sequences_val/'
@@ -475,7 +481,8 @@ def main():
     generate_CSV(base_directory+ "val.csv", data_dir_val)
     generate_CSV(base_directory + "test.csv", data_dir_test)
     generate_CSV_final(base_directory + "train_final.csv", data_dir_train, data_dir_val)
-    
+    '''
+    find_stats(train_ids, activities)
     return
 
 if __name__ == "__main__":
