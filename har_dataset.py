@@ -843,7 +843,7 @@ def __prepare_mobiact__(path, split):
                                 0.50209062, 0.48269266, 0.49570778]).transpose(column_names=__get_data_col_names__('mobiact'))
     std_values  = pl.DataFrame([0.21741833, 0.21943885, 0.21258983, 
                                 0.21520634, 0.20116301, 0.2078448,
-                                0.24957102, 0.20147778, 0.21548381]]).transpose(column_names=__get_data_col_names__('mobiact'))
+                                0.24957102, 0.20147778, 0.21548381]).transpose(column_names=__get_data_col_names__('mobiact'))
 
 
     min_df = mean_values.with_columns(
