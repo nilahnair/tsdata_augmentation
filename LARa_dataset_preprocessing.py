@@ -364,7 +364,8 @@ def compute_min_num_samples(ids, boolean_classes=True, attr=0):
         NUM_CLASSES = 2
 
     #min_durations = np.ones((NUM_CLASSES)) * 10000000
-    min_durations = np.empty((0,NUM_CLASSES))
+    #min_durations = np.empty((0,NUM_CLASSES))
+    accumulator_measurements = np.empty((0,126))
     hist_classes_all = np.zeros((NUM_CLASSES))
     for P in persons:
         if P in ids:
@@ -397,13 +398,31 @@ def compute_min_num_samples(ids, boolean_classes=True, attr=0):
                         annotator_file = "A01"
                     if P == 'S09' and R in ['R21', 'R22', 'R23', 'R24', 'R25']:
                         annotator_file = "A11"
-                    file_name_label = "{}/{}_{}_{}_{}_{}_labels.csv".format(P, S, P, R, annotator_file,N)
-
+                    file_name_norm = "{}/{}_{}_{}_{}_{}_norm_data.csv".format(P, S, P, R, annotator_file, N)
+                    file_name_label = "{}/{}_{}_{}_{}_{}_labels.csv".format(P, S, P, R, annotator_file, N)
+                    print(file_name_norm)
+                    print(file_name_label)
                     try:
-                        data = csv_reader.reader_labels(FOLDER_PATH + file_name_label)
-                        labels = data[:,attr]
+                        data = csv_reader.reader_data(FOLDER_PATH + file_name_norm)
+                        data = select_columns_opp(data)
+                        labels = csv_reader.reader_labels(FOLDER_PATH + file_name_label)
+                        class_labels = np.where(labels[:, 0] == 7)[0]
                         print("Files loaded")
+                        # Deleting rows containing the "none" class
+                        data = np.delete(data, class_labels, 0)
+                        labels = np.delete(labels, class_labels, 0)
+                        print('null labels deleted')
+                        data_t, data_x, data_y = divide_x_y(data)
+                        print('printing data_x shape {}'.format(data_x.shape))
+                        accumulator_measurements= np.vstack((accumulator_measurements,data_x))
+                        print('accumulator shape {}'.format(accumulator_measurements.shape))
+                    except:
+                        print('error in loading file '+ file_name_norm)
+                        
 
+                        #max_values_total = np.max((max_values, max_values_total), axis = 0)
+                        #min_values_total = np.min((min_values, min_values_total), axis = 0)
+                        '''
                         min_duration = np.zeros((1,NUM_CLASSES))
                         for c in range(NUM_CLASSES):
 
@@ -431,10 +450,33 @@ def compute_min_num_samples(ids, boolean_classes=True, attr=0):
 
                         hist_classes = np.bincount(labels.astype(int), minlength = NUM_CLASSES)
                         hist_classes_all += hist_classes
-
+                        '''
+                '''
                     except:
                         print("No file {}".format(FOLDER_PATH + file_name_label))
+                '''
+    try:
+        max_values = np.max(accumulator_measurements, axis=0)
+        print("Max values")
+        print(max_values)
+        min_values = np.min(accumulator_measurements, axis=0)
+        print("Min values")
+        print(min_values)
+        mean_values = np.mean(accumulator_measurements, axis=0)
+        print("Mean values")
+        print(mean_values)
+        std_values = np.std(accumulator_measurements, axis=0)
+        print("std values")
+        print(std_values)
+    except:
+        max_values = 0
+        min_values = 0
+        mean_values = 0
+        std_values = 0
+        print("Error computing statistics")
     
+    
+    '''
     min_durations[min_durations == 0] = np.Inf
     print("Minimal duration per class \n{}".format(min_durations))
     
@@ -442,6 +484,8 @@ def compute_min_num_samples(ids, boolean_classes=True, attr=0):
     print("Number of samples per class {}".format(hist_classes_all / np.float(np.sum(hist_classes_all)) * 100))
     
     return np.min(min_durations, axis = 0)
+    '''
+    return
 
 
 
@@ -932,18 +976,20 @@ def create_dataset(half=True):
     data_dir_train = base_directory + 'sequences_train/'
     data_dir_val = base_directory + 'sequences_val/'
     data_dir_test = base_directory + 'sequences_test/'
+    
+    compute_min_num_samples(train_ids, boolean_classes=True, attr=0)
 
-    generate_data(train_ids, sliding_window_length=sliding_window_length,
-                  sliding_window_step=sliding_window_step, data_dir=data_dir_train, half=half, usage_modus='train')
-    generate_data(val_ids, sliding_window_length=sliding_window_length,
-                  sliding_window_step=sliding_window_step, data_dir=data_dir_val, half=half, usage_modus='val')
-    generate_data(test_ids, sliding_window_length=sliding_window_length,
-                  sliding_window_step=sliding_window_step, data_dir=data_dir_test, half=half, usage_modus='test')
+    #generate_data(train_ids, sliding_window_length=sliding_window_length,
+                  #sliding_window_step=sliding_window_step, data_dir=data_dir_train, half=half, usage_modus='train')
+    #generate_data(val_ids, sliding_window_length=sliding_window_length,
+                  #sliding_window_step=sliding_window_step, data_dir=data_dir_val, half=half, usage_modus='val')
+    #generate_data(test_ids, sliding_window_length=sliding_window_length,
+                  #sliding_window_step=sliding_window_step, data_dir=data_dir_test, half=half, usage_modus='test')
 
-    generate_CSV(base_directory + "train.csv", data_dir_train)
-    generate_CSV(base_directory + "val.csv", data_dir_val)
-    generate_CSV(base_directory + "test.csv", data_dir_test)
-    generate_CSV_final(base_directory + "train_final.csv", data_dir_train, data_dir_val)
+    #generate_CSV(base_directory + "train.csv", data_dir_train)
+    #generate_CSV(base_directory + "val.csv", data_dir_val)
+    #generate_CSV(base_directory + "test.csv", data_dir_test)
+    #generate_CSV_final(base_directory + "train_final.csv", data_dir_train, data_dir_val)
 
     return
 
