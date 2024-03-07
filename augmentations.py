@@ -16,11 +16,13 @@ def get_augmentation(augmentation):
 
 # Working
 def jittering(x, sigma = 0.03):
+    #using this
     # https://arxiv.org/pdf/1706.00527.pdf
     return x + np.random.normal(loc=0., scale=sigma, size=x.shape)
 
 # Working
 def scaling(x):
+    #using this
     # https://arxiv.org/pdf/1706.00527.pdf
     sigma=0.04
     factor = np.random.normal(loc=1., scale=sigma, size=(x.shape[0],x.shape[2])) #TODO: check if indices are the right ones
@@ -29,11 +31,13 @@ def scaling(x):
 
 # Working
 def flipping(x):
+    #using this
     rand_val=np.flip(x,1)
     x=np.array(rand_val)
     return x
 # Working
 def magnitude_warping(x):
+    #using this
     from scipy.interpolate import CubicSpline
     sigma = 0.1
     knot = 4
@@ -49,6 +53,7 @@ def magnitude_warping(x):
 
 # Working
 def permutation(x):
+    #using this
     max_segments=5
     seg_mode="equal"
     
@@ -73,6 +78,7 @@ def permutation(x):
     return augmentedData
 
 def slicing(data):
+    #using this
     """
     Augments a multivariate time-series by slicing and stretching.
 
@@ -153,6 +159,7 @@ def slicing(data):
 
 # Working
 def time_warping(x):
+    #using this
     from scipy.interpolate import CubicSpline
     sigma = 0.06
     knot = 4
@@ -197,6 +204,7 @@ def window_warping(x):
     return ret.reshape((1,length,channel))
 
 def tilt(x):
+    #using this
     channel=x.shape[2]
     length=x.shape[1]
     x = x.reshape((1,channel,length))
@@ -280,6 +288,7 @@ def spawner(x, labels, sigma=0.05, verbose=0):
             ret[i,:] = pat
     return jittering(ret, sigma=sigma)
 
+'''
 def windowslicing(x):
         #for 4 dimensional input - including batch
         slice_fraction=0.5
@@ -331,6 +340,11 @@ def windowslicing(x):
                 # `normalized_array` now contains the normalized time-series.
                 ret_b[i]=normalized_array 
         return ret_b
+'''
+
+def vertical_flip(x):
+    x=((x-0.5)*-1)+0.5
+    return x
 
 def wdba(x, labels, batch_size=6, slope_constraint="symmetric", use_window=True, verbose=0):
     # https://ieeexplore.ieee.org/document/8215569
