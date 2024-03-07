@@ -838,12 +838,12 @@ def __prepare_mobiact__(path, split):
         1.1238746, 1.12533643, 0.72129725,
         105.81241608, 58.62837783, 17.58456297]).transpose(column_names=__get_data_col_names__('mobiact'))
     '''
-    mean_values = pl.DataFrame([0.49754024, 0.51163896, 0.49568849, 
-                                0.50152986, 0.50009648, 0.49993277, 
-                                0.50209062, 0.48269266, 0.49570778]).transpose(column_names=__get_data_col_names__('mobiact'))
-    std_values  = pl.DataFrame([0.21741833, 0.21943885, 0.21258983, 
-                                0.21520634, 0.20116301, 0.2078448,
-                                0.24957102, 0.20147778, 0.21548381]).transpose(column_names=__get_data_col_names__('mobiact'))
+    mean_values = pl.DataFrame([ 0.240851623,  7.13644628,  0.373189246, 
+                                -0.0232327440, -0.00395112804,  0.0136019672,  
+                                179.498688, -67.9060605,  1.90372102]).transpose(column_names=__get_data_col_names__('mobiact'))
+    std_values  = pl.DataFrame([ 3.4748497,    6.7072082,    3.2804421,    
+                                1.11511935,   1.11383806, 0.71638005,
+                                 105.66588754,  58.62028255,  17.53491985]).transpose(column_names=__get_data_col_names__('mobiact'))
 
 
     min_df = mean_values.with_columns(
