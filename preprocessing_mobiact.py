@@ -473,8 +473,7 @@ def get_max_min(ids):
                 except:
                     print("\n1 In loading data,  in file {}".format(FOLDER_PATH + file_name_data))
                     continue
-            all_segments = norm_mobi(all_segments)
-            print("\nFiles loaded and normalised")
+    
             frames = all_segments.shape[0]
             if frames != 0:
                 train_no=round(0.70*frames)
