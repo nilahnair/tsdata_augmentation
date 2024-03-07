@@ -833,15 +833,12 @@ def __prepare_mobiact__(path, split):
     # remove subjects
     all_files = list(filter(lambda p: not any(str(identity) in p.name.split('_')[1] for identity in [13, 14, 15, 17, 28, 30, 31, 34, 57]), all_files))
 
-    mean_values = pl.DataFrame([
-        0.265079537, 7.13106528, 0.387973281,
-        -0.0225606363, -0.00302826137,  0.0131514254,
-        178.629895, -67.8435738, 2.02923485]).transpose(column_names=__get_data_col_names__('mobiact'))
-    std_values  = pl.DataFrame([
-        3.49444826, 6.70119943, 3.31003981,
-        1.1238746, 1.12533643, 0.72129725,
-        105.81241608, 58.62837783, 17.58456297]).transpose(column_names=__get_data_col_names__('mobiact'))
-
+    mean_values = pl.DataFrame([ 0.240851623,  7.13644628,  0.373189246, 
+                                -0.0232327440, -0.00395112804,  0.0136019672,  
+                                179.498688, -67.9060605,  1.90372102]).transpose(column_names=__get_data_col_names__('mobiact'))
+    std_values  = pl.DataFrame([ 3.4748497,    6.7072082,    3.2804421,    
+                                1.11511935,   1.11383806, 0.71638005,
+                                 105.66588754,  58.62028255,  17.53491985]).transpose(column_names=__get_data_col_names__('mobiact'))
 
     min_df = mean_values.with_columns(
         [pl.col(c) - 2 * std_values[c] for c in set(mean_values.columns).intersection(std_values.columns)]
