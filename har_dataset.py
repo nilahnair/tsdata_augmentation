@@ -636,12 +636,12 @@ def __prepare_motionsense__(path, split):
         0.32820886, 0.52756613, 0.37621195]). \
         transpose(column_names=__get_data_col_names__('motionsense'))
     '''
-    mean_values = pl.DataFrame([0.98075318, 0.18328575, 0.99292009,
-                                0.59533219, 0.59871923, 0.65080072,
-                                0.4997794,  0.48942474, 0.49554215]).transpose(column_names=__get_data_col_names__('motionsense'))
-    std_values = pl.DataFrame([0.04484587, 0.10159578, 0.01879438, 
-                               0.04119698, 0.04039789, 0.05996744,
-                               0.18559804, 0.18338014, 0.18613415]).transpose(column_names=__get_data_col_names__('motionsense'))
+    mean_values = pl.DataFrame([0.76639554, 0.33924385, 0.78441527, 
+                                0.53088344, 0.5315443,  0.54900857,
+                                0.62962032, 0.55816487, 0.58608871]).transpose(column_names=__get_data_col_names__('motionsense'))
+    std_values = pl.DataFrame([0.25867806, 0.21371301, 0.25959621, 
+                               0.13331802, 0.12606953, 0.13749548,
+                               0.21065503, 0.14886348, 0.17937903]).transpose(column_names=__get_data_col_names__('motionsense'))
 
     min_df = mean_values.with_columns(
         [pl.col(c) - 2 * std_values[c] 
