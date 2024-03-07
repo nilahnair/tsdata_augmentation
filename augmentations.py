@@ -542,3 +542,33 @@ def window_slice(x, reduce_ratio=0.9):
         for dim in range(x.shape[2]):
             ret[i,:,dim] = np.interp(np.linspace(0, target_len, num=x.shape[1]), np.arange(target_len), pat[starts[i]:ends[i],dim]).T
     return ret
+
+def freq_mix(x,rate=0.5):
+   
+    x_f = torch.fft.rfft(x,dim=1)
+        
+    m = torch.cuda.FloatTensor(x_f.shape).uniform_() < rate
+    amp = abs(x_f)
+    _,index = amp.sort(dim=1, descending=True)
+    dominant_mask = index > 2
+    m = torch.bitwise_and(m,dominant_mask)
+    freal = x_f.real.masked_fill(m,0)
+    fimag = x_f.imag.masked_fill(m,0)
+        
+    b_idx = np.arange(x.shape[0])
+    np.random.shuffle(b_idx)
+    x2= x[b_idx]
+    x2_f = torch.fft.rfft(x2,dim=1)
+
+    m = torch.bitwise_not(m)
+    freal2 = x2_f.real.masked_fill(m,0)
+    fimag2 = x2_f.imag.masked_fill(m,0)
+
+    freal += freal2
+    fimag += fimag2
+
+    x_f = torch.complex(freal,fimag)
+        
+    x = torch.fft.irfft(x_f,dim=1)
+    return x
+
