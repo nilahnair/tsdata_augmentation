@@ -720,8 +720,13 @@ def __prepare_sisfall__(path, split):
     # TODO keep, remove or fix?
     # all_files = list(filter(lambda p: 'SA15/D17_SE15' not in str(p), all_files)) 
 
-    mean_values = pl.DataFrame([3.16212380, -220.821147, -37.2032848, -4.97325388, 34.9530823, -7.05977257, -0.394311490, -864.960077, -98.0097123]).transpose(column_names=__get_data_col_names__('sisfall'))
-    std_values  = pl.DataFrame([76.42413571, 133.73065249, 108.80401481, 664.20882435, 503.17930668, 417.85844231, 296.16101639, 517.27540723, 443.30238268]).transpose(column_names=__get_data_col_names__('sisfall'))
+    # mean_values = pl.DataFrame([3.16212380, -220.821147, -37.2032848, -4.97325388, 34.9530823, -7.05977257, -0.394311490, -864.960077, -98.0097123]).transpose(column_names=__get_data_col_names__('sisfall'))
+    # std_values  = pl.DataFrame([76.42413571, 133.73065249, 108.80401481, 664.20882435, 503.17930668, 417.85844231, 296.16101639, 517.27540723, 443.30238268]).transpose(column_names=__get_data_col_names__('sisfall'))
+
+    #norm only by train
+    mean_values = pl.DataFrame([2.127375,	-221.389032,	-34.440465,	-5.715684,	35.594734,	-7.504432,	-4.377009,	-867.128955,	-87.342661]).transpose(column_names=__get_data_col_names__('sisfall'))
+    std_values  = pl.DataFrame([74.162487,	130.044887,	108.781505,	650.286619,	499.172359,	421.662805,	287.202157,	503.059895,	443.137327]).transpose(column_names=__get_data_col_names__('sisfall'))
+
 
     min_df = mean_values.with_columns(
         [pl.col(c) - 2 * std_values[c] for c in set(mean_values.columns).intersection(std_values.columns)]
@@ -805,11 +810,11 @@ def __prepare_sisfall__(path, split):
     recordings = pl.concat(dfs_by_split, how='vertical')
 
     # normalzation
-    df = df.with_columns(
-        [(pl.col(c) -  min_df[c]) / (max_df[c] - min_df[c])  for c in set(df.columns).intersection(min_df.columns)]
+    recordings = recordings.with_columns(
+        [(pl.col(c) -  min_df[c]) / (max_df[c] - min_df[c])  for c in set(recordings.columns).intersection(min_df.columns)]
     )
 
-    df = df.with_columns(
+    recordings = recordings.with_columns(
         pl.col(__get_data_col_names__('sisfall')).clip(0.0, 1)
     )
 
@@ -828,23 +833,12 @@ def __prepare_mobiact__(path, split):
     # remove subjects
     all_files = list(filter(lambda p: not any(str(identity) in p.name.split('_')[1] for identity in [13, 14, 15, 17, 28, 30, 31, 34, 57]), all_files))
 
-    '''
-    mean_values = pl.DataFrame([
-        0.265079537, 7.13106528, 0.387973281,
-        -0.0225606363, -0.00302826137,  0.0131514254,
-        178.629895, -67.8435738, 2.02923485]).transpose(column_names=__get_data_col_names__('mobiact'))
-    std_values  = pl.DataFrame([
-        3.49444826, 6.70119943, 3.31003981,
-        1.1238746, 1.12533643, 0.72129725,
-        105.81241608, 58.62837783, 17.58456297]).transpose(column_names=__get_data_col_names__('mobiact'))
-    '''
     mean_values = pl.DataFrame([ 0.240851623,  7.13644628,  0.373189246, 
                                 -0.0232327440, -0.00395112804,  0.0136019672,  
                                 179.498688, -67.9060605,  1.90372102]).transpose(column_names=__get_data_col_names__('mobiact'))
     std_values  = pl.DataFrame([ 3.4748497,    6.7072082,    3.2804421,    
                                 1.11511935,   1.11383806, 0.71638005,
                                  105.66588754,  58.62028255,  17.53491985]).transpose(column_names=__get_data_col_names__('mobiact'))
-
 
     min_df = mean_values.with_columns(
         [pl.col(c) - 2 * std_values[c] for c in set(mean_values.columns).intersection(std_values.columns)]
@@ -878,7 +872,7 @@ def __prepare_mobiact__(path, split):
     )
 
     dfs_by_split = []
-    for group_name, data in recordings.group_by(__get_separating_cols__(dataset_name='sisfall'), maintain_order=True):
+    for group_name, data in recordings.group_by(__get_separating_cols__(dataset_name='mobiact'), maintain_order=True):
         # subselect split first 70% for train, next 15% for val, next 15% for test
         total_rows = data.shape[0]
         val_start_row = round(total_rows * 0.7)
@@ -895,11 +889,11 @@ def __prepare_mobiact__(path, split):
     recordings = pl.concat(dfs_by_split, how='vertical')
 
     # normalzation
-    df = df.with_columns(
-        [(pl.col(c) -  min_df[c]) / (max_df[c] - min_df[c])  for c in set(df.columns).intersection(min_df.columns)]
+    recordings = recordings.with_columns(
+        [(pl.col(c) -  min_df[c]) / (max_df[c] - min_df[c])  for c in set(recordings.columns).intersection(min_df.columns)]
     )
 
-    df = df.with_columns(
+    recordings = recordings.with_columns(
         pl.col(__get_data_col_names__('mobiact')).clip(0.0, 1)
     )
 
