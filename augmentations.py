@@ -572,3 +572,31 @@ def freq_mix(x,rate=0.5):
     x = torch.fft.irfft(x_f,dim=1)
     return x
 
+def resampling_random(x):
+    import random
+    M = random.randint(1, 3)
+    N = random.randint(0, M - 1)
+    assert M > N, 'the value of M have to greater than N'
+
+    timesetps = x.shape[1]
+
+    for i in range(timesetps - 1):
+        x1 = x[:, i * (M + 1), :]
+        x2 = x[:, i * (M + 1) + 1, :]
+        for j in range(M):
+            v = np.add(x1, np.subtract(x2, x1) * (j + 1) / (M + 1))
+            x = np.insert(x, i * (M + 1) + j + 1, v, axis=1)
+    length_inserted = x.shape[1]
+    num = x.shape[0]
+    start = random.randint(0, length_inserted - timesetps * (N + 1))
+    index_selected = np.arange(start, start + timesetps * (N + 1), N + 1)
+    x_selected=x[0,index_selected,:][np.newaxis,]
+    for k in range(1,num):
+        start = random.randint(0, length_inserted - timesetps * (N + 1))
+        index_selected = np.arange(start, start + timesetps * (N + 1), N + 1)
+        x_selected = np.concatenate((x_selected,x[k,index_selected,:][np.newaxis,]),axis=0)
+    return x_selected
+
+def magnify(x):
+    lam = np.random.randint(11,14)/10
+    return tf.multiply(x,lam)
