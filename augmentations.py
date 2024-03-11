@@ -16,11 +16,13 @@ def get_augmentation(augmentation):
 
 # Working
 def jittering(x, sigma = 0.03):
+    #using this
     # https://arxiv.org/pdf/1706.00527.pdf
     return x + np.random.normal(loc=0., scale=sigma, size=x.shape)
 
 # Working
 def scaling(x):
+    #using this
     # https://arxiv.org/pdf/1706.00527.pdf
     sigma=0.04
     factor = np.random.normal(loc=1., scale=sigma, size=(x.shape[0],x.shape[2])) #TODO: check if indices are the right ones
@@ -29,11 +31,13 @@ def scaling(x):
 
 # Working
 def flipping(x):
+    #using this
     rand_val=np.flip(x,1)
     x=np.array(rand_val)
     return x
 # Working
 def magnitude_warping(x):
+    #using this
     from scipy.interpolate import CubicSpline
     sigma = 0.1
     knot = 4
@@ -49,6 +53,7 @@ def magnitude_warping(x):
 
 # Working
 def permutation(x):
+    #using this
     max_segments=5
     seg_mode="equal"
     
@@ -73,6 +78,7 @@ def permutation(x):
     return augmentedData
 
 def slicing(data):
+    #using this
     """
     Augments a multivariate time-series by slicing and stretching.
 
@@ -153,6 +159,7 @@ def slicing(data):
 
 # Working
 def time_warping(x):
+    #using this
     from scipy.interpolate import CubicSpline
     sigma = 0.06
     knot = 4
@@ -197,6 +204,7 @@ def window_warping(x):
     return ret.reshape((1,length,channel))
 
 def tilt(x):
+    #using this
     channel=x.shape[2]
     length=x.shape[1]
     x = x.reshape((1,channel,length))
@@ -280,6 +288,7 @@ def spawner(x, labels, sigma=0.05, verbose=0):
             ret[i,:] = pat
     return jittering(ret, sigma=sigma)
 
+'''
 def windowslicing(x):
         #for 4 dimensional input - including batch
         slice_fraction=0.5
@@ -331,6 +340,11 @@ def windowslicing(x):
                 # `normalized_array` now contains the normalized time-series.
                 ret_b[i]=normalized_array 
         return ret_b
+'''
+
+def vertical_flip(x):
+    x=((x-0.5)*-1)+0.5
+    return x
 
 def wdba(x, labels, batch_size=6, slope_constraint="symmetric", use_window=True, verbose=0):
     # https://ieeexplore.ieee.org/document/8215569
@@ -528,3 +542,61 @@ def window_slice(x, reduce_ratio=0.9):
         for dim in range(x.shape[2]):
             ret[i,:,dim] = np.interp(np.linspace(0, target_len, num=x.shape[1]), np.arange(target_len), pat[starts[i]:ends[i],dim]).T
     return ret
+
+def freq_mix(x,rate=0.5):
+   
+    x_f = torch.fft.rfft(x,dim=1)
+        
+    m = torch.cuda.FloatTensor(x_f.shape).uniform_() < rate
+    amp = abs(x_f)
+    _,index = amp.sort(dim=1, descending=True)
+    dominant_mask = index > 2
+    m = torch.bitwise_and(m,dominant_mask)
+    freal = x_f.real.masked_fill(m,0)
+    fimag = x_f.imag.masked_fill(m,0)
+        
+    b_idx = np.arange(x.shape[0])
+    np.random.shuffle(b_idx)
+    x2= x[b_idx]
+    x2_f = torch.fft.rfft(x2,dim=1)
+
+    m = torch.bitwise_not(m)
+    freal2 = x2_f.real.masked_fill(m,0)
+    fimag2 = x2_f.imag.masked_fill(m,0)
+
+    freal += freal2
+    fimag += fimag2
+
+    x_f = torch.complex(freal,fimag)
+        
+    x = torch.fft.irfft(x_f,dim=1)
+    return x
+
+def resampling_random(x):
+    import random
+    M = random.randint(1, 3)
+    N = random.randint(0, M - 1)
+    assert M > N, 'the value of M have to greater than N'
+
+    timesetps = x.shape[1]
+
+    for i in range(timesetps - 1):
+        x1 = x[:, i * (M + 1), :]
+        x2 = x[:, i * (M + 1) + 1, :]
+        for j in range(M):
+            v = np.add(x1, np.subtract(x2, x1) * (j + 1) / (M + 1))
+            x = np.insert(x, i * (M + 1) + j + 1, v, axis=1)
+    length_inserted = x.shape[1]
+    num = x.shape[0]
+    start = random.randint(0, length_inserted - timesetps * (N + 1))
+    index_selected = np.arange(start, start + timesetps * (N + 1), N + 1)
+    x_selected=x[0,index_selected,:][np.newaxis,]
+    for k in range(1,num):
+        start = random.randint(0, length_inserted - timesetps * (N + 1))
+        index_selected = np.arange(start, start + timesetps * (N + 1), N + 1)
+        x_selected = np.concatenate((x_selected,x[k,index_selected,:][np.newaxis,]),axis=0)
+    return x_selected
+
+def magnify(x):
+    lam = np.random.randint(11,14)/10
+    return tf.multiply(x,lam)
