@@ -35,8 +35,13 @@ class HARDataset(Dataset):
         sub_frame = sub_frame[None,:] # add dummy dimension for code compatibility 
 
         if self.transform:
-            if random.choices(population=[True, False], weights=[self.augmentation_probabiblity, 1-self.augmentation_probabiblity])[0]:
-                sub_frame = self.transform(sub_frame) # TODO: rn, applied on window, not implemented as intended on whole sequence
+            if isinstance(self.transform, list):
+                for t in self.transform:
+                    if __random_apply__(self.augmentation_probabiblity):
+                        sub_frame = t(sub_frame)
+            else:
+                if __random_apply__(self.augmentation_probabiblity):
+                    sub_frame = self.transform(sub_frame)
         # if self.target_transform:
         #     label = self.target_transform(label)
 
@@ -982,3 +987,6 @@ def __check_same_col_names__(path='/vol/actrec/DFG_Project/2019/LARa_dataset/MoC
         minority_list = var1_files if var2_count > var1_count else var2_files
         for f in minority_list:
             print(str(f))
+
+def __random_apply__(prob):
+    return random.choices(population=[True, False], weights=[prob, 1-prob])[0]
