@@ -3,6 +3,7 @@ import polars as pl
 from pathlib import Path
 from collections import OrderedDict
 import random
+import numpy as np
 
 class HARDataset(Dataset):
     def __init__(self, path, dataset_name = 'mbientlab', window_length = 200, window_stride = 25, split = 'train', transform = None, target_transform = None, augmenation_probability = 0):
@@ -17,8 +18,8 @@ class HARDataset(Dataset):
 
         self.recordings = __prepare_dataframe__(self.path, self.dataset_name, self.split).with_row_count()
 
+        print('Build index')
         self.index = self.__build_index__(self.recordings, __get_separating_cols__(self.dataset_name))
-
 
     def __len__(self):
         return len(self.index)
@@ -28,15 +29,24 @@ class HARDataset(Dataset):
         stop = start + self.window_length
         sub_frame = self.recordings[start:stop]
 
-        labels = sub_frame['class']
+        labels_df = sub_frame['class']
+
+        # convert to numpy by hand, seems to be broken in polars
+        labels = np.array([l for l in labels_df])
         label = sub_frame['class'].mode()[0]
         
-        sub_frame = sub_frame.select(__get_data_col_names__(self.dataset_name))
-        sub_frame = sub_frame.to_pandas()
-        sub_frame = sub_frame.to_numpy()
+        sub_frame_df = sub_frame.select(__get_data_col_names__(self.dataset_name))
+
+        # convert to numpy by hand, seems to be broken in polars
+        sub_frame = np.hstack([
+            np.array([[v for v in sub_frame_df[col]]]).T
+            for col in sub_frame_df.columns
+        ])
+
         sub_frame = sub_frame[None,:] # add dummy dimension for code compatibility 
 
         if self.transform:
+            # print('transforming')
             if isinstance(self.transform, list):
                 for t in self.transform:
                     if __random_apply__(self.augmentation_probabiblity):
@@ -50,7 +60,8 @@ class HARDataset(Dataset):
         return {
             'data': sub_frame,
             'label': label,
-            'labels': labels.to_numpy()}
+            'labels': labels
+            }
 
     def __build_index__(self, df, unique_cols):
         index = []
