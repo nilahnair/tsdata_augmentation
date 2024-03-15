@@ -44,7 +44,7 @@ parser.add_argument('-a', '--arch', metavar='ARCH', default='cnn',
                     help='model architecture: ' +
                         # ' | '.join(model_names) +
                         ' (default: cnn)')
-parser.add_argument('-j', '--workers', default=1, type=int, metavar='N',
+parser.add_argument('-j', '--num_workers', default=None, type=int, metavar='N',
                     help='number of data loading workers (default: 32)')
 parser.add_argument('--epochs', default=256, type=int, metavar='N',
                     help='number of total epochs to run')
@@ -224,7 +224,12 @@ def main():
         split='train'
         )
 
-    train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True, drop_last=True)
+    train_loader = torch.utils.data.DataLoader(
+        train_dataset,
+        batch_size=args.batch_size,
+        num_workers=args.num_workers,
+        shuffle=True,
+        drop_last=True)
 
     writer = SummaryWriter(log_dir=args.output_dir)
 

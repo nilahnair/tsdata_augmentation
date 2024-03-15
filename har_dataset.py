@@ -21,6 +21,18 @@ class HARDataset(Dataset):
         print('Build index')
         self.index = self.__build_index__(self.recordings, __get_separating_cols__(self.dataset_name))
 
+        print('Convert labels to numpy')
+        # convert to numpy by hand, seems to be broken in polars
+        self.labels = np.array([l for l in self.recordings['class']])
+
+        print('Convert data to numpy')
+        # convert to numpy by hand, seems to be broken in polars
+        self.recordings = np.hstack([
+            np.array([[v for v in self.recordings[col]]]).T
+            for col in self.recordings.select(__get_data_col_names__(self.dataset_name)).columns
+        ])
+        print('Dataset constructed')
+
     def __len__(self):
         return len(self.index)
     
@@ -28,20 +40,17 @@ class HARDataset(Dataset):
         start = self.index[index]
         stop = start + self.window_length
         sub_frame = self.recordings[start:stop]
+        labels = self.labels[start:stop]
 
-        labels_df = sub_frame['class']
-
-        # convert to numpy by hand, seems to be broken in polars
-        labels = np.array([l for l in labels_df])
-        label = sub_frame['class'].mode()[0]
+        label = np.bincount(labels).argmax()
         
-        sub_frame_df = sub_frame.select(__get_data_col_names__(self.dataset_name))
+        # sub_frame_df = sub_frame.select(__get_data_col_names__(self.dataset_name))
 
         # convert to numpy by hand, seems to be broken in polars
-        sub_frame = np.hstack([
-            np.array([[v for v in sub_frame_df[col]]]).T
-            for col in sub_frame_df.columns
-        ])
+        # sub_frame = np.hstack([
+        #     np.array([[v for v in sub_frame_df[col]]]).T
+        #     for col in sub_frame_df.columns
+        # ])
 
         sub_frame = sub_frame[None,:] # add dummy dimension for code compatibility 
 
