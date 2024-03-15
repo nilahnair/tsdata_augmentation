@@ -29,8 +29,10 @@ class HARDataset(Dataset):
         sub_frame = self.recordings[start:stop]
 
         labels = sub_frame['class']
-        label = sub_frame['class'].value_counts(sort=True)[0]['class'][0]
+        label = sub_frame['class'].mode()[0]
+        
         sub_frame = sub_frame.select(__get_data_col_names__(self.dataset_name))
+        sub_frame = sub_frame.to_pandas()
         sub_frame = sub_frame.to_numpy()
         sub_frame = sub_frame[None,:] # add dummy dimension for code compatibility 
 

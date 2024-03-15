@@ -238,7 +238,7 @@ class Modus_Selecter(object):
             self.train(itera=self.config['repetitions'], testing=True)
         elif self.config['usage_modus'] == 'test':
             self.test()
-        elif self.configig['usage_modus'] == 'evolution':
+        elif self.config['usage_modus'] == 'evolution':
             # Not implementing here, see paper ICPR2018
             self.evolution()
         elif self.config['usage_modus'] == 'train_final':
