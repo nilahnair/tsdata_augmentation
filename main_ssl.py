@@ -44,7 +44,7 @@ parser.add_argument('-a', '--arch', metavar='ARCH', default='cnn',
                     help='model architecture: ' +
                         # ' | '.join(model_names) +
                         ' (default: cnn)')
-parser.add_argument('-j', '--num_workers', default=None, type=int, metavar='N',
+parser.add_argument('-j', '--num_workers', default=8, type=int, metavar='N',
                     help='number of data loading workers (default: 32)')
 parser.add_argument('--epochs', default=256, type=int, metavar='N',
                     help='number of total epochs to run')
