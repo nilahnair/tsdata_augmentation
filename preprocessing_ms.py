@@ -28,12 +28,29 @@ def norm_ms(data):
     @param data: numpy integer matrix
     @return data_norm: Normalized sensor data
     """
-
+    
+    '''
+    mean_values = pl.DataFrame([0.76639554, 0.33924385, 0.78441527, 
+                                0.53088344, 0.5315443,  0.54900857,
+                                0.62962032, 0.55816487, 0.58608871]).transpose(column_names=__get_data_col_names__('motionsense'))
+    std_values = pl.DataFrame([0.25867806, 0.21371301, 0.25959621, 
+                               0.13331802, 0.12606953, 0.13749548,
+                               0.21065503, 0.14886348, 0.17937903]).transpose(column_names=__get_data_col_names__('motionsense'))
+    ####old values
     mean_values = np.array([ 0.04213359,  0.75472223, -0.13882479,  0.00532117,  0.01458119,  0.01276031,
                             -0.00391064,  0.0442438,   0.03927177])
     mean_values = np.reshape(mean_values, [1, 9])
     std_values = np.array([0.33882991, 0.33326483, 0.42832299, 1.29291558, 1.22646988, 0.80804086,
                            0.32820886, 0.52756613, 0.37621195])
+    std_values = np.reshape(std_values, [1, 9])
+    '''
+    mean_values = np.array([0.76639554, 0.33924385, 0.78441527, 
+                                0.53088344, 0.5315443,  0.54900857,
+                                0.62962032, 0.55816487, 0.58608871])
+    mean_values = np.reshape(mean_values, [1, 9])
+    std_values = np.array([0.25867806, 0.21371301, 0.25959621, 
+                               0.13331802, 0.12606953, 0.13749548,
+                               0.21065503, 0.14886348, 0.17937903])
     std_values = np.reshape(std_values, [1, 9])
     
     mean_array = np.repeat(mean_values, data.shape[0], axis=0)
