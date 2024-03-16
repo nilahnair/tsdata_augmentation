@@ -102,6 +102,9 @@ def my_config():
     # Flags
     plotting = False
 
+    # Path to checkpoint for fine-tuning
+    fine_tune_path = None
+
     # Options
 
     dataset_root_defaults = {
