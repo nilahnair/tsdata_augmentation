@@ -554,7 +554,7 @@ def create_dataset(identity_bool = False):
     generate_CSV(base_directory, "test.csv", data_dir_test)
     generate_CSV_final(base_directory + "train_final.csv", data_dir_train, data_dir_val)
     '''
-    get_max_min(train_ids)
+    get_max_min(half_train_ids)
     return
     
 
