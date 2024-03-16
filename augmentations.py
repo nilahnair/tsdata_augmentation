@@ -599,4 +599,4 @@ def resampling_random(x):
 
 def magnify(x):
     lam = np.random.randint(11,14)/10
-    return tf.multiply(x,lam)
+    return np.multiply(x,lam)
