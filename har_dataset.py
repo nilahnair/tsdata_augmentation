@@ -3,6 +3,7 @@ import polars as pl
 from pathlib import Path
 from collections import OrderedDict
 import random
+import numpy as np
 
 class HARDataset(Dataset):
     def __init__(self, path, dataset_name = 'mbientlab', window_length = 200, window_stride = 25, split = 'train', transform = None, target_transform = None, augmenation_probability = 0):
@@ -17,8 +18,20 @@ class HARDataset(Dataset):
 
         self.recordings = __prepare_dataframe__(self.path, self.dataset_name, self.split).with_row_count()
 
+        print('Build index')
         self.index = self.__build_index__(self.recordings, __get_separating_cols__(self.dataset_name))
 
+        print('Convert labels to numpy')
+        # convert to numpy by hand, seems to be broken in polars
+        self.labels = np.array([l for l in self.recordings['class']])
+
+        print('Convert data to numpy')
+        # convert to numpy by hand, seems to be broken in polars
+        self.recordings = np.hstack([
+            np.array([[v for v in self.recordings[col]]]).T
+            for col in self.recordings.select(__get_data_col_names__(self.dataset_name)).columns
+        ])
+        print('Dataset constructed')
 
     def __len__(self):
         return len(self.index)
@@ -27,14 +40,22 @@ class HARDataset(Dataset):
         start = self.index[index]
         stop = start + self.window_length
         sub_frame = self.recordings[start:stop]
+        labels = self.labels[start:stop]
 
-        labels = sub_frame['class']
-        label = sub_frame['class'].value_counts(sort=True)[0]['class'][0]
-        sub_frame = sub_frame.select(__get_data_col_names__(self.dataset_name))
-        sub_frame = sub_frame.to_numpy()
+        label = np.bincount(labels).argmax()
+        
+        # sub_frame_df = sub_frame.select(__get_data_col_names__(self.dataset_name))
+
+        # convert to numpy by hand, seems to be broken in polars
+        # sub_frame = np.hstack([
+        #     np.array([[v for v in sub_frame_df[col]]]).T
+        #     for col in sub_frame_df.columns
+        # ])
+
         sub_frame = sub_frame[None,:] # add dummy dimension for code compatibility 
 
         if self.transform:
+            # print('transforming')
             if isinstance(self.transform, list):
                 for t in self.transform:
                     if __random_apply__(self.augmentation_probabiblity):
@@ -48,7 +69,8 @@ class HARDataset(Dataset):
         return {
             'data': sub_frame,
             'label': label,
-            'labels': labels.to_numpy()}
+            'labels': labels
+            }
 
     def __build_index__(self, df, unique_cols):
         index = []
