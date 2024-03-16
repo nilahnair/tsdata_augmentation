@@ -545,31 +545,31 @@ def window_slice(x, reduce_ratio=0.9):
 
 def freq_mix(x,rate=0.5):
    
-    x_f = torch.fft.rfft(x,dim=1)
+    x_f = np.fft.rfft(x,dim=1)
         
-    m = torch.cuda.FloatTensor(x_f.shape).uniform_() < rate
+    m =(x_f.shape).uniform_() < rate
     amp = abs(x_f)
     _,index = amp.sort(dim=1, descending=True)
     dominant_mask = index > 2
-    m = torch.bitwise_and(m,dominant_mask)
+    m = np.bitwise_and(m,dominant_mask)
     freal = x_f.real.masked_fill(m,0)
     fimag = x_f.imag.masked_fill(m,0)
         
     b_idx = np.arange(x.shape[0])
     np.random.shuffle(b_idx)
     x2= x[b_idx]
-    x2_f = torch.fft.rfft(x2,dim=1)
+    x2_f = np.fft.rfft(x2,dim=1)
 
-    m = torch.bitwise_not(m)
+    m = np.bitwise_not(m)
     freal2 = x2_f.real.masked_fill(m,0)
     fimag2 = x2_f.imag.masked_fill(m,0)
 
     freal += freal2
     fimag += fimag2
 
-    x_f = torch.complex(freal,fimag)
+    x_f = np.complex(freal,fimag)
         
-    x = torch.fft.irfft(x_f,dim=1)
+    x = np.fft.irfft(x_f,dim=1)
     return x
 
 def resampling_random(x):
