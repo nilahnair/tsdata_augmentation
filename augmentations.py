@@ -3,7 +3,7 @@ import numpy as np
 from tqdm import tqdm
 import torch
 import math
-
+import dtw as dtw
 
 def get_augmentation(augmentation):
     if isinstance(augmentation, str):
@@ -259,7 +259,7 @@ def spawner(x, sigma=0.05, verbose=0):
     # use verbose=-1 to turn off warnings
     # use verbose=1 to print out figures
     
-    import dtw as dtw
+    
     random_points = np.random.randint(low=1, high=x.shape[1]-1, size=x.shape[0])
     window = np.ceil(x.shape[1] / 10.).astype(int)
     orig_steps = np.arange(x.shape[1])
