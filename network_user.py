@@ -622,6 +622,7 @@ class Network_User(object):
         dataLoader_train = DataLoader(
             harwindows_train,
             batch_size=self.config['batch_size_train'],
+            num_workers=self.config.get('num_workers', 0), # get num_workers if present, else 0
             shuffle=True)
 
         # determine modulo value for logging

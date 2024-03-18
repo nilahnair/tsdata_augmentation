@@ -79,6 +79,7 @@ def my_config():
     output = 'softmax'
     reshape_input = False
     usage_modus = 'train'
+    num_workers = 8
 
     name_counter = 0
     sacred = True
