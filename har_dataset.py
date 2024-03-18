@@ -4,6 +4,7 @@ from pathlib import Path
 from collections import OrderedDict
 import random
 import numpy as np
+import inspect
 
 class HARDataset(Dataset):
     def __init__(self, path, dataset_name = 'mbientlab', window_length = 200, window_stride = 25, split = 'train', transform = None, target_transform = None, augmenation_probability = 0):
@@ -59,10 +60,16 @@ class HARDataset(Dataset):
             if isinstance(self.transform, list):
                 for t in self.transform:
                     if __random_apply__(self.augmentation_probabiblity):
-                        sub_frame = t(sub_frame)
+                        if 'labels' in inspect.signature(t).parameters:
+                            sub_frame=t(sub_frame, labels)
+                        else:
+                            sub_frame = t(sub_frame)
             else:
                 if __random_apply__(self.augmentation_probabiblity):
-                    sub_frame = self.transform(sub_frame)
+                    if 'labels' in inspect.signature(t).parameters:
+                        sub_frame=t(sub_frame, labels)
+                    else:
+                        sub_frame = t(sub_frame)
         # if self.target_transform:
         #     label = self.target_transform(label)
 

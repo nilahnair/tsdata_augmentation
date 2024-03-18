@@ -297,10 +297,11 @@ def main():
             'augmentations': args.augmentations,
             'state_dict': model.state_dict(),
             'optimizer' : optimizer.state_dict(),
+            'config': vars(args)
         }, is_best=False,
             filename=save_path)
         
-        if epoch % (args.epochs // 4) == 0:
+        if epoch % (args.epochs // args.num_checkpoints) == 0:
             save_path = f'checkpoint_{epoch:04d}.pth.tar' 
             if args.output_dir != None:
                 save_path = os.path.join(args.output_dir, save_path)
@@ -312,8 +313,19 @@ def main():
                 'state_dict': model.state_dict(),
                 'encoder_state_dict': model.encoder.state_dict(),
                 'optimizer' : optimizer.state_dict(),
+                'config': vars(args)
             }, is_best=False,
                 filename=save_path)
+
+            save_checkpoint({
+                'epoch': epoch + 1,
+                'arch': args.arch,
+                'dataset': args.dataset,
+                'augmentations': args.augmentations,
+                'state_dict': model.encoder.state_dict(),
+                'config': vars(args)
+            }, is_best=False,
+                filename=f'encoder_{epoch:04d}.pth.tar')
 
     save_path = f'encoder.pth.tar' 
     if args.output_dir != None:
@@ -323,6 +335,7 @@ def main():
         'dataset': args.dataset,
         'augmentations': args.augmentations,
         'state_dict': model.encoder.state_dict(),
+        'config': vars(args)
     }, is_best=False,
         filename=save_path)
 
