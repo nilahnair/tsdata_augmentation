@@ -253,7 +253,8 @@ def tilt(x):
     return normalized_array.reshape((1,length,channel))
 
 #working
-def spawner(x, labels, sigma=0.05, verbose=0):
+#def spawner(x, labels, sigma=0.05, verbose=0):
+def spawner(x, sigma=0.05, verbose=0):
     # https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6983028/
     # use verbose=-1 to turn off warnings
     # use verbose=1 to print out figures
@@ -547,7 +548,8 @@ def window_slice(x, reduce_ratio=0.9):
 
 def freq_mix(x,rate=0.5):
    
-    x_f = np.fft.rfft(x,dim=1)
+    #x_f = np.fft.rfft(x,dim=1)
+    x_f = np.fft.rfft(x)
         
     m =(x_f.shape).uniform_() < rate
     amp = abs(x_f)
@@ -560,7 +562,8 @@ def freq_mix(x,rate=0.5):
     b_idx = np.arange(x.shape[0])
     np.random.shuffle(b_idx)
     x2= x[b_idx]
-    x2_f = np.fft.rfft(x2,dim=1)
+    #x2_f = np.fft.rfft(x2,dim=1)
+    x2_f = np.fft.rfft(x2)
 
     m = np.bitwise_not(m)
     freal2 = x2_f.real.masked_fill(m,0)
@@ -571,7 +574,8 @@ def freq_mix(x,rate=0.5):
 
     x_f = np.complex(freal,fimag)
         
-    x = np.fft.irfft(x_f,dim=1)
+    #x = np.fft.irfft(x_f,dim=1)
+    x = np.fft.irfft(x_f)
     return x
 
 def resampling_random(x):
