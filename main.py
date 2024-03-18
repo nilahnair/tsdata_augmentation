@@ -80,6 +80,7 @@ def my_config():
     reshape_input = False
     usage_modus = 'train'
     num_workers = 8
+    half_dataset = True
 
     name_counter = 0
     sacred = True
@@ -134,6 +135,7 @@ def my_config():
     num_classes = num_classes_defaults[dataset]
     num_attributes = num_attributes_defaults[dataset]
     num_tr_inputs = num_tr_inputs_defaults[dataset]
+    
 
 
     # It was thought to have different LR per dataset, but experimentally have worked the next three
