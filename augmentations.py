@@ -254,7 +254,7 @@ def tilt(x):
 
 #working
 #def spawner(x, labels, sigma=0.05, verbose=0):
-def spawner(x, sigma=0.05, verbose=0):
+def spawner(x, labels, sigma=0.05, verbose=0):
     # https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6983028/
     # use verbose=-1 to turn off warnings
     # use verbose=1 to print out figures
@@ -263,14 +263,14 @@ def spawner(x, sigma=0.05, verbose=0):
     random_points = np.random.randint(low=1, high=x.shape[1]-1, size=x.shape[0])
     window = np.ceil(x.shape[1] / 10.).astype(int)
     orig_steps = np.arange(x.shape[1])
-    #l = np.argmax(labels, axis=1) if labels.ndim > 1 else labels
+    l = np.argmax(labels, axis=1) if labels.ndim > 1 else labels
     
     ret = np.zeros_like(x)
     for i, pat in enumerate(tqdm(x)):
         # guarentees that same one isnt selected
         choices = np.delete(np.arange(x.shape[0]), i)
         # remove ones of different classes
-        #choices = np.where(l[choices] == l[i])[0]
+        choices = np.where(l[choices] == l[i])[0]
         if choices.size > 0:     
             random_sample = x[np.random.choice(choices)]
             # SPAWNER splits the path into two randomly
@@ -286,8 +286,8 @@ def spawner(x, sigma=0.05, verbose=0):
             for dim in range(x.shape[2]):
                 ret[i,:,dim] = np.interp(orig_steps, np.linspace(0, x.shape[1]-1., num=mean.shape[0]), mean[:,dim]).T
         else:
-            #if verbose > -1:
-            #    print("There is only one pattern of class %d, skipping pattern average"%l[i])
+            if verbose > -1:
+                print("There is only one pattern of class %d, skipping pattern average"%l[i])
             ret[i,:] = pat
     return jittering(ret, sigma=sigma)
 
