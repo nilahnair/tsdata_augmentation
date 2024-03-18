@@ -66,10 +66,10 @@ class HARDataset(Dataset):
                             sub_frame = t(sub_frame)
             else:
                 if __random_apply__(self.augmentation_probabiblity):
-                    if 'labels' in inspect.signature(t).parameters:
-                        sub_frame=t(sub_frame, labels)
+                    if 'labels' in inspect.signature(self.transform).parameters:
+                        sub_frame=self.transform(sub_frame, labels)
                     else:
-                        sub_frame = t(sub_frame)
+                        sub_frame = self.transform(sub_frame)
         # if self.target_transform:
         #     label = self.target_transform(label)
 
