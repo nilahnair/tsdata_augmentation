@@ -551,7 +551,7 @@ def freq_mix(x,rate=0.5):
     #x_f = np.fft.rfft(x,dim=1)
     x_f = np.fft.rfft(x)
         
-    m =(x_f.shape).uniform_() < rate
+    m =np.random.uniform(x_f.shape) < rate
     amp = abs(x_f)
     _,index = amp.sort(dim=1, descending=True)
     dominant_mask = index > 2
