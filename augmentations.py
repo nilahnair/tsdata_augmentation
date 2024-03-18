@@ -619,7 +619,7 @@ def spectral_pooling(x, pooling_number = 0):
         '''
         # xpool = F.max_pool2d(x, (2, 1))
 
-        x = x.permute(0, 2, 1)
+        x = np.transpose(x,(0, 2, 1))
 
         # plt.figure()
         # f, axarr = plt.subplots(5, 1)
@@ -658,7 +658,7 @@ def spectral_pooling(x, pooling_number = 0):
         # x_plt = x[0, 0].to("cpu", torch.double).detach()
         # axarr[3].plot(x_plt[0], label='input')
 
-        x = x.permute(0, 2, 1)
+        x = np.transpose(x,(0, 2, 1))
 
         # fft2_plt = fft2[0, 0].to("cpu", torch.double).detach()
         # fft2_plt = torch.norm(fft2_plt, dim=2)
