@@ -628,7 +628,7 @@ def spectral_pooling(x, pooling_number = 0):
         # axarr[0].plot(x_plt[0], label='input')
 
         #fft = torch.rfft(x, signal_ndim=1, normalized=True, onesided=True)
-        fft = torch.fft.rfft(x, norm="forward")
+        fft = np.fft.rfft(x, norm="forward")
         #if self.config["storing_acts"]:
         #    self.save_acts(fft, "x_LA_fft")
         # fft2 = torch.rfft(x, signal_ndim=1, normalized=False, onesided=False)
@@ -647,7 +647,7 @@ def spectral_pooling(x, pooling_number = 0):
         # axarr[2].plot(fftx_plt[0], 'o', label='fft')
 
         # x = torch.irfft(x, signal_ndim=1, normalized=True, onesided=True)
-        x = torch.fft.irfft(x, norm="forward")
+        x = np.fft.irfft(x, norm="forward")
         #if self.config["storing_acts"]:
         #    self.save_acts(x, "x_LA_ifft")
 
