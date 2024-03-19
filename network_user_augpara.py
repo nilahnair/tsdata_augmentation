@@ -944,12 +944,13 @@ class Network_User(object):
                              print(x_f.shape)
         
                              m =np.random.uniform(size=x_f.shape)
-                             print(m.shape)
+                             print('m shape {}'.format(m.shape))
                              amp = abs(x_f)
                              print('amp shape {}'.format(amp.shape))
                              index = amp.argsort(axis=2)[::-1]
                              print(index.shape)
                              dominant_mask = index > 2
+                             print(dominant_mask.shape)
                              m = np.bitwise_and(m,dominant_mask)
                              freal = x_f.real.masked_fill(m,0)
                              fimag = x_f.imag.masked_fill(m,0)
