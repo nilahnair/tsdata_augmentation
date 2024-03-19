@@ -556,7 +556,7 @@ def freq_mix(x,rate=0.5):
     print(m.shape)
     amp = abs(x_f)
     print('amp shape {}'.format(amp.shape))
-    index = amp.argsort(axis=1)[::-1]
+    index = amp.argsort(axis=2)[::-1]
     print(index.shape)
     dominant_mask = index > 2
     m = np.bitwise_and(m,dominant_mask)
