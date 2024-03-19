@@ -368,16 +368,21 @@ def __prepare_mbientlab__(path, split):
                     .transpose(column_names=__get_data_col_names__('mbientlab'))
     '''
     if self.half_dataset == True:
-        mean_values = pl.DataFrame([-0.54500987,  0.2359267,   0.41365014,  0.75939991,  0.45260669, -1.64541735,
-                                 0.0348056,   1.01229711, -0.15291412,  1.13933308,  1.25191319, -1.31139035,
-                                 -0.95371123, -0.13385367,  0.11866632,  0.07939548,  1.01893604,  0.37542043,
-                                 -0.56282943, -0.24623158,  0.4628526,  -0.93787543,  0.72026707,  0.42921303,
-                                 -0.28700185, -0.796151,   -0.22205536, -0.02801856,  0.42729555,  0.38405919]).transpose(column_names=__get_data_col_names__('mbientlab'))
-        std_values = pl.DataFrame([ 0.9961251,   0.55239004,  0.58403631, 59.58809613, 76.27589425, 78.0843988,
-                               0.82938303,  0.51172909,  0.58215739, 70.62313089, 86.24173266, 59.75094051,
-                               0.32797796,  0.22417789,  0.32213265, 40.91219229, 23.57650369, 18.51281435,
-                               0.45282034,  0.52099548,  0.45035532, 74.97293103, 76.47782082, 72.34254963,
-                               0.88575923,  0.49797133,  0.49598463, 37.95358771, 54.10728164, 60.13442281]).transpose(column_names=__get_data_col_names__('mbientlab'))
+        ids = {
+            'train':    ["S07", "S08"],
+            'val':      ["S11", "S12"],
+            'test':     ["S13", "S14"]
+            }
+        mean_values = pl.DataFrame([-0.503717766, 0.188054507, 0.479226948, 0.449298663, 0.625211039, -0.978823753,
+                                    0.035611225, 1.004233194, -0.140474441, 0.388258504, 0.017969134, -1.091376453,
+                                    -0.951142798, -0.143084672, 0.08722548, -0.152900813, 0.843425477, 0.330682448,
+                                    -0.553546376, -0.238370082, 0.465959529, -0.537973662, 0.601648677, 0.811599813,
+                                    -0.426852611, -0.667905869, -0.214780663, 0.05403048, 0.4209334, 0.179208588]).transpose(column_names=__get_data_col_names__('mbientlab'))
+        std_values = pl.DataFrame([ 0.442215514, 0.542314415, 0.444705607, 60.7252273, 74.30996485, 59.75919811,
+                                   0.394248664, 0.201944768, 0.247684111, 22.32055162, 51.95205036, 55.98131917,
+                                   0.159983328, 0.227631877, 0.316127019, 37.63787526, 20.05942273, 17.7025135,
+                                   0.452795267, 0.523671809, 0.437481135, 61.53426095, 78.80819335, 63.84203605,
+                                   0.786087635, 0.513288879, 0.332568531, 42.82558192, 46.462563, 56.11444557]).transpose(column_names=__get_data_col_names__('mbientlab'))
 
     else: 
         ids = {
@@ -812,9 +817,9 @@ def __prepare_sisfall__(path, split):
                          'SE06', 'SE07', 'SE08', 'SE09', 'SE10']
             }
         mean_values = pl.DataFrame([3.04515007, -221.43728873,  -37.43335154,   -8.27287361,   33.93140619,
-                                    -7.99068869,   -4.15529522, -863.85571455, -105.02726574]).transpose(column_names=__get_data_col_names__('motionsense'))
+                                    -7.99068869,   -4.15529522, -863.85571455, -105.02726574]).transpose(column_names=__get_data_col_names__('sisfall'))
         std_values = pl.DataFrame([74.36859033, 128.54189427, 112.10862744, 635.39393999, 461.98950427,
-                                   399.27897798, 287.28151142, 497.12335155, 457.45188691]).transpose(column_names=__get_data_col_names__('motionsense'))
+                                   399.27897798, 287.28151142, 497.12335155, 457.45188691]).transpose(column_names=__get_data_col_names__('sisfall'))
     else:
         mean_values = pl.DataFrame([2.127375,	-221.389032,	-34.440465,	-5.715684,	35.594734,	-7.504432,	-4.377009,	-867.128955,	-87.342661]).transpose(column_names=__get_data_col_names__('sisfall'))
         std_values  = pl.DataFrame([74.162487,	130.044887,	108.781505,	650.286619,	499.172359,	421.662805,	287.202157,	503.059895,	443.137327]).transpose(column_names=__get_data_col_names__('sisfall'))
@@ -894,9 +899,7 @@ def __prepare_sisfall__(path, split):
         pl.col('class_name').map_dict(activities_map).alias('class').cast(pl.Int32)
     )
     
-    if half_data==True:
-    
-    else:
+    if half_data==False:
         dfs_by_split = []
         for group_name, data in recordings.group_by(__get_separating_cols__(dataset_name='sisfall'), maintain_order=True):
             # subselect split first 70% for train, next 15% for val, next 15% for test
@@ -937,18 +940,17 @@ def __prepare_mobiact__(path, split):
     
     if self.half_dataset == True:
         ids = {
-            'train':    ['1', '2', '3', '4', '5', '16', '18', '19', '20', '21','36', '37', '38', '39', '40','47', '48', '49', '50','55', '56', '58', '59', '60','61', '62', '63'],
-            'val':      ['SA18', 'SA19', 'SE01', 'SE02'],
-            'test':     ['SA05', 'SA06', 'SA07', 'SA08', 'SA09', 'SA10', 
-                         'SA11', 'SA12', 'SA13', 'SA14', 
-                         'SA20', 'SA21', 'SA22', 'SA23', 'SE05', 
-                         'SE06', 'SE07', 'SE08', 'SE09', 'SE10']
+            'train':    ['1', '2', '3', '4', '5', '16', '18', '19', '36', '37', '38', '47', '48', '49', '50', '58', '59', '60','61', '62', '63'],
+            'val':      ['20', '21','39', '40','55', '56',],
+            'test':     [ '6', '7', '8', '9', '10','11', '12',  
+                         '22', '23', '24', '25', '26', '27', '29',
+                         '32', '33', '35', '41', '42', '43', '44', '45', '46',  
+                         '51', '52', '53', '54', '64', '65', '66', '67']
             }
         mean_values = pl.DataFrame([-0.106543690,  7.55363529,  0.515221591, -0.0318603071,
-                                    -0.00978048784,  0.0192607895,  179.035916, -71.5338154,
-                                    -0.493605015]).transpose(column_names=__get_data_col_names__('motionsense'))
+                                    -0.00978048784,  0.0192607895,  179.035916, -71.5338154, -0.493605015]).transpose(column_names=__get_data_col_names__('mobiact'))
         std_values = pl.DataFrame([ 3.18530934,   6.34963055,   3.34537117,   1.16675544,   1.10560823,
-                                   0.66171724, 107.29336703,  51.92894512,  15.70740516]).transpose(column_names=__get_data_col_names__('motionsense'))
+                                   0.66171724, 107.29336703,  51.92894512,  15.70740516]).transpose(column_names=__get_data_col_names__('mobiact'))
     else:
         # remove subjects
         all_files = list(filter(lambda p: not any(str(identity) in p.name.split('_')[1] for identity in [13, 14, 15, 17, 28, 30, 31, 34, 57]), all_files))
@@ -970,6 +972,11 @@ def __prepare_mobiact__(path, split):
     print(f'Parsing {len(all_files)} files...')
     recordings = []
     for i, file in enumerate(all_files):
+        if half_dataset == True:
+            # skip subjects according to split id list
+            if subject not in ids[split]:
+                continue 
+        
         class_name, subject, recording, _ = file.name.split('_')
 
         df = pl.read_csv(file)
@@ -990,23 +997,24 @@ def __prepare_mobiact__(path, split):
     recordings = recordings.with_columns(
         pl.col(class_col_name).map_dict(activities_map).alias('class').cast(pl.Int16)
     )
+    
+    if half_dataset==False:
+        dfs_by_split = []
+        for group_name, data in recordings.group_by(__get_separating_cols__(dataset_name='mobiact'), maintain_order=True):
+            # subselect split first 70% for train, next 15% for val, next 15% for test
+            total_rows = data.shape[0]
+            val_start_row = round(total_rows * 0.7)
+            test_start_row = round(total_rows * 0.85)
 
-    dfs_by_split = []
-    for group_name, data in recordings.group_by(__get_separating_cols__(dataset_name='mobiact'), maintain_order=True):
-        # subselect split first 70% for train, next 15% for val, next 15% for test
-        total_rows = data.shape[0]
-        val_start_row = round(total_rows * 0.7)
-        test_start_row = round(total_rows * 0.85)
+            match split:
+                case 'train':
+                    dfs_by_split.append(data[0:val_start_row])
+                case 'val':
+                    dfs_by_split.append(data[val_start_row:test_start_row])
+                case 'test':
+                    dfs_by_split.append(data[test_start_row:])
 
-        match split:
-            case 'train':
-                dfs_by_split.append(data[0:val_start_row])
-            case 'val':
-                dfs_by_split.append(data[val_start_row:test_start_row])
-            case 'test':
-                dfs_by_split.append(data[test_start_row:])
-
-    recordings = pl.concat(dfs_by_split, how='vertical')
+        recordings = pl.concat(dfs_by_split, how='vertical')
 
     # normalzation
     recordings = recordings.with_columns(

@@ -33,6 +33,7 @@ from har_dataset import HARDataset
 
 from metrics import Metrics
 from augmentations import get_augmentation
+from augmentations import *
 
 
 class Network_User(object):
@@ -821,6 +822,16 @@ class Network_User(object):
                 #         train_batch_l = harwindow_batched["label"]
 
                 train_batch_l = harwindow_batched["label"]
+                
+                if self.dtw_application == True and HARDataset.__random_apply__(self.augmentation_probabiblity):
+                    if self.dtw_aug == 'spawner':
+                        train_batch_v= spawner(train_batch_v, train_batch_l, sigma=0.05, verbose=0)
+                    elif self.dtw_aug == 'wdba':
+                        train_batch_v= wdba(train_batch_v, train_batch_l, batch_size=self.config['batch_size_train'], slope_constraint="symmetric", use_window=True, verbose=0)
+                    elif self.dtw_aug == 'random_guided_warp':
+                        train_batch_v= random_guided_warp(train_batch_v, train_batch_l, slope_constraint="symmetric", use_window=True, dtw_type="normal", verbose=0)
+                    elif self.dtw_aug == 'discriminative_guided_warp':
+                        train_batch_v= discriminative_guided_warp(train_batch_v, train_batch_l, batch_size= self.config['batch_size_train'], slope_constraint="symmetric", use_window=True, dtw_type="normal", use_variable_slice=True, verbose=0)
                 
                 # Adding gaussian noise
                 noise = self.normal.sample((train_batch_v.size()))

@@ -80,8 +80,15 @@ def my_config():
     reshape_input = False
     usage_modus = 'train'
     num_workers = 8
+    
+    ######new additions
     half_dataset = True
+    dtw_application = True
+    dtw_aug = 'spawner'
+    assert dtw_aug in ['spawner', 'wdba', 'random_guided_warp', 'discriminative_guided_warp'], 'dtw_aug is configured wrong'
 
+    ###############
+    
     name_counter = 0
     sacred = True
 
