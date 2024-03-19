@@ -550,10 +550,14 @@ def freq_mix(x,rate=0.5):
    
     #x_f = np.fft.rfft(x,dim=1)
     x_f = np.fft.rfft(x)
+    print(x_f.shape)
         
     m =np.random.uniform(x_f.shape) < rate
+    print(m.shape)
     amp = abs(x_f)
-    index = amp.argsort(axis=1)[:,:,::-1]
+    print('amp shape {}'.format(amp.shape))
+    index = amp.argsort(axis=1)[::-1]
+    print(index.shape)
     dominant_mask = index > 2
     m = np.bitwise_and(m,dominant_mask)
     freal = x_f.real.masked_fill(m,0)
