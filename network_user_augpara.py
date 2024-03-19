@@ -951,7 +951,7 @@ class Network_User(object):
                              print(index.shape)
                              dominant_mask = index > 2
                              print(dominant_mask.shape)
-                             m = np.bitwise_and(m,dominant_mask)
+                             m = np.bitwise_and(int(m),int(dominant_mask))
                              freal = x_f.real.masked_fill(m,0)
                              fimag = x_f.imag.masked_fill(m,0)
         
