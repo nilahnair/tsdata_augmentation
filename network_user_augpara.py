@@ -905,7 +905,7 @@ class Network_User(object):
         save_list=[]
         p=np.arange(0.01, 0.1, 0.02)
         #p=range(0, 2, 1)
-        with open('/data/nnair/icpr2024/augment_test/tilt_lstm_motionsense.csv', 'a') as myfile:
+        with open('/data/nnair/icpr2024/augment_test/freqmix_lstm_motionsense.csv', 'a') as myfile:
             for aug in p:
                 print('augmentation value')
                 print(aug)
@@ -936,59 +936,47 @@ class Network_User(object):
                         ret_b=np.zeros_like(test_batch_v)
                         #print('ret_b shape')
                         #print(ret_b.shape)
+                     
                         for k, pat in enumerate(test_batch_v):
-                            x = pat.reshape((1,test_batch_v.shape[3],test_batch_v.shape[2]))
-                            #print(x.shape)
-
-                            # Generate time points
-                            time_points = np.linspace(0, test_batch_v.shape[2], test_batch_v.shape[2])
-                            #print(time_points.shape)
-
-                            # Define the angle of rotation in degrees
-                            angle_degrees = aug  # Replace with the desired angle
-                            angle_radians = np.radians(angle_degrees)
-
-                            # Create the rotation matrix
-                            rotation_matrix = np.array([[np.cos(angle_radians), -np.sin(angle_radians)],
-                                                        	[np.sin(angle_radians), np.cos(angle_radians)]])
-
-                            # Initialize an array to store the rotated time-series
-                            rotated_array = np.zeros_like(x)
-
-                            # Rotate each time-series
-                            for j in range(test_batch_v.shape[3]):
-                                for i in range(test_batch_v.shape[2]):
-                                    #print('in loop')
-                                    #print(time_points.shape)
-                                    
-                                    point = np.array([time_points[i], x[0, j, i]])
-                                    #print(point.shape)
-                                    rotated_point = np.dot(rotation_matrix, point)
-                                    rotated_array[0, j, i] = rotated_point[1]
-
-                            # `rotated_array` now contains the rotated time-series.
-                            #return rotated_array
-
-                            # Initialize an array to store the normalized time-series
-                            normalized_array = np.zeros_like(rotated_array)
-
-                            # Normalize each time-series
-                            for j in range(test_batch_v.shape[3]):
-                                min_val = np.min(rotated_array[0, j, :])
-                                max_val = np.max(rotated_array[0, j, :])
+                             rate=0.5
+                             x_f = np.fft.rfft(pat)
+                             print(x_f.shape)
         
-                                # Check for the case where all values are the same (max_val = min_val)
-                                if max_val == min_val:
-                                    normalized_array[0, j, :] = 0  # or any constant value in [0, 1]
-                                else:
-                                    normalized_array[0, j, :] = (rotated_array[0, j, :] - min_val) / (max_val - min_val)
+                             m =np.random.uniform(x_f.shape) < rate
+                             print(m.shape)
+                             amp = abs(x_f)
+                             print('amp shape {}'.format(amp.shape))
+                             index = amp.argsort(axis=2)[::-1]
+                             print(index.shape)
+                             dominant_mask = index > 2
+                             m = np.bitwise_and(m,dominant_mask)
+                             freal = x_f.real.masked_fill(m,0)
+                             fimag = x_f.imag.masked_fill(m,0)
+        
+                             b_idx = np.arange(pat.shape[0])
+                             np.random.shuffle(b_idx)
+                             x2= pat[b_idx]
+                             #x2_f = np.fft.rfft(x2,dim=1)
+                             x2_f = np.fft.rfft(x2)
+
+                             m = np.bitwise_not(m)
+                             freal2 = x2_f.real.masked_fill(m,0)
+                             fimag2 = x2_f.imag.masked_fill(m,0)
+
+                             freal += freal2
+                             fimag += fimag2
+
+                             x_f = np.complex(freal,fimag)
+        
+                             #x = np.fft.irfft(x_f,dim=1)
+                             x = np.fft.irfft(x_f)
                                     
-                            #print('normalised shape')
-                            #print(normalized_array.shape)
-                            # `normalized_array` now contains the normalized time-series.
-                            p= normalized_array.reshape((1,test_batch_v.shape[2],test_batch_v.shape[3]))
-                            #print(p.shape)
-                            ret_b[k] = p
+                             #print('normalised shape')
+                             #print(normalized_array.shape)
+                             # `normalized_array` now contains the normalized time-series.
+                
+                             #print(p.shape)
+                             ret_b[k] = x
                         
                         test_batch_v=torch.as_tensor(ret_b)
                         
