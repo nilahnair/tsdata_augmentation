@@ -349,15 +349,7 @@ def __prepare_mbientlab__(path, split):
     label_files =    list(filter(lambda f: 'labels'     in str(f), all_files))
     files = list(zip(sample_files, label_files))
     
-    if self.half_dataset == True:
-        
-    else:
-        ids = {
-            'train':    ["S07", "S08", "S09", "S10"],
-            'val':      ["S11", "S12"],
-            'test':     ["S13", "S14"]
-            }
-
+    
     # for normalization later
     '''
     mean_values = pl.DataFrame([-0.6018319,   0.234877,    0.2998928,   1.11102944,  0.17661719, -1.41729978,
@@ -387,7 +379,12 @@ def __prepare_mbientlab__(path, split):
                                0.45282034,  0.52099548,  0.45035532, 74.97293103, 76.47782082, 72.34254963,
                                0.88575923,  0.49797133,  0.49598463, 37.95358771, 54.10728164, 60.13442281]).transpose(column_names=__get_data_col_names__('mbientlab'))
 
-    else:    
+    else: 
+        ids = {
+            'train':    ["S07", "S08", "S09", "S10"],
+            'val':      ["S11", "S12"],
+            'test':     ["S13", "S14"]
+            }
         mean_values = pl.DataFrame([-0.54500987,  0.2359267,   0.41365014,  0.75939991,  0.45260669, -1.64541735,
                                  0.0348056,   1.01229711, -0.15291412,  1.13933308,  1.25191319, -1.31139035,
                                  -0.95371123, -0.13385367,  0.11866632,  0.07939548,  1.01893604,  0.37542043,
@@ -674,6 +671,7 @@ def __prepare_mocap__(path, split):
 def __prepare_motionsense__(path, split):
     print(f'Preparing DataFrame for MotionSense {split}')
     all_files = sorted(Path(path).glob('**/*.csv'))
+    
     '''
     mean_values = pl.DataFrame([
         0.04213359,  0.75472223, -0.13882479,
@@ -686,11 +684,21 @@ def __prepare_motionsense__(path, split):
         0.32820886, 0.52756613, 0.37621195]). \
         transpose(column_names=__get_data_col_names__('motionsense'))
     '''
-    
-    mean_values = pl.DataFrame([0.76639554, 0.33924385, 0.78441527, 
+    if self.half_dataset == True:
+        ids = {
+            'train':    [1, 2, 3, 8, 9, 18, 19, 20, 21],
+            'val':      [10, 11, 12],
+            'test':     [4, 5, 6, 7, 13, 14, 15, 16, 17, 22, 23, 24]
+            }
+        mean_values = pl.DataFrame([0.98226758, 0.18443719, 0.99184777, 0.59551966, 0.59868517, 0.65062432,
+                                    0.50107564, 0.48792383, 0.49755016]).transpose(column_names=__get_data_col_names__('motionsense'))
+        std_values = pl.DataFrame([0.04111503, 0.09900084, 0.02008144, 0.03991415, 0.03838883, 0.05495882,
+                                   0.1780599,  0.17728579, 0.17757048]).transpose(column_names=__get_data_col_names__('motionsense'))
+    else:
+        mean_values = pl.DataFrame([0.76639554, 0.33924385, 0.78441527, 
                                 0.53088344, 0.5315443,  0.54900857,
                                 0.62962032, 0.55816487, 0.58608871]).transpose(column_names=__get_data_col_names__('motionsense'))
-    std_values = pl.DataFrame([0.25867806, 0.21371301, 0.25959621, 
+        std_values = pl.DataFrame([0.25867806, 0.21371301, 0.25959621, 
                                0.13331802, 0.12606953, 0.13749548,
                                0.21065503, 0.14886348, 0.17937903]).transpose(column_names=__get_data_col_names__('motionsense'))
 
@@ -702,34 +710,52 @@ def __prepare_motionsense__(path, split):
         [pl.col(c) + 2 * std_values[c]
             for c in set(mean_values.columns).intersection(std_values.columns)]
     )
-
+    
     print(f'Parsing {len(all_files)} files...')
     recordings = []
+    
     for i, file in enumerate(all_files):
-        subject = int(file.stem.split('_')[1])
-        class_name_full = str(file.parent.name)
-        class_name = class_name_full.split('_')[0]
+        # skip subjects according to split id list
+        if half_data==True:
+            if subject not in ids[split]:
+                continue
+            subject = int(file.stem.split('_')[1])
+            class_name_full = str(file.parent.name)
+            class_name = class_name_full.split('_')[0]
         
-        df = pl.read_csv(file)
-        df = df.drop("") # drop index col  because of duplicates
-        # add cls and subject cols
-        df = df.with_columns([
-            pl.lit(class_name_full).alias('class_name_full'),
-            pl.lit(class_name).alias('class_name'),
-            pl.lit(subject).alias('subject')
-        ])
-        # subselect split first 70% for train, next 15% for val, next 15% for test
-        total_rows = df.shape[0]
-        val_start_row = round(total_rows * 0.7)
-        test_start_row = round(total_rows * 0.85)
+            df = pl.read_csv(file)
+            df = df.drop("") # drop index col  because of duplicates
+            # add cls and subject cols
+            df = df.with_columns([
+                pl.lit(class_name_full).alias('class_name_full'),
+                pl.lit(class_name).alias('class_name'),
+                pl.lit(subject).alias('subject')
+                ])
+        else:
+            subject = int(file.stem.split('_')[1])
+            class_name_full = str(file.parent.name)
+            class_name = class_name_full.split('_')[0]
+        
+            df = pl.read_csv(file)
+            df = df.drop("") # drop index col  because of duplicates
+            # add cls and subject cols
+            df = df.with_columns([
+                pl.lit(class_name_full).alias('class_name_full'),
+                pl.lit(class_name).alias('class_name'),
+                pl.lit(subject).alias('subject')
+                ])
+            # subselect split first 70% for train, next 15% for val, next 15% for test
+            total_rows = df.shape[0]
+            val_start_row = round(total_rows * 0.7)
+            test_start_row = round(total_rows * 0.85)
 
-        match split:
-            case 'train':
-                df = df[0:val_start_row]
-            case 'val':
-                df = df[val_start_row:test_start_row]
-            case 'test':
-                df = df[test_start_row:]
+            match split:
+                case 'train':
+                    df = df[0:val_start_row]
+                case 'val':
+                    df = df[val_start_row:test_start_row]
+                case 'test':
+                    df = df[test_start_row:]
 
         df = df.with_columns([
             pl.lit(class_name).alias('class_name'),
@@ -775,8 +801,23 @@ def __prepare_sisfall__(path, split):
     # std_values  = pl.DataFrame([76.42413571, 133.73065249, 108.80401481, 664.20882435, 503.17930668, 417.85844231, 296.16101639, 517.27540723, 443.30238268]).transpose(column_names=__get_data_col_names__('sisfall'))
 
     #norm only by train
-    mean_values = pl.DataFrame([2.127375,	-221.389032,	-34.440465,	-5.715684,	35.594734,	-7.504432,	-4.377009,	-867.128955,	-87.342661]).transpose(column_names=__get_data_col_names__('sisfall'))
-    std_values  = pl.DataFrame([74.162487,	130.044887,	108.781505,	650.286619,	499.172359,	421.662805,	287.202157,	503.059895,	443.137327]).transpose(column_names=__get_data_col_names__('sisfall'))
+    if self.half_dataset == True:
+        ids = {
+            'train':    ['SA01','SA02', 'SA03', 'SA04','SA15', 'SA16', 'SA17', 
+                         'SE03', 'SE04','SE11', 'SE12', 'SE13', 'SE14', 'SE15'],
+            'val':      ['SA18', 'SA19', 'SE01', 'SE02'],
+            'test':     ['SA05', 'SA06', 'SA07', 'SA08', 'SA09', 'SA10', 
+                         'SA11', 'SA12', 'SA13', 'SA14', 
+                         'SA20', 'SA21', 'SA22', 'SA23', 'SE05', 
+                         'SE06', 'SE07', 'SE08', 'SE09', 'SE10']
+            }
+        mean_values = pl.DataFrame([3.04515007, -221.43728873,  -37.43335154,   -8.27287361,   33.93140619,
+                                    -7.99068869,   -4.15529522, -863.85571455, -105.02726574]).transpose(column_names=__get_data_col_names__('motionsense'))
+        std_values = pl.DataFrame([74.36859033, 128.54189427, 112.10862744, 635.39393999, 461.98950427,
+                                   399.27897798, 287.28151142, 497.12335155, 457.45188691]).transpose(column_names=__get_data_col_names__('motionsense'))
+    else:
+        mean_values = pl.DataFrame([2.127375,	-221.389032,	-34.440465,	-5.715684,	35.594734,	-7.504432,	-4.377009,	-867.128955,	-87.342661]).transpose(column_names=__get_data_col_names__('sisfall'))
+        std_values  = pl.DataFrame([74.162487,	130.044887,	108.781505,	650.286619,	499.172359,	421.662805,	287.202157,	503.059895,	443.137327]).transpose(column_names=__get_data_col_names__('sisfall'))
 
 
     min_df = mean_values.with_columns(
@@ -790,12 +831,22 @@ def __prepare_sisfall__(path, split):
     print(f'Parsing {len(all_files)} files...')
     recordings = []
     for i, file in enumerate(all_files):
-        class_name, subject, recording = file.stem.split('_')
-        subject = file.parent.name # override possible labeling error in SA15/D17_SE15...
-        # cls = int(class_name[1:]) # infer class at the end because of skipped activities
-        # subject = int(subject[2:])
-        #TODO: map subject name to number == identity label 
-        recording = int(recording[1:])
+        if half_data==True:
+            if subject not in ids[split]:
+                continue
+            class_name, subject, recording = file.stem.split('_')
+            subject = file.parent.name # override possible labeling error in SA15/D17_SE15...
+            # cls = int(class_name[1:]) # infer class at the end because of skipped activities
+            # subject = int(subject[2:])
+            #TODO: map subject name to number == identity label 
+            recording = int(recording[1:])
+        else:
+            class_name, subject, recording = file.stem.split('_')
+            subject = file.parent.name # override possible labeling error in SA15/D17_SE15...
+            # cls = int(class_name[1:]) # infer class at the end because of skipped activities
+            # subject = int(subject[2:])
+            #TODO: map subject name to number == identity label 
+            recording = int(recording[1:])
 
         df = pl.read_csv(
             file,
@@ -842,23 +893,26 @@ def __prepare_sisfall__(path, split):
     recordings = recordings.with_columns(
         pl.col('class_name').map_dict(activities_map).alias('class').cast(pl.Int32)
     )
+    
+    if half_data==True:
+    
+    else:
+        dfs_by_split = []
+        for group_name, data in recordings.group_by(__get_separating_cols__(dataset_name='sisfall'), maintain_order=True):
+            # subselect split first 70% for train, next 15% for val, next 15% for test
+            total_rows = data.shape[0]
+            val_start_row = round(total_rows * 0.7)
+            test_start_row = round(total_rows * 0.85)
 
-    dfs_by_split = []
-    for group_name, data in recordings.group_by(__get_separating_cols__(dataset_name='sisfall'), maintain_order=True):
-        # subselect split first 70% for train, next 15% for val, next 15% for test
-        total_rows = data.shape[0]
-        val_start_row = round(total_rows * 0.7)
-        test_start_row = round(total_rows * 0.85)
+            match split:
+                case 'train':
+                    dfs_by_split.append(data[0:val_start_row])
+                case 'val':
+                    dfs_by_split.append(data[val_start_row:test_start_row])
+                case 'test':
+                    dfs_by_split.append(data[test_start_row:])
 
-        match split:
-            case 'train':
-                dfs_by_split.append(data[0:val_start_row])
-            case 'val':
-                dfs_by_split.append(data[val_start_row:test_start_row])
-            case 'test':
-                dfs_by_split.append(data[test_start_row:])
-
-    recordings = pl.concat(dfs_by_split, how='vertical')
+        recordings = pl.concat(dfs_by_split, how='vertical')
 
     # normalzation
     recordings = recordings.with_columns(
@@ -880,14 +934,29 @@ def __prepare_mobiact__(path, split):
     # keep only:
     all_activities = ['STD', 'WAL', 'JOG', 'JUM', 'STU', 'STN', 'SCH', 'CSI', 'CSO']
     all_files = filter(lambda p: any(activity in str(p.parent) for activity in all_activities), all_files)
+    
+    if self.half_dataset == True:
+        ids = {
+            'train':    ['1', '2', '3', '4', '5', '16', '18', '19', '20', '21','36', '37', '38', '39', '40','47', '48', '49', '50','55', '56', '58', '59', '60','61', '62', '63'],
+            'val':      ['SA18', 'SA19', 'SE01', 'SE02'],
+            'test':     ['SA05', 'SA06', 'SA07', 'SA08', 'SA09', 'SA10', 
+                         'SA11', 'SA12', 'SA13', 'SA14', 
+                         'SA20', 'SA21', 'SA22', 'SA23', 'SE05', 
+                         'SE06', 'SE07', 'SE08', 'SE09', 'SE10']
+            }
+        mean_values = pl.DataFrame([-0.106543690,  7.55363529,  0.515221591, -0.0318603071,
+                                    -0.00978048784,  0.0192607895,  179.035916, -71.5338154,
+                                    -0.493605015]).transpose(column_names=__get_data_col_names__('motionsense'))
+        std_values = pl.DataFrame([ 3.18530934,   6.34963055,   3.34537117,   1.16675544,   1.10560823,
+                                   0.66171724, 107.29336703,  51.92894512,  15.70740516]).transpose(column_names=__get_data_col_names__('motionsense'))
+    else:
+        # remove subjects
+        all_files = list(filter(lambda p: not any(str(identity) in p.name.split('_')[1] for identity in [13, 14, 15, 17, 28, 30, 31, 34, 57]), all_files))
 
-    # remove subjects
-    all_files = list(filter(lambda p: not any(str(identity) in p.name.split('_')[1] for identity in [13, 14, 15, 17, 28, 30, 31, 34, 57]), all_files))
-
-    mean_values = pl.DataFrame([ 0.240851623,  7.13644628,  0.373189246, 
+        mean_values = pl.DataFrame([ 0.240851623,  7.13644628,  0.373189246, 
                                 -0.0232327440, -0.00395112804,  0.0136019672,  
                                 179.498688, -67.9060605,  1.90372102]).transpose(column_names=__get_data_col_names__('mobiact'))
-    std_values  = pl.DataFrame([ 3.4748497,    6.7072082,    3.2804421,    
+        std_values  = pl.DataFrame([ 3.4748497,    6.7072082,    3.2804421,    
                                 1.11511935,   1.11383806, 0.71638005,
                                  105.66588754,  58.62028255,  17.53491985]).transpose(column_names=__get_data_col_names__('mobiact'))
 
