@@ -638,10 +638,11 @@ def spectral_pooling(x, pooling_number = 0):
         # axarr[1].plot(fft_plt[0], 'o', label='fft')
 
         #x = fft[:, :, :, :int(fft.shape[3] / 2)]
-        x = fft[ :, :, :int(math.ceil(fft.shape[2]))]
+        #x = fft[ :, :, :int(math.ceil(fft.shape[2])//2)]
+        fft[:, :, int(math.ceil(fft.shape[2] // 2)) :  ] *= 0
+        x=fft
         #if self.config["storing_acts"]:
         #    self.save_acts(x, "x_LA_fft_2")
-
         # fftx_plt = x[0, 0].to("cpu", torch.double).detach()
         # fftx_plt = torch.norm(fftx_plt, dim=2)
         # axarr[2].plot(fftx_plt[0], 'o', label='fft')

@@ -719,36 +719,26 @@ def __prepare_motionsense__(path, split):
     print(f'Parsing {len(all_files)} files...')
     recordings = []
     
+    subject = int(file.stem.split('_')[1])
+    class_name_full = str(file.parent.name)
+    class_name = class_name_full.split('_')[0]
     for i, file in enumerate(all_files):
         # skip subjects according to split id list
         if half_data==True:
             if subject not in ids[split]:
                 continue
-            subject = int(file.stem.split('_')[1])
-            class_name_full = str(file.parent.name)
-            class_name = class_name_full.split('_')[0]
+         
         
-            df = pl.read_csv(file)
-            df = df.drop("") # drop index col  because of duplicates
-            # add cls and subject cols
-            df = df.with_columns([
-                pl.lit(class_name_full).alias('class_name_full'),
-                pl.lit(class_name).alias('class_name'),
-                pl.lit(subject).alias('subject')
-                ])
-        else:
-            subject = int(file.stem.split('_')[1])
-            class_name_full = str(file.parent.name)
-            class_name = class_name_full.split('_')[0]
         
-            df = pl.read_csv(file)
-            df = df.drop("") # drop index col  because of duplicates
-            # add cls and subject cols
-            df = df.with_columns([
-                pl.lit(class_name_full).alias('class_name_full'),
-                pl.lit(class_name).alias('class_name'),
-                pl.lit(subject).alias('subject')
-                ])
+        df = pl.read_csv(file)
+        df = df.drop("") # drop index col  because of duplicates
+        # add cls and subject cols
+        df = df.with_columns([
+            pl.lit(class_name_full).alias('class_name_full'),
+            pl.lit(class_name).alias('class_name'),
+            pl.lit(subject).alias('subject')
+            ])
+        if half_data==False:
             # subselect split first 70% for train, next 15% for val, next 15% for test
             total_rows = df.shape[0]
             val_start_row = round(total_rows * 0.7)
@@ -835,23 +825,17 @@ def __prepare_sisfall__(path, split):
 
     print(f'Parsing {len(all_files)} files...')
     recordings = []
+    class_name, subject, recording = file.stem.split('_')
+    subject = file.parent.name # override possible labeling error in SA15/D17_SE15...
     for i, file in enumerate(all_files):
         if half_data==True:
             if subject not in ids[split]:
                 continue
-            class_name, subject, recording = file.stem.split('_')
-            subject = file.parent.name # override possible labeling error in SA15/D17_SE15...
-            # cls = int(class_name[1:]) # infer class at the end because of skipped activities
-            # subject = int(subject[2:])
-            #TODO: map subject name to number == identity label 
-            recording = int(recording[1:])
-        else:
-            class_name, subject, recording = file.stem.split('_')
-            subject = file.parent.name # override possible labeling error in SA15/D17_SE15...
-            # cls = int(class_name[1:]) # infer class at the end because of skipped activities
-            # subject = int(subject[2:])
-            #TODO: map subject name to number == identity label 
-            recording = int(recording[1:])
+            
+        # cls = int(class_name[1:]) # infer class at the end because of skipped activities
+        # subject = int(subject[2:])
+        #TODO: map subject name to number == identity label 
+        recording = int(recording[1:])
 
         df = pl.read_csv(
             file,
@@ -953,7 +937,7 @@ def __prepare_mobiact__(path, split):
                                    0.66171724, 107.29336703,  51.92894512,  15.70740516]).transpose(column_names=__get_data_col_names__('mobiact'))
     else:
         # remove subjects
-        all_files = list(filter(lambda p: not any(str(identity) in p.name.split('_')[1] for identity in [13, 14, 15, 17, 28, 30, 31, 34, 57]), all_files))
+       
 
         mean_values = pl.DataFrame([ 0.240851623,  7.13644628,  0.373189246, 
                                 -0.0232327440, -0.00395112804,  0.0136019672,  
@@ -961,7 +945,8 @@ def __prepare_mobiact__(path, split):
         std_values  = pl.DataFrame([ 3.4748497,    6.7072082,    3.2804421,    
                                 1.11511935,   1.11383806, 0.71638005,
                                  105.66588754,  58.62028255,  17.53491985]).transpose(column_names=__get_data_col_names__('mobiact'))
-
+        
+     all_files = list(filter(lambda p: not any(str(identity) in p.name.split('_')[1] for identity in [13, 14, 15, 17, 28, 30, 31, 34, 57]), all_files))
     min_df = mean_values.with_columns(
         [pl.col(c) - 2 * std_values[c] for c in set(mean_values.columns).intersection(std_values.columns)]
     )
@@ -971,13 +956,13 @@ def __prepare_mobiact__(path, split):
 
     print(f'Parsing {len(all_files)} files...')
     recordings = []
+    class_name, subject, recording, _ = file.name.split('_')
     for i, file in enumerate(all_files):
         if half_dataset == True:
             # skip subjects according to split id list
             if subject not in ids[split]:
                 continue 
-        
-        class_name, subject, recording, _ = file.name.split('_')
+    
 
         df = pl.read_csv(file)
         df = df.with_columns([
