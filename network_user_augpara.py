@@ -939,7 +939,7 @@ class Network_User(object):
                      
                         for k, pat in enumerate(test_batch_v):
                              rate=0.5
-                             x_f = np.fft.rfft(pat)
+                             x_f = np.fft.rfft(pat, axis=1)
                              print(x_f.shape)
         
                              m =np.random.uniform(x_f.shape) < rate
