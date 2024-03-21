@@ -27,6 +27,7 @@ from har_dataset import HARDataset
 from network import Network
 
 from torch.utils.tensorboard import SummaryWriter
+import yaml
 
 model_names = sorted(name for name in models.__dict__
     if name.islower() and not name.startswith("__")
@@ -77,7 +78,7 @@ parser.add_argument('--dist-url', default='tcp://224.66.41.62:23456', type=str,
                     help='url used to set up distributed training')
 parser.add_argument('--dist-backend', default='nccl', type=str,
                     help='distributed backend')
-parser.add_argument('--seed', default=42, type=int,
+parser.add_argument('--seed', default=None, type=int,
                     help='seed for initializing training. ')
 parser.add_argument('--gpu', default=0, type=int,
                     help='GPU id to use.')
@@ -161,8 +162,8 @@ def main():
     criterion = nn.CosineSimilarity(dim=1).cuda(args.gpu)
 
     if args.fix_pred_lr:
-        optim_params = [{'params': model.module.encoder.parameters(), 'fix_lr': False},
-                        {'params': model.module.predictor.parameters(), 'fix_lr': True}]
+        optim_params = [{'params': model.encoder.parameters(), 'fix_lr': False},
+                        {'params': model.predictor.parameters(), 'fix_lr': True}]
     else:
         optim_params = model.parameters()
 
@@ -239,6 +240,8 @@ def main():
         global_step = 0
 
     writer.add_hparams(hparam_dict=vars(args), metric_dict={})
+    with open(os.path.join(args.output_dir, 'config.yaml'), 'w') as cfile:
+        yaml.dump(vars(args), cfile, default_flow_style=False)
 
     for epoch in range(args.start_epoch, args.epochs):
         adjust_learning_rate(optimizer, init_lr, epoch, args)
@@ -317,6 +320,9 @@ def main():
             }, is_best=False,
                 filename=save_path)
 
+            save_path = f'encoder_{epoch:04d}.pth.tar' 
+            if args.output_dir != None:
+                save_path = os.path.join(args.output_dir, save_path)
             save_checkpoint({
                 'epoch': epoch + 1,
                 'arch': args.arch,
@@ -325,7 +331,7 @@ def main():
                 'state_dict': model.encoder.state_dict(),
                 'config': vars(args)
             }, is_best=False,
-                filename=f'encoder_{epoch:04d}.pth.tar')
+                filename=save_path)
 
     save_path = f'encoder.pth.tar' 
     if args.output_dir != None:
