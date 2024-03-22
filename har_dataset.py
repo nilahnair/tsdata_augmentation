@@ -7,7 +7,7 @@ import numpy as np
 import inspect
 
 class HARDataset(Dataset):
-    def __init__(self, path, dataset_name = 'mbientlab', window_length = 200, window_stride = 25, split = 'train', transform = None, target_transform = None, augmenation_probability = 0):
+    def __init__(self, path, dataset_name = 'mbientlab', window_length = 200, window_stride = 25, split = 'train', transform = None, target_transform = None, augmenation_probability = 0, half_dataset = False):
         self.path = path
         self.dataset_name = dataset_name
         self.window_length = window_length
