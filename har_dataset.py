@@ -16,6 +16,8 @@ class HARDataset(Dataset):
         self.transform = transform
         self.target_transform = target_transform
         self.augmentation_probabiblity = augmenation_probability
+        self.half_dataset = half_dataset
+        
 
         self.recordings = __prepare_dataframe__(self.path, self.dataset_name, self.split).with_row_count()
 

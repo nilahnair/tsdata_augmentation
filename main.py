@@ -82,8 +82,8 @@ def my_config():
     num_workers = 8
     
     ######new additions
-    half_dataset = True
-    dtw_application = True
+    half_dataset = False
+    dtw_application = False
     dtw_aug = 'spawner'
     assert dtw_aug in ['spawner', 'wdba', 'random_guided_warp', 'discriminative_guided_warp'], 'dtw_aug is configured wrong'
 
