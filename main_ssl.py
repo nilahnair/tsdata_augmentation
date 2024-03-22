@@ -229,6 +229,7 @@ def main():
         train_dataset,
         batch_size=args.batch_size,
         num_workers=args.num_workers,
+        persistent_workers=True,
         shuffle=True,
         drop_last=True)
 

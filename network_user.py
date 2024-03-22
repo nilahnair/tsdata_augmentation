@@ -623,6 +623,7 @@ class Network_User(object):
             harwindows_train,
             batch_size=self.config['batch_size_train'],
             num_workers=self.config.get('num_workers', 0), # get num_workers if present, else 0
+            persistent_workers=True,
             shuffle=True)
 
         # determine modulo value for logging
