@@ -125,16 +125,25 @@ def slicing(data):
     # Initialize an array to store the normalized time-series
     normalized_array = np.zeros_like(stretched_data)
 
-    # Normalize each time-series
-    for j in range(time_points):
-        min_val = np.min(stretched_data[0, j, :])
-        max_val = np.max(stretched_data[0, j, :])
+    # # Normalize each time-series
+    # for j in range(sensor):
+    #     min_val = np.min(stretched_data[0, :, j])
+    #     max_val = np.max(stretched_data[0, :, j])
         
-        # Check for the case where all values are the same (max_val = min_val)
-        if max_val == min_val:
-            normalized_array[0, j, :] = 0  # or any constant value in [0, 1]
-        else:
-            normalized_array[0, j, :] = (stretched_data[0, j, :] - min_val) / (max_val - min_val)
+    #     # Check for the case where all values are the same (max_val = min_val)
+    #     if max_val == min_val:
+    #         normalized_array[0, :, j] = 0  # or any constant value in [0, 1]
+    #     else:
+    #         normalized_array[0, :, j] = (stretched_data[0, :, j] - min_val) / (max_val - min_val)
+
+    # Faster implementation without for loops
+    min_arr = np.min(stretched_data, axis=1)[:, None] # max over channels for all times, add dimension at the center, 1x1x9
+    max_arr = np.max(stretched_data, axis=1)[:, None]
+    diff_arr = max_arr - min_arr
+
+    normalized_array = stretched_data - min_arr
+    normalized_array = np.divide(normalized_array, diff_arr, out=np.zeros_like(normalized_array), where=diff_arr!=0)
+
 
     # `normalized_array` now contains the normalized time-series.
     return normalized_array
@@ -215,7 +224,8 @@ def tilt(x):
     time_points = np.linspace(0, 199, length)
 
     # Define the angle of rotation in degrees
-    angle_degrees = 0.02  # Replace with the desired angle
+    max_angle_degrees = 0.02  # Replace with the desired angle
+    angle_degrees = np.random.uniform(-max_angle_degrees, max_angle_degrees)
     angle_radians = np.radians(angle_degrees)
 
     # Create the rotation matrix
@@ -225,29 +235,42 @@ def tilt(x):
     # Initialize an array to store the rotated time-series
     rotated_array = np.zeros_like(x)
 
-    # Rotate each time-series
+    # # Rotate each time-series
+    # for j in range(channel):
+    #     for i in range(length):
+    #         point = np.array([time_points[i], x[0, j, i]])
+    #         rotated_point = np.dot(rotation_matrix, point)
+    #         rotated_array[0, j, i] = rotated_point[1]
+
     for j in range(channel):
-        for i in range(length):
-            point = np.array([time_points[i], x[0, j, i]])
-            rotated_point = np.dot(rotation_matrix, point)
-            rotated_array[0, j, i] = rotated_point[1]
+        vals = x[0, j, :]
+        points = np.hstack((time_points[:, None], vals[:, None]))
+        rotated_array[0, j] = np.dot(rotation_matrix, points.T)[1]
 
     # `rotated_array` now contains the rotated time-series.
     #return rotated_array
 
     # Initialize an array to store the normalized time-series
-    normalized_array = np.zeros_like(rotated_array)
+    # normalized_array = np.zeros_like(rotated_array)
 
     # Normalize each time-series
-    for j in range(channel):
-        min_val = np.min(rotated_array[0, j, :])
-        max_val = np.max(rotated_array[0, j, :])
+    # for j in range(channel):
+    #     min_val = np.min(rotated_array[0, j, :])
+    #     max_val = np.max(rotated_array[0, j, :])
         
-        # Check for the case where all values are the same (max_val = min_val)
-        if max_val == min_val:
-            normalized_array[0, j, :] = 0  # or any constant value in [0, 1]
-        else:
-            normalized_array[0, j, :] = (rotated_array[0, j, :] - min_val) / (max_val - min_val)
+    #     # Check for the case where all values are the same (max_val = min_val)
+    #     if max_val == min_val:
+    #         normalized_array[0, j, :] = 0  # or any constant value in [0, 1]
+    #     else:
+    #         normalized_array[0, j, :] = (rotated_array[0, j, :] - min_val) / (max_val - min_val)
+
+    # with numpy instead of loop
+    min_arr = np.min(rotated_array, axis=2)[..., None] # max over channels for all times, add dimension at the center, 1x1x9
+    max_arr = np.max(rotated_array, axis=2)[..., None]
+    diff_arr = max_arr - min_arr
+
+    normalized_array = rotated_array - min_arr
+    normalized_array = np.divide(normalized_array, diff_arr, out=np.zeros_like(normalized_array), where=diff_arr!=0)
 
     # `normalized_array` now contains the normalized time-series.
     return normalized_array.reshape((1,length,channel))
