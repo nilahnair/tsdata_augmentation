@@ -17,7 +17,7 @@ def get_augmentation(augmentation):
 # Augmentations start here
 
 # Working
-def jittering(x, sigma = 0.08): #0.03
+def jittering(x, sigma = 0.03):
     #using this
     # https://arxiv.org/pdf/1706.00527.pdf
     return x + np.random.normal(loc=0., scale=sigma, size=x.shape)
@@ -26,7 +26,7 @@ def jittering(x, sigma = 0.08): #0.03
 def scaling(x):
     #using this
     # https://arxiv.org/pdf/1706.00527.pdf
-    sigma= 0.06  #0.04
+    sigma= 0.04
     factor = np.random.normal(loc=1., scale=sigma, size=(x.shape[0],x.shape[2])) #TODO: check if indices are the right ones
     augmentedData = np.multiply(x, factor[:,np.newaxis,:])
     return augmentedData
@@ -41,7 +41,7 @@ def flipping(x):
 def magnitude_warping(x):
     #using this
     from scipy.interpolate import CubicSpline
-    sigma = 0.2 #0.1
+    sigma = 0.1
     knot = 4
     orig_steps = np.arange(x.shape[1])
     
@@ -56,7 +56,7 @@ def magnitude_warping(x):
 # Working
 def permutation(x):
     #using this
-    max_segments=10 #5
+    max_segments=5
     seg_mode="equal"
     
     orig_steps = np.arange(x.shape[1])
@@ -91,7 +91,7 @@ def slicing(data):
     Returns:
     - numpy.ndarray: The augmented data array of shape (1, 200, 126).
     """
-    slice_fraction=0.25 #0.5
+    slice_fraction=0.5
 
     # # Validate the shape of the data
     # if data.shape != (1, 200, 126):
@@ -172,7 +172,7 @@ def slicing(data):
 def time_warping(x):
     #using this
     from scipy.interpolate import CubicSpline
-    sigma = 1.5 #0.06
+    sigma = 0.6
     knot = 4
     orig_steps = np.arange(x.shape[1])
     
@@ -191,7 +191,7 @@ def time_warping(x):
 # Working
 def window_warping(x):
     # https://halshs.archives-ouvertes.fr/halshs-01357973/document
-    window_ratio= 0.5 #0.2
+    window_ratio= 0.2
     scales=[0.5, 2.]
     channel=x.shape[2]
     length=x.shape[1]
@@ -631,7 +631,7 @@ def resampling_random(x):
     return x_selected
 
 def magnify(x):
-    lam = np.random.randint(8,18)/10 #(11,14)
+    lam = np.random.randint(11,14)/10 #(11,14)
     return np.multiply(x,lam)
 
 def spectral_pooling(x, pooling_number = 0):
