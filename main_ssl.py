@@ -129,7 +129,7 @@ def main():
     # logic to load backbone
     encoder_config = {
         'reshape_input': False, #fixed
-        'sliding_window_length': 200,
+        'sliding_window_length': 100 if args.dataset == 'mbientlab' and args.arch != 'cnn_transformer' else 200,
         'fully_convolutional': 'FC', #fixed
         'filter_size': 5, #fixed
         'num_filters': 64, #fixed
@@ -223,7 +223,7 @@ def main():
     train_dataset = HARDataset(
         path=dataset_root_defaults[args.dataset],
         dataset_name=args.dataset,
-        window_length=100 if args.dataset == 'mbientlab' and args.arch != 'cnn_transformer' else 200,
+        window_length=encoder_config['sliding_window_length'],
         window_stride=sliding_window_step_defaults[args.dataset],
         transform=TwoCropsTransform(augmentation),
         augmenation_probability=1.0,
