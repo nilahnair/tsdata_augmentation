@@ -260,8 +260,8 @@ def spawner(x, labels, sigma=0.05, verbose=0):
     # use verbose=1 to print out figures
     
     
-    random_points = np.random.randint(low=1, high=x.shape[1]-1, size=x.shape[0])
-    window = np.ceil(x.shape[1] / 10.).astype(int)
+    random_points = np.random.randint(low=1, high=x.shape[2]-1, size=x.shape[0])
+    window = np.ceil(x.shape[2] / 10.).astype(int)
     orig_steps = np.arange(x.shape[1])
     l = np.argmax(labels, axis=1) if labels.ndim > 1 else labels
     
@@ -354,7 +354,7 @@ def wdba(x, labels, batch_size=6, slope_constraint="symmetric", use_window=True,
     # use verbose = -1 to turn off warnings    
     # slope_constraint is for DTW. "symmetric" or "asymmetric"
     
-    import utils.dtw as dtw
+    #import utils.dtw as dtw
     
     if use_window:
         window = np.ceil(x.shape[1] / 10.).astype(int)
@@ -415,7 +415,7 @@ def random_guided_warp(x, labels, slope_constraint="symmetric", use_window=True,
     # slope_constraint is for DTW. "symmetric" or "asymmetric"
     # dtw_type is for shapeDTW or DTW. "normal" or "shape"
     
-    import utils.dtw as dtw
+    #import utils.dtw as dtw
     
     if use_window:
         window = np.ceil(x.shape[1] / 10.).astype(int)
@@ -457,7 +457,7 @@ def discriminative_guided_warp(x, labels, batch_size=6, slope_constraint="symmet
     # slope_constraint is for DTW. "symmetric" or "asymmetric"
     # dtw_type is for shapeDTW or DTW. "normal" or "shape"
     
-    import utils.dtw as dtw
+    #import utils.dtw as dtw
     
     if use_window:
         window = np.ceil(x.shape[1] / 10.).astype(int)
