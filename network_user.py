@@ -1,3 +1,6 @@
+
+
+
 '''
 Created on May 17, 2019
 
@@ -824,7 +827,7 @@ class Network_User(object):
 
                 train_batch_l = harwindow_batched["label"]
                 
-                if self.config["dtw_application"] == True and __random_apply__(self.config["augmentation_probabiblity"]):
+                if self.config["dtw_application"] == True and __random_apply__(self.config['augmentation_probability']): 
                     if self.config["dtw_aug"] == 'spawner':
                         train_batch_v= aug.spawner(train_batch_v, train_batch_l, sigma=0.05, verbose=0)
                     elif self.config["dtw_aug"] == 'wdba':
