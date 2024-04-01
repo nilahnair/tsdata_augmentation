@@ -357,7 +357,7 @@ def wdba(x, labels, batch_size=6, slope_constraint="symmetric", use_window=True,
     #import utils.dtw as dtw
     
     if use_window:
-        window = np.ceil(x.shape[1] / 10.).astype(int)
+        window = np.ceil(x.shape[2] / 10.).astype(int)
     else:
         window = None
     orig_steps = np.arange(x.shape[1])
@@ -418,10 +418,10 @@ def random_guided_warp(x, labels, slope_constraint="symmetric", use_window=True,
     #import utils.dtw as dtw
     
     if use_window:
-        window = np.ceil(x.shape[1] / 10.).astype(int)
+        window = np.ceil(x.shape[2] / 10.).astype(int)
     else:
         window = None
-    orig_steps = np.arange(x.shape[1])
+    orig_steps = np.arange(x.shape[2])
     l = np.argmax(labels, axis=1) if labels.ndim > 1 else labels
     
     ret = np.zeros_like(x)
@@ -440,9 +440,9 @@ def random_guided_warp(x, labels, slope_constraint="symmetric", use_window=True,
                 path = dtw.dtw(random_prototype, pat, dtw.RETURN_PATH, slope_constraint=slope_constraint, window=window)
                             
             # Time warp
-            warped = pat[path[1]]
-            for dim in range(x.shape[2]):
-                ret[i,:,dim] = np.interp(orig_steps, np.linspace(0, x.shape[1]-1., num=warped.shape[0]), warped[:,dim]).T
+            warped = pat[path[2]]
+            for dim in range(x.shape[3]):
+                ret[i,:,dim] = np.interp(orig_steps, np.linspace(0, x.shape[2]-1., num=warped.shape[0]), warped[:,dim]).T
         else:
             if verbose > -1:
                 print("There is only one pattern of class %d, skipping timewarping"%l[i])
@@ -460,10 +460,10 @@ def discriminative_guided_warp(x, labels, batch_size=6, slope_constraint="symmet
     #import utils.dtw as dtw
     
     if use_window:
-        window = np.ceil(x.shape[1] / 10.).astype(int)
+        window = np.ceil(x.shape[2] / 10.).astype(int)
     else:
         window = None
-    orig_steps = np.arange(x.shape[1])
+    orig_steps = np.arange(x.shape[2])
     l = np.argmax(labels, axis=1) if labels.ndim > 1 else labels
     
     positive_batch = np.ceil(batch_size / 2).astype(int)
@@ -508,11 +508,11 @@ def discriminative_guided_warp(x, labels, batch_size=6, slope_constraint="symmet
                 path = dtw.dtw(positive_prototypes[selected_id], pat, dtw.RETURN_PATH, slope_constraint=slope_constraint, window=window)
                    
             # Time warp
-            warped = pat[path[1]]
-            warp_path_interp = np.interp(orig_steps, np.linspace(0, x.shape[1]-1., num=warped.shape[0]), path[1])
+            warped = pat[path[2]]
+            warp_path_interp = np.interp(orig_steps, np.linspace(0, x.shape[2]-1., num=warped.shape[0]), path[1])
             warp_amount[i] = np.sum(np.abs(orig_steps-warp_path_interp))
             for dim in range(x.shape[2]):
-                ret[i,:,dim] = np.interp(orig_steps, np.linspace(0, x.shape[1]-1., num=warped.shape[0]), warped[:,dim]).T
+                ret[i,:,dim] = np.interp(orig_steps, np.linspace(0, x.shape[2]-1., num=warped.shape[0]), warped[:,dim]).T
         else:
             if verbose > -1:
                 print("There is only one pattern of class %d"%l[i])
