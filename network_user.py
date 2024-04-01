@@ -30,6 +30,7 @@ from network import Network
 
 from HARWindows import HARWindows
 from har_dataset import HARDataset
+from har_dataset import __random_apply__
 
 from metrics import Metrics
 from augmentations import get_augmentation
@@ -823,7 +824,7 @@ class Network_User(object):
 
                 train_batch_l = harwindow_batched["label"]
                 
-                if self.config["dtw_application"] == True and HARDataset.__random_apply__(self.config["augmentation_probabiblity"]):
+                if self.config["dtw_application"] == True and __random_apply__(self.config["augmentation_probabiblity"]):
                     if self.config["dtw_aug"] == 'spawner':
                         train_batch_v= aug.spawner(train_batch_v, train_batch_l, sigma=0.05, verbose=0)
                     elif self.config["dtw_aug"] == 'wdba':
