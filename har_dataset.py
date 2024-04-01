@@ -738,9 +738,9 @@ def __prepare_motionsense__(path, split, half_dataset):
 
         match split:
             case 'train':
-                if half_data==True and subject in ids:
+                if half_dataset==True and subject in ids:
                     df = df[0:val_start_row]
-                elif half_data==False:
+                elif half_dataset==False:
                     df = df[0:val_start_row]
             case 'val':
                 df = df[val_start_row:test_start_row]
@@ -878,9 +878,9 @@ def __prepare_sisfall__(path, split, half_dataset):
         subject=group_name[1]
         match split:
             case 'train':
-                if half_data==True and subject in ids:
+                if half_dataset==True and subject in ids:
                     dfs_by_split.append(data[0:val_start_row])
-                elif half_data==False:
+                elif half_dataset==False:
                     dfs_by_split.append(data[0:val_start_row])
             case 'val':
                 dfs_by_split.append(data[val_start_row:test_start_row])
@@ -970,9 +970,9 @@ def __prepare_mobiact__(path, split, half_dataset):
         subject= group_name[1]
         match split:
             case 'train':
-                if half_data==True and subject in ids:
+                if half_dataset==True and subject in ids:
                     dfs_by_split.append(data[0:val_start_row])
-                elif half_data==False:
+                elif half_dataset==False:
                     dfs_by_split.append(data[0:val_start_row])
             case 'val':
                 dfs_by_split.append(data[val_start_row:test_start_row])
