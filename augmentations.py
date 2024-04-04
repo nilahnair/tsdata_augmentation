@@ -267,6 +267,7 @@ def spawner(x, labels, sigma=0.05, verbose=0):
     
     ret = np.zeros_like(x)
     for i, pat in enumerate(tqdm(x)):
+    
         # guarentees that same one isnt selected
         choices = np.delete(np.arange(x.shape[0]), i)
         # remove ones of different classes
@@ -360,7 +361,7 @@ def wdba(x, labels, batch_size=6, slope_constraint="symmetric", use_window=True,
         window = np.ceil(x.shape[2] / 10.).astype(int)
     else:
         window = None
-    orig_steps = np.arange(x.shape[1])
+    orig_steps = np.arange(x.shape[2])
     l = np.argmax(labels, axis=1) if labels.ndim > 1 else labels
         
     ret = np.zeros_like(x)
