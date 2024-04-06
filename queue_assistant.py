@@ -134,6 +134,12 @@ class QAssistant(object):
 
             # exp_path = exp['config']['fs_observer_path'] #TODO: check if experiment path exists, avoid constantly failing experiments
 
+            local_hostname = os.uname()[1]
+            exp_hostname = exp['host']['hostname']
+            if local_hostname != exp_hostname:
+                filtered_ids.remove(exp)
+                logger.info(f'Skipping {exp_id} - Experiment was queued on a different host (local hostname {local_hostname} != experiment hostname {exp_hostname})')
+                continue
 
             # check if exp depends on a pretrained_id
             if 'pretrained_id' in exp['config']:
