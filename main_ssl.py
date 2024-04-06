@@ -128,6 +128,7 @@ def main():
 
     # logic to load backbone
     encoder_config = {
+        'dataset': args.dataset,
         'reshape_input': False, #fixed
         'sliding_window_length': 100 if args.dataset == 'mbientlab' and args.arch != 'cnn_transformer' else 200,
         'fully_convolutional': 'FC', #fixed
@@ -439,11 +440,11 @@ class SimSiam(nn.Module):
             case 'cnn_imu':
                 # prev_dim = self.encoder.fc4.in_features # toke fc4 because fc3 is per limb and is concatenated afterwards
                 
-                self.encoder.fc3_LA = torch.nn.Identity()
-                self.encoder.fc3_LL = torch.nn.Identity()
-                self.encoder.fc3_RA = torch.nn.Identity()
-                self.encoder.fc3_RL = torch.nn.Identity()
-                self.encoder.fc3_N  = torch.nn.Identity()
+                # self.encoder.fc3_LA = torch.nn.Identity()
+                # self.encoder.fc3_LL = torch.nn.Identity()
+                # self.encoder.fc3_RA = torch.nn.Identity()
+                # self.encoder.fc3_RL = torch.nn.Identity()
+                # self.encoder.fc3_N  = torch.nn.Identity()
                 self.encoder.fc4    = torch.nn.Linear(self.encoder.fc4.in_features, 2048)
                 prev_dim = self.encoder.fc4.out_features
                 

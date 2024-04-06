@@ -283,13 +283,14 @@ def spawner(x, labels, sigma=0.05, verbose=0):
     # use verbose=1 to print out figures
     
     
-    random_points = np.random.randint(low=1, high=x.shape[1]-1, size=x.shape[0])
-    window = np.ceil(x.shape[1] / 10.).astype(int)
+    random_points = np.random.randint(low=1, high=x.shape[2]-1, size=x.shape[0])
+    window = np.ceil(x.shape[2] / 10.).astype(int)
     orig_steps = np.arange(x.shape[1])
     l = np.argmax(labels, axis=1) if labels.ndim > 1 else labels
     
     ret = np.zeros_like(x)
     for i, pat in enumerate(tqdm(x)):
+    
         # guarentees that same one isnt selected
         choices = np.delete(np.arange(x.shape[0]), i)
         # remove ones of different classes
@@ -377,13 +378,13 @@ def wdba(x, labels, batch_size=6, slope_constraint="symmetric", use_window=True,
     # use verbose = -1 to turn off warnings    
     # slope_constraint is for DTW. "symmetric" or "asymmetric"
     
-    import utils.dtw as dtw
+    #import utils.dtw as dtw
     
     if use_window:
-        window = np.ceil(x.shape[1] / 10.).astype(int)
+        window = np.ceil(x.shape[2] / 10.).astype(int)
     else:
         window = None
-    orig_steps = np.arange(x.shape[1])
+    orig_steps = np.arange(x.shape[2])
     l = np.argmax(labels, axis=1) if labels.ndim > 1 else labels
         
     ret = np.zeros_like(x)
@@ -438,13 +439,13 @@ def random_guided_warp(x, labels, slope_constraint="symmetric", use_window=True,
     # slope_constraint is for DTW. "symmetric" or "asymmetric"
     # dtw_type is for shapeDTW or DTW. "normal" or "shape"
     
-    import utils.dtw as dtw
+    #import utils.dtw as dtw
     
     if use_window:
-        window = np.ceil(x.shape[1] / 10.).astype(int)
+        window = np.ceil(x.shape[2] / 10.).astype(int)
     else:
         window = None
-    orig_steps = np.arange(x.shape[1])
+    orig_steps = np.arange(x.shape[2])
     l = np.argmax(labels, axis=1) if labels.ndim > 1 else labels
     
     ret = np.zeros_like(x)
@@ -463,9 +464,9 @@ def random_guided_warp(x, labels, slope_constraint="symmetric", use_window=True,
                 path = dtw.dtw(random_prototype, pat, dtw.RETURN_PATH, slope_constraint=slope_constraint, window=window)
                             
             # Time warp
-            warped = pat[path[1]]
-            for dim in range(x.shape[2]):
-                ret[i,:,dim] = np.interp(orig_steps, np.linspace(0, x.shape[1]-1., num=warped.shape[0]), warped[:,dim]).T
+            warped = pat[path[2]]
+            for dim in range(x.shape[3]):
+                ret[i,:,dim] = np.interp(orig_steps, np.linspace(0, x.shape[2]-1., num=warped.shape[0]), warped[:,dim]).T
         else:
             if verbose > -1:
                 print("There is only one pattern of class %d, skipping timewarping"%l[i])
@@ -480,13 +481,13 @@ def discriminative_guided_warp(x, labels, batch_size=6, slope_constraint="symmet
     # slope_constraint is for DTW. "symmetric" or "asymmetric"
     # dtw_type is for shapeDTW or DTW. "normal" or "shape"
     
-    import utils.dtw as dtw
+    #import utils.dtw as dtw
     
     if use_window:
-        window = np.ceil(x.shape[1] / 10.).astype(int)
+        window = np.ceil(x.shape[2] / 10.).astype(int)
     else:
         window = None
-    orig_steps = np.arange(x.shape[1])
+    orig_steps = np.arange(x.shape[2])
     l = np.argmax(labels, axis=1) if labels.ndim > 1 else labels
     
     positive_batch = np.ceil(batch_size / 2).astype(int)
@@ -531,11 +532,11 @@ def discriminative_guided_warp(x, labels, batch_size=6, slope_constraint="symmet
                 path = dtw.dtw(positive_prototypes[selected_id], pat, dtw.RETURN_PATH, slope_constraint=slope_constraint, window=window)
                    
             # Time warp
-            warped = pat[path[1]]
-            warp_path_interp = np.interp(orig_steps, np.linspace(0, x.shape[1]-1., num=warped.shape[0]), path[1])
+            warped = pat[path[2]]
+            warp_path_interp = np.interp(orig_steps, np.linspace(0, x.shape[2]-1., num=warped.shape[0]), path[1])
             warp_amount[i] = np.sum(np.abs(orig_steps-warp_path_interp))
             for dim in range(x.shape[2]):
-                ret[i,:,dim] = np.interp(orig_steps, np.linspace(0, x.shape[1]-1., num=warped.shape[0]), warped[:,dim]).T
+                ret[i,:,dim] = np.interp(orig_steps, np.linspace(0, x.shape[2]-1., num=warped.shape[0]), warped[:,dim]).T
         else:
             if verbose > -1:
                 print("There is only one pattern of class %d"%l[i])
@@ -575,16 +576,13 @@ def window_slice(x, reduce_ratio=0.9):
 #     x_f = np.fft.rfft(x)
 #     print(x_f.shape)
         
-#     m =np.random.uniform(x_f.shape) < rate
-#     print(m.shape)
-#     amp = abs(x_f)
-#     print('amp shape {}'.format(amp.shape))
-#     index = amp.argsort(axis=2)[::-1]
-#     print(index.shape)
-#     dominant_mask = index > 2
-#     m = np.bitwise_and(m,dominant_mask)
-#     freal = x_f.real.masked_fill(m,0)
-#     fimag = x_f.imag.masked_fill(m,0)
+    m =np.random.uniform(x_f.shape) < rate
+    amp = abs(x_f)
+    _,index = -np.sort(-amp)
+    dominant_mask = index > 2
+    m = np.bitwise_and(m,dominant_mask)
+    freal = x_f.real.masked_fill(m,0)
+    fimag = x_f.imag.masked_fill(m,0)
         
 #     b_idx = np.arange(x.shape[0])
 #     np.random.shuffle(b_idx)
@@ -665,11 +663,11 @@ def spectral_pooling(x, pooling_number = 0):
         # axarr[1].plot(fft_plt[0], 'o', label='fft')
 
         #x = fft[:, :, :, :int(fft.shape[3] / 2)]
+        #x = fft[ :, :, :int(math.ceil(fft.shape[2])//2)]
         fft[:, :, int(math.ceil(fft.shape[2] // 2)) :  ] *= 0
         x=fft
         #if self.config["storing_acts"]:
         #    self.save_acts(x, "x_LA_fft_2")
-
         # fftx_plt = x[0, 0].to("cpu", torch.double).detach()
         # fftx_plt = torch.norm(fftx_plt, dim=2)
         # axarr[2].plot(fftx_plt[0], 'o', label='fft')
