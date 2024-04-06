@@ -137,7 +137,7 @@ class QAssistant(object):
             local_hostname = os.uname()[1]
             exp_hostname = exp['host']['hostname']
             if local_hostname != exp_hostname:
-                filtered_ids.remove(exp)
+                filtered_ids.remove(exp_id)
                 logger.info(f'Skipping {exp_id} - Experiment was queued on a different host (local hostname {local_hostname} != experiment hostname {exp_hostname})')
                 continue
 
