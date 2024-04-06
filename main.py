@@ -12,7 +12,6 @@ import torch
 import numpy as np
 import random
 
-import platform
 from modus_selecter import Modus_Selecter
 
 import datetime
@@ -28,14 +27,23 @@ configure_sacred()
 now = datetime.datetime.now()
 ex= Experiment('ICPR 2024')
 
-if os.uname()[1] in ['rosenblatt', 'cameron']:
-    user, pw, url, db_name = load_credentials(path='~/.mongodb_credentials')
-    ex.observers.append(MongoObserver.create(url=url,
-                                            db_name=db_name,
-                                            username=user,
-                                            password=pw,
-                                            authSource='admin',
-                                            authMechanism='SCRAM-SHA-1'))
+cred_file = Path('~/.mongodb_credentials').expanduser()
+if cred_file.exists():
+    print(f'Parsing MongoDB credentials from {str(cred_file)}')
+    user, pw, url, db_name = load_credentials(path=str(cred_file))
+    respons = os.system(f'ping -c 1 {url} > /dev/null 2>&1') 
+    if respons == 0:
+        print(f'Adding MongoObserver for {url}')
+        ex.observers.append(MongoObserver.create(url=url,
+                                                db_name=db_name,
+                                                username=user,
+                                                password=pw,
+                                                authSource='admin',
+                                                authMechanism='SCRAM-SHA-1'))
+    else:
+        print(f'WARNING :: MongoDB on {url} not reachable. Not adding MongoObserver.')
+else:
+    print(f'No credentials file found')
 
 
 

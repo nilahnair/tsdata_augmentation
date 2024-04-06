@@ -27,6 +27,7 @@ from har_dataset import HARDataset
 from network import Network
 
 from torch.utils.tensorboard import SummaryWriter
+import yaml
 
 model_names = sorted(name for name in models.__dict__
     if name.islower() and not name.startswith("__")
@@ -55,6 +56,7 @@ parser.add_argument('-b', '--batch-size', default=512, type=int,
                     help='mini-batch size (default: 512), this is the total '
                          'batch size of all GPUs on the current node when '
                          'using Data Parallel or Distributed Data Parallel')
+parser.add_argument('--optimizer', default='sgd', choices=['sgd','adam'])
 parser.add_argument('--lr', '--learning-rate', default=0.05, type=float,
                     metavar='LR', help='initial (base) learning rate', dest='lr')
 parser.add_argument('--momentum', default=0.9, type=float, metavar='M',
@@ -64,7 +66,7 @@ parser.add_argument('--wd', '--weight-decay', default=1e-4, type=float,
                     dest='weight_decay')
 parser.add_argument('-p', '--print-freq', default=10, type=int,
                     metavar='N', help='print frequency (default: 10)')
-parser.add_argument('--num_checkpoints', default=8, type=int,
+parser.add_argument('--num_checkpoints', default=0, type=int,
                     help='Number of checkpoints to save during training. Saves every epochs // num_checkpoints.')
 
 parser.add_argument('--resume', default='', type=str, metavar='PATH',
@@ -77,7 +79,7 @@ parser.add_argument('--dist-url', default='tcp://224.66.41.62:23456', type=str,
                     help='url used to set up distributed training')
 parser.add_argument('--dist-backend', default='nccl', type=str,
                     help='distributed backend')
-parser.add_argument('--seed', default=42, type=int,
+parser.add_argument('--seed', default=None, type=int,
                     help='seed for initializing training. ')
 parser.add_argument('--gpu', default=0, type=int,
                     help='GPU id to use.')
@@ -126,8 +128,9 @@ def main():
 
     # logic to load backbone
     encoder_config = {
+        'dataset': args.dataset,
         'reshape_input': False, #fixed
-        'sliding_window_length': 200,
+        'sliding_window_length': 100 if args.dataset == 'mbientlab' and args.arch != 'cnn_transformer' else 200,
         'fully_convolutional': 'FC', #fixed
         'filter_size': 5, #fixed
         'num_filters': 64, #fixed
@@ -161,14 +164,18 @@ def main():
     criterion = nn.CosineSimilarity(dim=1).cuda(args.gpu)
 
     if args.fix_pred_lr:
-        optim_params = [{'params': model.module.encoder.parameters(), 'fix_lr': False},
-                        {'params': model.module.predictor.parameters(), 'fix_lr': True}]
+        optim_params = [{'params': model.encoder.parameters(), 'fix_lr': False},
+                        {'params': model.predictor.parameters(), 'fix_lr': True}]
     else:
         optim_params = model.parameters()
 
-    optimizer = torch.optim.SGD(optim_params, init_lr,
-                                momentum=args.momentum,
-                                weight_decay=args.weight_decay)
+    match args.optimizer:
+        case 'sgd':
+            optimizer = torch.optim.SGD(optim_params, init_lr,
+                                        momentum=args.momentum,
+                                        weight_decay=args.weight_decay)
+        case 'adam':
+            optimizer = torch.optim.Adam(optim_params, init_lr, weight_decay=args.weight_decay)
 
     # optionally resume from a checkpoint
     if args.resume:
@@ -190,7 +197,7 @@ def main():
             print("=> no checkpoint found at '{}'".format(args.resume))
     else:
         exp_identifier = '_'.join([args.dataset, args.arch, args.augmentations])
-        args.output_dir = Path(args.output_dir) / exp_identifier
+        args.output_dir = Path(args.output_dir) / exp_identifier / os.uname()[1] # add hostname to prevent merges from different hosts when copying
         run_id = 0
         while (args.output_dir / f'{run_id:03d}').exists():
             run_id +=1
@@ -217,7 +224,7 @@ def main():
     train_dataset = HARDataset(
         path=dataset_root_defaults[args.dataset],
         dataset_name=args.dataset,
-        window_length=100 if args.dataset == 'mbientlab' and args.arch != 'cnn_transformer' else 200,
+        window_length=encoder_config['sliding_window_length'],
         window_stride=sliding_window_step_defaults[args.dataset],
         transform=TwoCropsTransform(augmentation),
         augmenation_probability=1.0,
@@ -228,17 +235,20 @@ def main():
         train_dataset,
         batch_size=args.batch_size,
         num_workers=args.num_workers,
+        persistent_workers=True if args.num_workers > 0 else False,
         shuffle=True,
         drop_last=True)
 
     writer = SummaryWriter(log_dir=args.output_dir)
 
     if args.resume:
-        global_step = args.start_epoch * len(train_loader)
+        log_step = args.start_epoch * len(train_loader)
     else:
-        global_step = 0
+        log_step = 0
 
     writer.add_hparams(hparam_dict=vars(args), metric_dict={})
+    with open(os.path.join(args.output_dir, 'config.yaml'), 'w') as cfile:
+        yaml.dump(vars(args), cfile, default_flow_style=False)
 
     for epoch in range(args.start_epoch, args.epochs):
         adjust_learning_rate(optimizer, init_lr, epoch, args)
@@ -269,7 +279,7 @@ def main():
             p1, p2, z1, z2 = model(x1=images[0], x2=images[1])
             loss = -(criterion(p1, z2).mean() + criterion(p2, z1).mean()) * 0.5
 
-            writer.add_scalar('loss', loss.item(), global_step=global_step)
+            writer.add_scalar('loss', loss.item(), global_step=log_step)
 
             losses.update(loss.item(), images[0].size(0))
 
@@ -285,7 +295,7 @@ def main():
             if i % args.print_freq == 0:
                 progress.display(i)
             
-            global_step += 1
+            log_step += 1
 
         save_path = f'checkpoint.pth.tar' 
         if args.output_dir != None:
@@ -301,22 +311,25 @@ def main():
         }, is_best=False,
             filename=save_path)
         
-        if epoch % (args.epochs // args.num_checkpoints) == 0:
-            save_path = f'checkpoint_{epoch:04d}.pth.tar' 
+        if args.num_checkpoints > 0 and epoch % (args.epochs // args.num_checkpoints) == 0:
+            # save_path = f'checkpoint_{epoch:04d}.pth.tar' 
+            # if args.output_dir != None:
+            #     save_path = os.path.join(args.output_dir, save_path)
+            # save_checkpoint({
+            #     'epoch': epoch + 1,
+            #     'arch': args.arch,
+            #     'dataset': args.dataset,
+            #     'augmentations': args.augmentations,
+            #     'state_dict': model.state_dict(),
+            #     'encoder_state_dict': model.encoder.state_dict(),
+            #     'optimizer' : optimizer.state_dict(),
+            #     'config': vars(args)
+            # }, is_best=False,
+            #     filename=save_path)
+
+            save_path = f'encoder_{epoch:04d}.pth.tar' 
             if args.output_dir != None:
                 save_path = os.path.join(args.output_dir, save_path)
-            save_checkpoint({
-                'epoch': epoch + 1,
-                'arch': args.arch,
-                'dataset': args.dataset,
-                'augmentations': args.augmentations,
-                'state_dict': model.state_dict(),
-                'encoder_state_dict': model.encoder.state_dict(),
-                'optimizer' : optimizer.state_dict(),
-                'config': vars(args)
-            }, is_best=False,
-                filename=save_path)
-
             save_checkpoint({
                 'epoch': epoch + 1,
                 'arch': args.arch,
@@ -325,7 +338,7 @@ def main():
                 'state_dict': model.encoder.state_dict(),
                 'config': vars(args)
             }, is_best=False,
-                filename=f'encoder_{epoch:04d}.pth.tar')
+                filename=save_path)
 
     save_path = f'encoder.pth.tar' 
     if args.output_dir != None:
@@ -427,11 +440,11 @@ class SimSiam(nn.Module):
             case 'cnn_imu':
                 # prev_dim = self.encoder.fc4.in_features # toke fc4 because fc3 is per limb and is concatenated afterwards
                 
-                self.encoder.fc3_LA = torch.nn.Identity()
-                self.encoder.fc3_LL = torch.nn.Identity()
-                self.encoder.fc3_RA = torch.nn.Identity()
-                self.encoder.fc3_RL = torch.nn.Identity()
-                self.encoder.fc3_N  = torch.nn.Identity()
+                # self.encoder.fc3_LA = torch.nn.Identity()
+                # self.encoder.fc3_LL = torch.nn.Identity()
+                # self.encoder.fc3_RA = torch.nn.Identity()
+                # self.encoder.fc3_RL = torch.nn.Identity()
+                # self.encoder.fc3_N  = torch.nn.Identity()
                 self.encoder.fc4    = torch.nn.Linear(self.encoder.fc4.in_features, 2048)
                 prev_dim = self.encoder.fc4.out_features
                 

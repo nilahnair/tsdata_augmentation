@@ -26,7 +26,7 @@ def jittering(x, sigma = 0.03):
 def scaling(x):
     #using this
     # https://arxiv.org/pdf/1706.00527.pdf
-    sigma=0.04
+    sigma= 0.04
     factor = np.random.normal(loc=1., scale=sigma, size=(x.shape[0],x.shape[2])) #TODO: check if indices are the right ones
     augmentedData = np.multiply(x, factor[:,np.newaxis,:])
     return augmentedData
@@ -125,16 +125,25 @@ def slicing(data):
     # Initialize an array to store the normalized time-series
     normalized_array = np.zeros_like(stretched_data)
 
-    # Normalize each time-series
-    for j in range(time_points):
-        min_val = np.min(stretched_data[0, j, :])
-        max_val = np.max(stretched_data[0, j, :])
+    # # Normalize each time-series
+    # for j in range(sensor):
+    #     min_val = np.min(stretched_data[0, :, j])
+    #     max_val = np.max(stretched_data[0, :, j])
         
-        # Check for the case where all values are the same (max_val = min_val)
-        if max_val == min_val:
-            normalized_array[0, j, :] = 0  # or any constant value in [0, 1]
-        else:
-            normalized_array[0, j, :] = (stretched_data[0, j, :] - min_val) / (max_val - min_val)
+    #     # Check for the case where all values are the same (max_val = min_val)
+    #     if max_val == min_val:
+    #         normalized_array[0, :, j] = 0  # or any constant value in [0, 1]
+    #     else:
+    #         normalized_array[0, :, j] = (stretched_data[0, :, j] - min_val) / (max_val - min_val)
+
+    # Faster implementation without for loops
+    min_arr = np.min(stretched_data, axis=1)[:, None] # max over channels for all times, add dimension at the center, 1x1x9
+    max_arr = np.max(stretched_data, axis=1)[:, None]
+    diff_arr = max_arr - min_arr
+
+    normalized_array = stretched_data - min_arr
+    normalized_array = np.divide(normalized_array, diff_arr, out=np.zeros_like(normalized_array), where=diff_arr!=0)
+
 
     # `normalized_array` now contains the normalized time-series.
     return normalized_array
@@ -163,7 +172,7 @@ def slicing(data):
 def time_warping(x):
     #using this
     from scipy.interpolate import CubicSpline
-    sigma = 0.06
+    sigma = 0.6
     knot = 4
     orig_steps = np.arange(x.shape[1])
     
@@ -182,7 +191,7 @@ def time_warping(x):
 # Working
 def window_warping(x):
     # https://halshs.archives-ouvertes.fr/halshs-01357973/document
-    window_ratio=0.2
+    window_ratio= 0.2
     scales=[0.5, 2.]
     channel=x.shape[2]
     length=x.shape[1]
@@ -215,7 +224,8 @@ def tilt(x):
     time_points = np.linspace(0, 199, length)
 
     # Define the angle of rotation in degrees
-    angle_degrees = 0.02  # Replace with the desired angle
+    max_angle_degrees = 0.02  # Replace with the desired angle
+    angle_degrees = np.random.uniform(-max_angle_degrees, max_angle_degrees)
     angle_radians = np.radians(angle_degrees)
 
     # Create the rotation matrix
@@ -225,29 +235,42 @@ def tilt(x):
     # Initialize an array to store the rotated time-series
     rotated_array = np.zeros_like(x)
 
-    # Rotate each time-series
+    # # Rotate each time-series
+    # for j in range(channel):
+    #     for i in range(length):
+    #         point = np.array([time_points[i], x[0, j, i]])
+    #         rotated_point = np.dot(rotation_matrix, point)
+    #         rotated_array[0, j, i] = rotated_point[1]
+
     for j in range(channel):
-        for i in range(length):
-            point = np.array([time_points[i], x[0, j, i]])
-            rotated_point = np.dot(rotation_matrix, point)
-            rotated_array[0, j, i] = rotated_point[1]
+        vals = x[0, j, :]
+        points = np.hstack((time_points[:, None], vals[:, None]))
+        rotated_array[0, j] = np.dot(rotation_matrix, points.T)[1]
 
     # `rotated_array` now contains the rotated time-series.
     #return rotated_array
 
     # Initialize an array to store the normalized time-series
-    normalized_array = np.zeros_like(rotated_array)
+    # normalized_array = np.zeros_like(rotated_array)
 
     # Normalize each time-series
-    for j in range(channel):
-        min_val = np.min(rotated_array[0, j, :])
-        max_val = np.max(rotated_array[0, j, :])
+    # for j in range(channel):
+    #     min_val = np.min(rotated_array[0, j, :])
+    #     max_val = np.max(rotated_array[0, j, :])
         
-        # Check for the case where all values are the same (max_val = min_val)
-        if max_val == min_val:
-            normalized_array[0, j, :] = 0  # or any constant value in [0, 1]
-        else:
-            normalized_array[0, j, :] = (rotated_array[0, j, :] - min_val) / (max_val - min_val)
+    #     # Check for the case where all values are the same (max_val = min_val)
+    #     if max_val == min_val:
+    #         normalized_array[0, j, :] = 0  # or any constant value in [0, 1]
+    #     else:
+    #         normalized_array[0, j, :] = (rotated_array[0, j, :] - min_val) / (max_val - min_val)
+
+    # with numpy instead of loop
+    min_arr = np.min(rotated_array, axis=2)[..., None] # max over channels for all times, add dimension at the center, 1x1x9
+    max_arr = np.max(rotated_array, axis=2)[..., None]
+    diff_arr = max_arr - min_arr
+
+    normalized_array = rotated_array - min_arr
+    normalized_array = np.divide(normalized_array, diff_arr, out=np.zeros_like(normalized_array), where=diff_arr!=0)
 
     # `normalized_array` now contains the normalized time-series.
     return normalized_array.reshape((1,length,channel))
@@ -547,10 +570,11 @@ def window_slice(x, reduce_ratio=0.9):
             ret[i,:,dim] = np.interp(np.linspace(0, target_len, num=x.shape[1]), np.arange(target_len), pat[starts[i]:ends[i],dim]).T
     return ret
 
-def freq_mix(x,rate=0.5):
+# def freq_mix(x,rate=0.5):
    
-    #x_f = np.fft.rfft(x,dim=1)
-    x_f = np.fft.rfft(x)
+#     #x_f = np.fft.rfft(x,dim=1)
+#     x_f = np.fft.rfft(x)
+#     print(x_f.shape)
         
     m =np.random.uniform(x_f.shape) < rate
     amp = abs(x_f)
@@ -560,24 +584,24 @@ def freq_mix(x,rate=0.5):
     freal = x_f.real.masked_fill(m,0)
     fimag = x_f.imag.masked_fill(m,0)
         
-    b_idx = np.arange(x.shape[0])
-    np.random.shuffle(b_idx)
-    x2= x[b_idx]
-    #x2_f = np.fft.rfft(x2,dim=1)
-    x2_f = np.fft.rfft(x2)
+#     b_idx = np.arange(x.shape[0])
+#     np.random.shuffle(b_idx)
+#     x2= x[b_idx]
+#     #x2_f = np.fft.rfft(x2,dim=1)
+#     x2_f = np.fft.rfft(x2)
 
-    m = np.bitwise_not(m)
-    freal2 = x2_f.real.masked_fill(m,0)
-    fimag2 = x2_f.imag.masked_fill(m,0)
+#     m = np.bitwise_not(m)
+#     freal2 = x2_f.real.masked_fill(m,0)
+#     fimag2 = x2_f.imag.masked_fill(m,0)
 
-    freal += freal2
-    fimag += fimag2
+#     freal += freal2
+#     fimag += fimag2
 
-    x_f = np.complex(freal,fimag)
+#     x_f = np.complex(freal,fimag)
         
-    #x = np.fft.irfft(x_f,dim=1)
-    x = np.fft.irfft(x_f)
-    return x
+#     #x = np.fft.irfft(x_f,dim=1)
+#     x = np.fft.irfft(x_f)
+#     return x
 
 def resampling_random(x):
     import random
@@ -605,7 +629,7 @@ def resampling_random(x):
     return x_selected
 
 def magnify(x):
-    lam = np.random.randint(11,14)/10
+    lam = np.random.randint(11,14)/10 #(11,14)
     return np.multiply(x,lam)
 
 def spectral_pooling(x, pooling_number = 0):
