@@ -510,7 +510,13 @@ class TwoCropsTransform:
 
     def __call__(self, x): # TODO handle what happens when transform is a list
         q = self.base_transform(x)
-        k = self.base_transform(x)
+        
+        # if augmentation is deterministic, only apply on query
+        if self.base_transform.__name__ not in ['flipping', 'vertical_flip']:
+            k = self.base_transform(x)
+        else:
+            k = x
+
         return [q, k]
 
 
