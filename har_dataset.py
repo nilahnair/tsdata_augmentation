@@ -105,6 +105,8 @@ def __get_separating_cols__(dataset_name):
             return ['logistic_scenario', 'subject', 'recording_number', 'annotator','execution']
         case 'mbientlab':
             return ['logistic_scenario', 'subject', 'recording_number']
+        case 'mm':
+            return ['logistic_scenario', 'subject', 'recording_number']
         case 'motionsense':
             # return ['class_name_full', 'subject']
             return None # for motionsense, index is built on the whole dataframe
@@ -287,6 +289,36 @@ def __get_data_col_names__(dataset_name):
                 'RL_GyroscopeY',
                 'RL_GyroscopeZ',
             ]
+        case 'mm':
+            return [
+                'AccX_L', 
+                'AccY_L', 
+                'AccZ_L', 
+                'GyrX_L', 
+                'GyrY_L', 
+                'GyrZ_L',
+                'MagX_L', 
+                'MagY_L', 
+                'MagZ_L', 
+                'AccX_T', 
+                'AccY_T', 
+                'AccZ_T', 
+                'GyrX_T', 
+                'GyrY_T',
+                'GyrZ_T', 
+                'MagX_T', 
+                'MagY_T', 
+                'MagZ_T', 
+                'AccX_R', 
+                'AccY_R', 
+                'AccZ_R', 
+                'GyrX_R',
+                'GyrY_R', 
+                'GyrZ_R', 
+                'MagX_R', 
+                'MagY_R', 
+                'MagZ_R'
+            ]
         case 'motionsense':
             return [
                 # 'attitude.roll',
@@ -333,6 +365,8 @@ def __prepare_dataframe__(path, dataset_name, split, half_dataset):
         case 'mocap':
             return __prepare_mocap__(path, split, half_dataset)
         case 'mbientlab':
+            return __prepare_mbientlab__(path, split, half_dataset)
+        case 'mm':
             return __prepare_mbientlab__(path, split, half_dataset)
         case 'motionsense':
             return __prepare_motionsense__(path, split, half_dataset)
@@ -474,6 +508,149 @@ def __prepare_mbientlab__(path, split, half_dataset):
 
         df = df.with_columns(
             pl.col(__get_data_col_names__('mbientlab')).clip(0.0, 1.0)
+        )
+        recordings.append(df)
+    
+        
+    # concat into big df
+    recordings = pl.concat(recordings, how='vertical')
+
+    return recordings
+
+def __prepare_mm__(path, split, half_dataset):
+    print(f'Preparing DataFrame for MotionMiners {split}')
+    all_files = sorted(Path(path).glob('**/*.csv'))
+    sample_files = list(filter(lambda f: 'labels' not in str(f), all_files))
+    label_files =    list(filter(lambda f: 'labels'     in str(f), all_files))
+    files = list(zip(sample_files, label_files))
+    
+    
+    # for normalization later
+    '''
+    mean_values = pl.DataFrame([-0.6018319,   0.234877,    0.2998928,   1.11102944,  0.17661719, -1.41729978,
+                    0.03774093,  1.0202137,  -0.1362719,   1.78369919,  2.4127946,  -1.36437627,
+                    -0.96302063, -0.0836716,   0.13035097,  0.08677377,  1.088766,    0.51141513,
+                    -0.61147614, -0.22219321,  0.41094977, -1.45036893,  0.80677986, -0.1342488,
+                    -0.02994514, -0.999678,   -0.22073192, -0.1808128,  -0.01197039,  0.82491874]) \
+                    .transpose(column_names=__get_data_col_names__('mbientlab'))
+
+    std_values = pl.DataFrame([1.17989719,   0.55680584,   0.65610454,  58.42857495,  74.36437559,
+                    86.72291263,   1.01306,      0.62489802,   0.70924608,  86.47014857,
+                    100.6318856,   61.02139095,   0.38256693,   0.21984504,   0.32184666,
+                    42.84023413,  24.85339931,  18.02111335,   0.44021448,   0.51931148,
+                    0.45731142,  78.58164965,  70.93038919,  76.34418105,   0.78003314,
+                    0.32844988,   0.54919488,  26.68953896,  61.04472454,  62.9225945]) \
+                    .transpose(column_names=__get_data_col_names__('mbientlab'))
+    '''
+    if half_dataset == True:
+        ids = {
+            'train':    ["MS01__P02-1", "MS01__P03-5"],
+            'val':      ["MS01__P02-2", "MS02__P03-3"],
+            'test':     ["MS01__P01-1", "MS01__P01-2", "MS02__P01-5"]
+            }
+        mean_values = pl.DataFrame([-0.503717766, 0.188054507, 0.479226948, 0.449298663, 0.625211039, -0.978823753,
+                                    0.035611225, 1.004233194, -0.140474441, 0.388258504, 0.017969134, -1.091376453,
+                                    -0.951142798, -0.143084672, 0.08722548, -0.152900813, 0.843425477, 0.330682448,
+                                    -0.553546376, -0.238370082, 0.465959529, -0.537973662, 0.601648677, 0.811599813,
+                                    -0.426852611, -0.667905869, -0.214780663, 0.05403048, 0.4209334, 0.179208588]).transpose(column_names=__get_data_col_names__('mbientlab'))
+        std_values = pl.DataFrame([ 0.442215514, 0.542314415, 0.444705607, 60.7252273, 74.30996485, 59.75919811,
+                                   0.394248664, 0.201944768, 0.247684111, 22.32055162, 51.95205036, 55.98131917,
+                                   0.159983328, 0.227631877, 0.316127019, 37.63787526, 20.05942273, 17.7025135,
+                                   0.452795267, 0.523671809, 0.437481135, 61.53426095, 78.80819335, 63.84203605,
+                                   0.786087635, 0.513288879, 0.332568531, 42.82558192, 46.462563, 56.11444557]).transpose(column_names=__get_data_col_names__('mbientlab'))
+
+    else: 
+        ids = {
+            'train':    ["MS01__P02-1", "MS01__P03-5", "MS02__P02-4", "MS02__P03-1"],
+            'val':      ["MS01__P02-2", "MS02__P03-3"],
+            'test':     ["MS01__P01-1", "MS01__P01-2", "MS02__P01-5"]
+            }
+        mean_values = pl.DataFrame([-2158.247781475599, 855.390755963325, 1389.4675813896226, 30.955428699441157,
+                            6.700558238662165, -22.262269242179915, 2468.306712385996, -1341.474143620317,
+                            -1150.9497615477298, 11.212617589578134, -3615.691366601724, -303.6048153056071,
+                            -3.6936435585433536, 25.792026400888272, -1.6807350787039403, -144.2625391404705,
+                            3261.3816818239684, 185.4163216453658, 2080.8597940893587, 711.4344334952643,
+                            1526.4707456468716, 1.8147758403105247, -13.757557233141402, -0.7271561241321074,
+                            -2283.7609492148913, -171.1391101933215, -1318.0302728777704]).transpose(column_names=__get_data_col_names__('mm'))
+        std_values = pl.DataFrame([1852.0063567250488, 2188.5663620188247, 2151.444400261148, 934.8641122210573,
+                           1597.1159856259112, 1057.2860746311146, 2388.125855279013, 2749.563422655149,
+                           2213.161234657168, 921.0891362969842, 1134.7120552945705, 1476.0313538420967,
+                           331.8760093184819, 619.5409993141205, 311.6784978431961, 2176.0962957638712,
+                           2039.0205194433688, 1777.7449273443692, 1882.3700322895595, 2188.449667811695,
+                           2221.5492336793204, 950.0355434899441, 1509.7002668544928, 1071.9455887036731,
+                           2924.6853702636913, 2755.637179167859, 2443.644113640929]).transpose(column_names=__get_data_col_names__('mm'))
+
+
+    min_df = mean_values.with_columns(
+        [pl.col(c) - 2 * std_values[c] for c in set(mean_values.columns).intersection(std_values.columns)]
+    )
+    max_df = mean_values.with_columns(
+        [pl.col(c) + 2 * std_values[c] for c in set(mean_values.columns).intersection(std_values.columns)]
+    )
+
+
+    recordings = []
+    for sfile, lfile in files:
+        logistic_scenario, subject, recording_number = sfile.stem.split('_')
+
+        # skip subjects according to split id list
+        if subject not in ids[split]:
+            continue
+
+        logistic_scenario = int(logistic_scenario[1:])
+        identity = int(subject[1:]) - 1 # same as original preprocessing
+        recording_number = int(recording_number[1:])
+
+        df = pl.concat(
+            (pl.read_csv(sfile, truncate_ragged_lines=True, ignore_errors=True),
+             pl.read_csv(lfile, truncate_ragged_lines=True, ignore_errors=True)),
+             how='horizontal')
+        df = df.with_columns([
+            pl.lit(logistic_scenario).alias('logistic_scenario'),
+            pl.lit(subject).alias('subject'),
+            pl.lit(identity).alias('identity'),
+            pl.lit(recording_number).alias('recording_number')])
+    
+        # fix col names
+        if 'Class' in df.columns:
+            df = df.rename({'Class': 'class'})
+        
+        df = df.filter(pl.col('class') != 7) # drop samples of activity 7
+
+        # cast columns to smaller datatypes
+        df = df.with_columns([
+            pl.col('class').cast(pl.UInt8),
+            pl.col('logistic_scenario').cast(pl.UInt8),
+            pl.col('identity').cast(pl.UInt8),
+            pl.col('recording_number').cast(pl.UInt8),
+            pl.col('I-A_GaitCycle').cast(pl.Boolean),
+            pl.col('I-B_Step').cast(pl.Boolean),
+            pl.col('I-C_StandingStill').cast(pl.Boolean),
+            pl.col('II-A_Upwards').cast(pl.Boolean),
+            pl.col('II-B_Centred').cast(pl.Boolean),
+            pl.col('II-C_Downwards').cast(pl.Boolean),
+            pl.col('II-D_NoIntentionalMotion').cast(pl.Boolean),
+            pl.col('II-E_TorsoRotation').cast(pl.Boolean),
+            pl.col('III-A_Right').cast(pl.Boolean),
+            pl.col('III-B_Left').cast(pl.Boolean),
+            pl.col('III-C_NoArms').cast(pl.Boolean),
+            pl.col('IV-A_BulkyUnit').cast(pl.Boolean),
+            pl.col('IV-B_HandyUnit').cast(pl.Boolean),
+            pl.col('IV-C_UtilityAux').cast(pl.Boolean),
+            pl.col('IV-D_Cart').cast(pl.Boolean),
+            pl.col('IV-E_Computer').cast(pl.Boolean),
+            pl.col('IV-F_NoItem').cast(pl.Boolean),
+            pl.col('V-A_None').cast(pl.Boolean),
+            pl.col('VI-A_Error',).cast(pl.Boolean) 
+            ])
+
+        # normalization
+        df = df.with_columns(
+            [(pl.col(c) -  min_df[c]) / (max_df[c] - min_df[c])  for c in set(df.columns).intersection(min_df.columns)]
+        )
+
+        df = df.with_columns(
+            pl.col(__get_data_col_names__('mm')).clip(0.0, 1.0)
         )
         recordings.append(df)
     
