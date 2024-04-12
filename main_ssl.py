@@ -130,7 +130,7 @@ def main():
     encoder_config = {
         'dataset': args.dataset,
         'reshape_input': False, #fixed
-        'sliding_window_length': 100 if args.dataset == 'mbientlab' and args.arch != 'cnn_transformer' else 200,
+        'sliding_window_length': 100 if args.dataset in ['mbientlab', 'lara_mm'] and args.arch != 'cnn_transformer' else 200,
         'fully_convolutional': 'FC', #fixed
         'filter_size': 5, #fixed
         'num_filters': 64, #fixed
@@ -145,7 +145,8 @@ def main():
     }
     encoder_config['network'] = args.arch
     # backbone_config['NB_sensor_channels'] = {'mbientlab': 30, 'mocap': 126}.get(args.dataset, 9)
-    encoder_config['NB_sensor_channels'] =  30 if args.dataset == 'mbientlab' else \
+    encoder_config['NB_sensor_channels'] =   30 if args.dataset == 'mbientlab' else \
+                                             27 if args.dataset == 'lara_mm' else \
                                             126 if args.dataset == 'mocap'     else \
                                               9
     
@@ -214,12 +215,13 @@ def main():
     dataset_root_defaults = {
         'mocap':        "/vol/actrec/DFG_Project/2019/LARa_dataset/MoCap/LARa_dataset_mocap/",
         'mbientlab':    "/vol/actrec/DFG_Project/2019/LARa_dataset/Mbientlab/LARa_dataset_mbientlab/",
+        'lara_mm':           "/vol/actrec/DFG_Project/2019/Motionminers_Dataset/DFG-Data/",
         'mobiact':      "/vol/actrec/MobiAct_Dataset/",
         'motionsense':  "/vol/actrec/motion-sense-master/data/A_DeviceMotion_data/A_DeviceMotion_data",
         'sisfall':      "/vol/actrec/SisFall_dataset"
         }
     # sliding_window_length_defaults = {}
-    sliding_window_step_defaults = {'mocap': 25, 'mbientlab': 12, 'mobiact': 50, 'motionsense': 25, 'sisfall': 50}
+    sliding_window_step_defaults = {'mocap': 25, 'mbientlab': 12, 'lara_mm': 12, 'mobiact': 50, 'motionsense': 25, 'sisfall': 50}
 
     train_dataset = HARDataset(
         path=dataset_root_defaults[args.dataset],
