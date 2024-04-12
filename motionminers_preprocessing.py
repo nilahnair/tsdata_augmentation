@@ -674,6 +674,45 @@ def create_dataset_motionminers(identity_bool = False):
 
     return
 
+def half_subject_norm():
+    
+    persons = ["MS01__P02-1", "MS01__P03-5", "MS01__P02-2", "MS02__P03-3"]
+
+    accumulator_measurements = np.empty((0, 27))
+    for P in persons:
+        file_name_data = "{}/{}_data.csv".format(P, P)
+        file_name_label = "{}/{}_labels.csv".format(P, P)
+        print("------------------------------\n{}\n{}".format(file_name_data, file_name_label))
+        try:
+            # getting data
+            data = csv_reader.reader_data(FOLDER_PATH + file_name_data)
+            data_x = data[:, 2:]
+            accumulator_measurements = np.append(accumulator_measurements, data_x, axis=0)
+            print("\nFiles loaded")
+        except:
+            print("\n1 In loading data,  in file {}".format(FOLDER_PATH + file_name_data))
+
+    try:
+        max_values = np.max(accumulator_measurements, axis=0)
+        min_values = np.min(accumulator_measurements, axis=0)
+        mean_values = np.mean(accumulator_measurements, axis=0)
+        std_values = np.std(accumulator_measurements, axis=0)
+    except:
+        max_values = 0
+        min_values = 0
+        mean_values = 0
+        std_values = 0
+        print("Error computing statistics")
+    print('maxvalues') 
+    print(max_values) 
+    print('min values')
+    print(min_values) 
+    print('mean values')
+    print(mean_values) 
+    print('std values')
+    print(std_values)
+    return
+
 if __name__ == '__main__':
     IMUSequenceContainer = IMUSequenceContainer()
 
@@ -684,6 +723,7 @@ if __name__ == '__main__':
     # get_labels_motionminers()
 
     # statistics_measurements()
-    create_dataset_motionminers(identity_bool=False)
+    #create_dataset_motionminers(identity_bool=False)
+    half_subject_norm()
 
     print("Done")
