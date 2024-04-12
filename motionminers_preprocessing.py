@@ -723,7 +723,7 @@ if __name__ == '__main__':
     # get_labels_motionminers()
 
     # statistics_measurements()
-    #create_dataset_motionminers(identity_bool=False)
-    half_subject_norm()
+    create_dataset_motionminers(identity_bool=False)
+    #half_subject_norm()
 
     print("Done")
