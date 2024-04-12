@@ -103,7 +103,7 @@ def my_config():
     #dataset_finetuning = config["dataset_finetuning"]
     #pooling = config["pooling"]
 
-    assert dataset in ['mocap', 'mbientlab', 'mobiact', 'motionsense', 'sisfall'], 'Dataset is configured wrong'
+    assert dataset in ['mocap', 'mbientlab', 'lara_mm', 'mobiact', 'motionsense', 'sisfall'], 'Dataset is configured wrong'
     assert network in ['cnn', 'lstm', 'cnn_imu', 'cnn_transformer'], 'Network is configured wrong'
     assert output in ['softmax', 'attribute'], 'Output is configured wrong'
     assert usage_modus in ['train', 'test',  'evolution',  'train_final',  'train_random',  'fine_tuning'], 'usage_mouds configured wrong'
@@ -127,6 +127,7 @@ def my_config():
     dataset_root_defaults = {
         'mocap':        "/vol/actrec/DFG_Project/2019/LARa_dataset/MoCap/LARa_dataset_mocap/",
         'mbientlab':    "/vol/actrec/DFG_Project/2019/LARa_dataset/Mbientlab/LARa_dataset_mbientlab/",
+        'lara_mm':           "/vol/actrec/DFG_Project/2019/Motionminers_Dataset/DFG-Data/",
         'mobiact':      "/vol/actrec/MobiAct_Dataset/",
         'motionsense':  "/vol/actrec/motion-sense-master/data/A_DeviceMotion_data/A_DeviceMotion_data",
         'sisfall':      "/vol/actrec/SisFall_dataset"
@@ -134,18 +135,18 @@ def my_config():
     dataset_root = dataset_root_defaults[dataset]
 
     # Dataset Hyperparameters
-    NB_sensor_channels_defaults = {'mocap': 126, 'mbientlab': 30, 'mobiact': 9, 'motionsense': 9, 'sisfall': 9}
-    sliding_window_length_defaults = {'mocap': 200, 'mbientlab': 100, 'mobiact': 200, 'motionsense': 200, 'sisfall': 200}
-    sliding_window_step_defaults = {'mocap': 25, 'mbientlab': 12, 'mobiact': 50, 'motionsense': 25, 'sisfall': 50}
+    NB_sensor_channels_defaults = {'mocap': 126, 'mbientlab': 30, 'lara_mm': 27, 'mobiact': 9, 'motionsense': 9, 'sisfall': 9}
+    sliding_window_length_defaults = {'mocap': 200, 'mbientlab': 100, 'lara_mm': 100, 'mobiact': 200, 'motionsense': 200, 'sisfall': 200}
+    sliding_window_step_defaults = {'mocap': 25, 'mbientlab': 12, 'lara_mm': 12, 'mobiact': 50, 'motionsense': 25, 'sisfall': 50}
 
     NB_sensor_channels = NB_sensor_channels_defaults[dataset]
     sliding_window_length = sliding_window_length_defaults[dataset]
     sliding_window_step = sliding_window_step_defaults[dataset]
     
     # Number of classes for either for activity recognition
-    num_classes_defaults = {'mocap': 7, 'mbientlab': 7, 'mobiact': 9, 'motionsense': 6, 'sisfall': 15}
-    num_attributes_defaults = {'mocap': 19, 'mbientlab': 19, 'mobiact': 0, 'motionsense': 0, 'sisfall': 0}
-    num_tr_inputs_defaults = {'mocap': 345417, 'mbientlab': 94753, 'mobiact': 160561, 'motionsense': 118671, 'sisfall': 118610}
+    num_classes_defaults = {'mocap': 7, 'mbientlab': 7, 'lara_mm': 6, 'mobiact': 9, 'motionsense': 6, 'sisfall': 15}
+    num_attributes_defaults = {'mocap': 19, 'mbientlab': 19, 'lara_mm': 0, 'mobiact': 0, 'motionsense': 0, 'sisfall': 0}
+    num_tr_inputs_defaults = {'mocap': 345417, 'mbientlab': 94753, 'lara_mm': 94753, 'mobiact': 160561, 'motionsense': 118671, 'sisfall': 118610}
 
     num_classes = num_classes_defaults[dataset]
     num_attributes = num_attributes_defaults[dataset]
@@ -186,7 +187,7 @@ def my_config():
 
     # Balacing the proportion of classes into the dataset dataset
     # This will be deprecated
-    balancing_defaults = {'mocap': False, 'mbientlab': False, 'mobiact': False, 'motionsense': False, 'sisfall': False}
+    balancing_defaults = {'mocap': False, 'mbientlab': False, 'lara_mm': False, 'mobiact': False, 'motionsense': False, 'sisfall': False}
     balancing = balancing_defaults[dataset]
 
     # Epochs
@@ -204,6 +205,10 @@ def my_config():
                         'cnn_imu': {'softmax': 10, 'attribute': 6},
                         'cnn_transformer':{'softmax': 15, 'attribute': 6}},
               'mbientlab': {'cnn': {'softmax': 10, 'attribute': 10},
+                            'lstm': {'softmax': 15, 'attribute': 10},
+                            'cnn_imu': {'softmax': 30, 'attribute': 10},
+                            'cnn_transformer':{'softmax': 50, 'attribute': 6}},
+              'lara_mm': {'cnn': {'softmax': 10, 'attribute': 10},
                             'lstm': {'softmax': 15, 'attribute': 10},
                             'cnn_imu': {'softmax': 30, 'attribute': 10},
                             'cnn_transformer':{'softmax': 50, 'attribute': 6}},
