@@ -367,7 +367,7 @@ def __prepare_dataframe__(path, dataset_name, split, half_dataset):
         case 'mbientlab':
             return __prepare_mbientlab__(path, split, half_dataset)
         case 'mm':
-            return __prepare_mbientlab__(path, split, half_dataset)
+            return __prepare_mm__(path, split, half_dataset)
         case 'motionsense':
             return __prepare_motionsense__(path, split, half_dataset)
         case 'sisfall':
