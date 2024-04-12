@@ -17,7 +17,7 @@ import pickle
 
 #from attributes import Attributes
 
-from IMUSequenceContainer import IMUSequenceContainer
+#from IMUSequenceContainer import IMUSequenceContainer
 
 # timeStamp,packetCounter, AccX,AccY,AccZ, GyrX,GyrY,GyrZ, MagX,MagY,MagZ, Q0,Q1,Q2,Q3, Vbat
 # data [L, T, R]
@@ -714,7 +714,7 @@ def half_subject_norm():
     return
 
 if __name__ == '__main__':
-    IMUSequenceContainer = IMUSequenceContainer()
+    #IMUSequenceContainer = IMUSequenceContainer()
 
     #save_data(data, imu_file_path + 'MS01__P02-1_data.csv')
 
