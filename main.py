@@ -233,34 +233,35 @@ def my_config():
     #                   'permutation',  'slicing',  'window_warping', 'tilt', 'spawner'], 'augmentation configured wrong' # TODO can directly infer list by sys.module[transforms]
     augmentation_probability = 0.5
     
-    division_epochs_defaults = {'mocap': 2, 'mbientlab': 1, 'mobiact': 1, 'motionsense': 1, 'sisfall': 1}
+    division_epochs_defaults = {'mocap': 2, 'mbientlab': 1,'lara_mm':1, 'mobiact': 1, 'motionsense': 1, 'sisfall': 1}
     division_epochs = division_epochs_defaults[dataset]
 
     # Batch size
     batch_size_train_defaults = {
-        'cnn': {'mocap': 100, 'mbientlab': 100, 'mobiact': 100, 'motionsense': 50, 'sisfall': 50},
-        'lstm': {'mocap': 50, 'mbientlab': 50, 'mobiact': 100, 'motionsense': 50, 'sisfall': 50},
-        'cnn_imu': {'mocap': 100, 'mbientlab': 100, 'mobiact': 100, 'motionsense': 100, 'sisfall': 100},
-        'cnn_transformer': {'mocap': 50, 'mbientlab': 128, 'mobiact': 200, 'motionsense': 50, 'sisfall': 50}}
+        'cnn': {'mocap': 100, 'mbientlab': 100, 'lara_mm': 100, 'mobiact': 100, 'motionsense': 50, 'sisfall': 50},
+        'lstm': {'mocap': 50, 'mbientlab': 50, 'lara_mm':50, 'mobiact': 100, 'motionsense': 50, 'sisfall': 50},
+        'cnn_imu': {'mocap': 100, 'mbientlab': 100, 'lara_mm':100, 'mobiact': 100, 'motionsense': 100, 'sisfall': 100},
+        'cnn_transformer': {'mocap': 50, 'mbientlab': 128, 'lara_mm':100, 'mobiact': 200, 'motionsense': 50, 'sisfall': 50}}
 
-    batch_size_val_defaults = {'cnn': {'mocap': 100, 'mbientlab': 100, 'mobiact': 100, 'motionsense': 50,'sisfall': 50},
-                      'lstm': {'mocap': 50, 'mbientlab': 50, 'mobiact': 100, 'motionsense': 50,'sisfall': 50},
-                      'cnn_imu': {'mocap': 100, 'mbientlab': 100,'mobiact': 100, 'motionsense': 100,'sisfall': 100},
-                      'cnn_transformer': {'mocap': 50, 'mbientlab': 128,'mobiact': 200, 'motionsense': 50,'sisfall': 50}}
+    batch_size_val_defaults = {'cnn': {'mocap': 100, 'mbientlab': 100, 'lara_mm':100, 'mobiact': 100, 'motionsense': 50,'sisfall': 50},
+                      'lstm': {'mocap': 50, 'mbientlab': 50, 'lara_mm':50, 'mobiact': 100, 'motionsense': 50,'sisfall': 50},
+                      'cnn_imu': {'mocap': 100, 'mbientlab': 100,'lara_mm':100, 'mobiact': 100, 'motionsense': 100,'sisfall': 100},
+                      'cnn_transformer': {'mocap': 50, 'mbientlab': 128,'lara_mm':100,'mobiact': 200, 'motionsense': 50,'sisfall': 50}}
 
     batch_size_train = batch_size_train_defaults[network][dataset]
     batch_size_val = batch_size_val_defaults[network][dataset]
     
 
     # Number of iterations for accumulating the gradients
-    accumulation_steps_defaults = {'mocap': 4, 'mbientlab': 4, 'mobiact': 4, 'motionsense': 4, 'sisfall': 4}
+    accumulation_steps_defaults = {'mocap': 4, 'mbientlab': 4, 'lara_mm':4, 'mobiact': 4, 'motionsense': 4, 'sisfall': 4}
     accumulation_steps = accumulation_steps_defaults[dataset]
 
     # Filters
-    filter_size_defaults = {'mocap': 5, 'mbientlab': 5, 'mobiact': 5, 'motionsense': 5, 'sisfall': 5}
+    filter_size_defaults = {'mocap': 5, 'mbientlab': 5, 'lara_mm':5, 'mobiact': 5, 'motionsense': 5, 'sisfall': 5}
     filter_size = filter_size_defaults[dataset]
     num_filters_defaults = {'mocap': {'cnn': 64, 'lstm': 64, 'cnn_imu': 64, 'cnn_transformer':64},
                    'mbientlab': {'cnn': 64, 'lstm': 64, 'cnn_imu': 64, 'cnn_transformer':64},
+                   'lara_mm': {'cnn': 64, 'lstm': 64, 'cnn_imu': 64, 'cnn_transformer':64},
                    'mobiact': {'cnn': 64, 'lstm': 64, 'cnn_imu': 64, 'cnn_transformer':64},
                    'motionsense': {'cnn': 64, 'lstm': 64, 'cnn_imu': 64, 'cnn_transformer':64},
                    'sisfall': {'cnn': 64, 'lstm': 64, 'cnn_imu': 64, 'cnn_transformer':64}
@@ -326,6 +327,7 @@ def my_config():
         folder_exp_defaults = { 
             'mocap':        str(Path(base_folder_exp) / "lara/results/"),
             'mbientlab':    str(Path(base_folder_exp) / "lara_imu/results/"),
+            'lara_mm':    str(Path(base_folder_exp) / "lara_mm/results/"),
             'mobiact':      str(Path(base_folder_exp) / "mobiact/results/"),
             'motionsense':  str(Path(base_folder_exp) / "motionsense/results/"),
             'sisfall':      str(Path(base_folder_exp) / "sisfall/results/")
