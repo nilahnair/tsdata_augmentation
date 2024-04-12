@@ -105,7 +105,7 @@ def __get_separating_cols__(dataset_name):
             return ['logistic_scenario', 'subject', 'recording_number', 'annotator','execution']
         case 'mbientlab':
             return ['logistic_scenario', 'subject', 'recording_number']
-        case 'mm':
+        case 'lara_mm':
             return ['logistic_scenario', 'subject', 'recording_number']
         case 'motionsense':
             # return ['class_name_full', 'subject']
@@ -289,7 +289,7 @@ def __get_data_col_names__(dataset_name):
                 'RL_GyroscopeY',
                 'RL_GyroscopeZ',
             ]
-        case 'mm':
+        case 'lara_mm':
             return [
                 'AccX_L', 
                 'AccY_L', 
@@ -366,8 +366,8 @@ def __prepare_dataframe__(path, dataset_name, split, half_dataset):
             return __prepare_mocap__(path, split, half_dataset)
         case 'mbientlab':
             return __prepare_mbientlab__(path, split, half_dataset)
-        case 'mm':
-            return __prepare_mm__(path, split, half_dataset)
+        case 'lara_mm':
+            return __prepare_lara_mm__(path, split, half_dataset)
         case 'motionsense':
             return __prepare_motionsense__(path, split, half_dataset)
         case 'sisfall':
@@ -517,7 +517,7 @@ def __prepare_mbientlab__(path, split, half_dataset):
 
     return recordings
 
-def __prepare_mm__(path, split, half_dataset):
+def __prepare_lara_mm__(path, split, half_dataset):
     print(f'Preparing DataFrame for MotionMiners {split}')
     all_files = sorted(Path(path).glob('**/*.csv'))
     sample_files = list(filter(lambda f: 'labels' not in str(f), all_files))
@@ -554,13 +554,13 @@ def __prepare_mm__(path, split, half_dataset):
                                     -1.83749448,  22.7382544,  3.82684557,  110.909543,
                                     4124.93755,  792.051213,  2172.97279,  412.895953,
                                     1688.48752, -1.60102759, -8.11238113,  0.941841818,
-                                    -3073.85326, -130.701438, -2006.67998]).transpose(column_names=__get_data_col_names__('mm'))
+                                    -3073.85326, -130.701438, -2006.67998]).transpose(column_names=__get_data_col_names__('lara_mm'))
         std_values = pl.DataFrame([ 1826.11771962, 2237.12831729, 2102.74730745,  897.27225143, 1562.60774081,
                                     1027.91314466, 2707.37064257, 2973.58510232, 2388.28788624,  813.64570776,
                                     1048.94503473, 1439.29069218,  319.98978927,  608.50895614,  321.12828959,
                                     3105.00798535, 2631.02877225, 2293.48818841, 1860.29711725, 2151.29325333,
                                     2107.06928689,  907.57565012, 1423.66566167, 1009.557906,   3605.91405081,
-                                    3407.81797634, 2667.09796459]).transpose(column_names=__get_data_col_names__('mm'))
+                                    3407.81797634, 2667.09796459]).transpose(column_names=__get_data_col_names__('lara_mm'))
 
     else: 
         ids = {
@@ -653,7 +653,7 @@ def __prepare_mm__(path, split, half_dataset):
         )
 
         df = df.with_columns(
-            pl.col(__get_data_col_names__('mm')).clip(0.0, 1.0)
+            pl.col(__get_data_col_names__('lara_mm')).clip(0.0, 1.0)
         )
         recordings.append(df)
     
