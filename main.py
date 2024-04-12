@@ -144,7 +144,7 @@ def my_config():
     sliding_window_step = sliding_window_step_defaults[dataset]
     
     # Number of classes for either for activity recognition
-    num_classes_defaults = {'mocap': 7, 'mbientlab': 7, 'mm': 7, 'mobiact': 9, 'motionsense': 6, 'sisfall': 15}
+    num_classes_defaults = {'mocap': 7, 'mbientlab': 7, 'mm': 6, 'mobiact': 9, 'motionsense': 6, 'sisfall': 15}
     num_attributes_defaults = {'mocap': 19, 'mbientlab': 19, 'mm': 0, 'mobiact': 0, 'motionsense': 0, 'sisfall': 0}
     num_tr_inputs_defaults = {'mocap': 345417, 'mbientlab': 94753, 'mm': 94753, 'mobiact': 160561, 'motionsense': 118671, 'sisfall': 118610}
 
