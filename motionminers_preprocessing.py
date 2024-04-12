@@ -10,7 +10,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import csv
 import csv_reader
-import csv_save
+#import csv_save
 from sliding_window import sliding_window
 import pickle
 #import scipy.interpolate
@@ -714,7 +714,7 @@ def half_subject_norm():
     return
 
 if __name__ == '__main__':
-    IMUSequenceContainer = IMUSequenceContainer()
+    #IMUSequenceContainer = IMUSequenceContainer()
 
     #save_data(data, imu_file_path + 'MS01__P02-1_data.csv')
 
