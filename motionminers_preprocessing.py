@@ -714,7 +714,7 @@ def half_subject_norm():
     return
 
 if __name__ == '__main__':
-    #IMUSequenceContainer = IMUSequenceContainer()
+    IMUSequenceContainer = IMUSequenceContainer()
 
     #save_data(data, imu_file_path + 'MS01__P02-1_data.csv')
 
