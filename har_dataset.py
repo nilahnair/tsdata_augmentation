@@ -1212,7 +1212,8 @@ def __check_ragged_cols__(path='/vol/actrec/DFG_Project/2019/LARa_dataset/MoCap/
             print(f'The following lines have errors {incorrect_rows}')
 
 
-def __check_same_col_names__(path='/vol/actrec/DFG_Project/2019/LARa_dataset/MoCap/LARa_dataset_mocap/', glob='*labels.csv', col_idx=0, var1 = 'class', var2 = 'Class'):
+def __check_same_col_names__(path='/vol/actrec/DFG_Project/2019/LARa_dataset/MoCap/LARa_dataset_mocap/', glob='*labels.csv', 
+                             col_idx=0, var1 = 'class', var2 = 'Class'):
     import csv
     import numpy as np
 
