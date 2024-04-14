@@ -105,7 +105,7 @@ def __get_separating_cols__(dataset_name):
             return ['logistic_scenario', 'subject', 'recording_number', 'annotator','execution']
         case 'mbientlab':
             return ['logistic_scenario', 'subject', 'recording_number']
-        case 'mm':
+        case 'lara_mm':
             return ['logistic_scenario', 'subject', 'recording_number']
         case 'motionsense':
             # return ['class_name_full', 'subject']
@@ -289,7 +289,7 @@ def __get_data_col_names__(dataset_name):
                 'RL_GyroscopeY',
                 'RL_GyroscopeZ',
             ]
-        case 'mm':
+        case 'lara_mm':
             return [
                 'AccX_L', 
                 'AccY_L', 
@@ -366,8 +366,8 @@ def __prepare_dataframe__(path, dataset_name, split, half_dataset):
             return __prepare_mocap__(path, split, half_dataset)
         case 'mbientlab':
             return __prepare_mbientlab__(path, split, half_dataset)
-        case 'mm':
-            return __prepare_mbientlab__(path, split, half_dataset)
+        case 'lara_mm':
+            return __prepare_lara_mm__(path, split, half_dataset)
         case 'motionsense':
             return __prepare_motionsense__(path, split, half_dataset)
         case 'sisfall':
@@ -517,50 +517,40 @@ def __prepare_mbientlab__(path, split, half_dataset):
 
     return recordings
 
-def __prepare_mm__(path, split, half_dataset):
+def __prepare_lara_mm__(path, split, half_dataset):
     print(f'Preparing DataFrame for MotionMiners {split}')
     all_files = sorted(Path(path).glob('**/*.csv'))
-    sample_files = list(filter(lambda f: 'labels' not in str(f), all_files))
-    label_files =    list(filter(lambda f: 'labels'     in str(f), all_files))
+    sample_files = list(filter(lambda f: '_data' in str(f), all_files))
+    label_files = list(filter(lambda f: '_labels' in str(f), all_files))
     files = list(zip(sample_files, label_files))
+    assert len(sample_files) == len(label_files), 'Number of sample files and label files does not match!'
     
     
     # for normalization later
-    '''
-    mean_values = pl.DataFrame([-0.6018319,   0.234877,    0.2998928,   1.11102944,  0.17661719, -1.41729978,
-                    0.03774093,  1.0202137,  -0.1362719,   1.78369919,  2.4127946,  -1.36437627,
-                    -0.96302063, -0.0836716,   0.13035097,  0.08677377,  1.088766,    0.51141513,
-                    -0.61147614, -0.22219321,  0.41094977, -1.45036893,  0.80677986, -0.1342488,
-                    -0.02994514, -0.999678,   -0.22073192, -0.1808128,  -0.01197039,  0.82491874]) \
-                    .transpose(column_names=__get_data_col_names__('mbientlab'))
-
-    std_values = pl.DataFrame([1.17989719,   0.55680584,   0.65610454,  58.42857495,  74.36437559,
-                    86.72291263,   1.01306,      0.62489802,   0.70924608,  86.47014857,
-                    100.6318856,   61.02139095,   0.38256693,   0.21984504,   0.32184666,
-                    42.84023413,  24.85339931,  18.02111335,   0.44021448,   0.51931148,
-                    0.45731142,  78.58164965,  70.93038919,  76.34418105,   0.78003314,
-                    0.32844988,   0.54919488,  26.68953896,  61.04472454,  62.9225945]) \
-                    .transpose(column_names=__get_data_col_names__('mbientlab'))
-    '''
     if half_dataset == True:
         ids = {
             'train':    ["MS01__P02-1", "MS01__P03-5"],
             'val':      ["MS01__P02-2", "MS02__P03-3"],
             'test':     ["MS01__P01-1", "MS01__P01-2", "MS02__P01-5"]
             }
-        mean_values = pl.DataFrame([-2132.08326,  775.099076,  1463.79081,  29.7056898,
-                                    -3.99976209, -11.6964709,  3405.78852, -2768.26398,
-                                    -1198.50163, -403.627000, -3566.88040, -638.041141,
-                                    -1.83749448,  22.7382544,  3.82684557,  110.909543,
-                                    4124.93755,  792.051213,  2172.97279,  412.895953,
-                                    1688.48752, -1.60102759, -8.11238113,  0.941841818,
-                                    -3073.85326, -130.701438, -2006.67998]).transpose(column_names=__get_data_col_names__('mm'))
-        std_values = pl.DataFrame([ 1826.11771962, 2237.12831729, 2102.74730745,  897.27225143, 1562.60774081,
-                                    1027.91314466, 2707.37064257, 2973.58510232, 2388.28788624,  813.64570776,
-                                    1048.94503473, 1439.29069218,  319.98978927,  608.50895614,  321.12828959,
-                                    3105.00798535, 2631.02877225, 2293.48818841, 1860.29711725, 2151.29325333,
-                                    2107.06928689,  907.57565012, 1423.66566167, 1009.557906,   3605.91405081,
-                                    3407.81797634, 2667.09796459]).transpose(column_names=__get_data_col_names__('mm'))
+        mean_values = pl.DataFrame([[-2419.352897416974, 636.082757195572, 1398.0709372693727,
+                                     27.840643542435423, -3.933709225092251, -7.787259040590406,
+                                     4416.937883394834, -3309.426957933579, -970.1650361623616,
+                                     -585.8178994152036, -3504.638900907374, -1264.0507507074371,
+                                     -1.2594386849078454, 21.54952371100957, 7.455690213204134,
+                                     313.5329580173019, 4335.137435153428, 1573.0668159117824,
+                                     2391.963920759569, 248.6346387605601, 1677.2157004114774,
+                                     -2.6729483363522473, -7.2084649019369165, 14.908697838458435,
+                                     -3076.7275070185783, 316.9695075654199, -2385.823965910246]]).transpose(column_names=__get_data_col_names__('lara_mm'))
+        std_values = pl.DataFrame([1599.3015658510171, 2276.3091764458786, 1877.1254563379575,
+                                   835.7803782872869, 1447.0806556101998, 960.5641669108853,
+                                   2067.2911009765726, 2945.754256650939, 2336.081911226845,
+                                   822.3703530728984, 846.7735834679409, 1214.155501992818,
+                                   281.64022669709317, 587.0529511685963, 311.1165558940723,
+                                   2613.414711189383, 1695.982702460058, 2150.019040293322,
+                                   1542.8021394695015, 2152.840167386653, 1963.7532298512251,
+                                   745.3196570601178, 1158.9941619070378, 884.660082026378,
+                                   2299.4680563979146, 2794.6350562887037, 2224.2576303837677]).transpose(column_names=__get_data_col_names__('lara_mm'))
 
     else: 
         ids = {
@@ -568,20 +558,24 @@ def __prepare_mm__(path, split, half_dataset):
             'val':      ["MS01__P02-2", "MS02__P03-3"],
             'test':     ["MS01__P01-1", "MS01__P01-2", "MS02__P01-5"]
             }
-        mean_values = pl.DataFrame([-2158.247781475599, 855.390755963325, 1389.4675813896226, 30.955428699441157,
-                            6.700558238662165, -22.262269242179915, 2468.306712385996, -1341.474143620317,
-                            -1150.9497615477298, 11.212617589578134, -3615.691366601724, -303.6048153056071,
-                            -3.6936435585433536, 25.792026400888272, -1.6807350787039403, -144.2625391404705,
-                            3261.3816818239684, 185.4163216453658, 2080.8597940893587, 711.4344334952643,
-                            1526.4707456468716, 1.8147758403105247, -13.757557233141402, -0.7271561241321074,
-                            -2283.7609492148913, -171.1391101933215, -1318.0302728777704]).transpose(column_names=__get_data_col_names__('mm'))
-        std_values = pl.DataFrame([1852.0063567250488, 2188.5663620188247, 2151.444400261148, 934.8641122210573,
-                           1597.1159856259112, 1057.2860746311146, 2388.125855279013, 2749.563422655149,
-                           2213.161234657168, 921.0891362969842, 1134.7120552945705, 1476.0313538420967,
-                           331.8760093184819, 619.5409993141205, 311.6784978431961, 2176.0962957638712,
-                           2039.0205194433688, 1777.7449273443692, 1882.3700322895595, 2188.449667811695,
-                           2221.5492336793204, 950.0355434899441, 1509.7002668544928, 1071.9455887036731,
-                           2924.6853702636913, 2755.637179167859, 2443.644113640929]).transpose(column_names=__get_data_col_names__('mm'))
+        mean_values = pl.DataFrame([-2349.234316995156, 646.831529351329, 1331.3183877738581,
+                                    47.25702429255411, 3.564953385426073, -20.14409782839897,
+                                    3513.0652844833467, -2319.467895541616, -1025.2077970550345,
+                                    -521.5533046118935, -3639.582831450502, -1069.2903395368596,
+                                    -0.4474841497990362, 34.97650281420756, 4.112893306985013,
+                                    293.8052643967949, 3828.512678023439, 1107.4210829245437,
+                                    2353.772998075654, 413.21034091703035, 1542.8251468406067,
+                                    -6.112649292937527, -14.863959653389383, 4.316012683622746,
+                                    -2459.0073824853903, 120.03791334641794, -1932.2583893484946]).transpose(column_names=__get_data_col_names__('lara_mm'))
+        std_values = pl.DataFrame([1735.8185751891917, 2275.438411194947, 2040.7303841359872,
+                                   948.523005957034, 1685.9836923630914, 1071.872170744278,
+                                   2262.015928321284, 2916.73647299707, 2117.2243543926693,
+                                   765.6871055287131, 809.7780088876233, 1158.846514757711,
+                                   276.74893825462544, 598.9447021955197, 297.3459618617213,
+                                   2204.8715753158194, 1668.8076498762327, 1971.1059613904895,
+                                   1701.7057476678835, 2167.303836119953, 2077.470777584032,
+                                   883.1219703827579, 1462.958501466499, 1007.0677441115469,
+                                   2209.6908470567246, 2435.7861867727147, 2128.1284011005973]).transpose(column_names=__get_data_col_names__('lara_mm'))
 
 
     min_df = mean_values.with_columns(
@@ -594,72 +588,78 @@ def __prepare_mm__(path, split, half_dataset):
 
     recordings = []
     for sfile, lfile in files:
-        logistic_scenario, subject, recording_number = sfile.stem.split('_')
+        file_id = sfile.stem.replace('_data', '')
+        logistic_scenario, _, remaining_str, _ = sfile.stem.split('_')
+        subject, recording_number = remaining_str.split('-')
 
         # skip subjects according to split id list
-        if subject not in ids[split]:
+        if file_id not in ids[split]:
             continue
 
-        logistic_scenario = int(logistic_scenario[1:])
+        # logistic_scenario = int(logistic_scenario[1:])
         identity = int(subject[1:]) - 1 # same as original preprocessing
-        recording_number = int(recording_number[1:])
+        # recording_number = int(recording_number[1:])
 
-        df = pl.concat(
-            (pl.read_csv(sfile, truncate_ragged_lines=True, ignore_errors=True),
-             pl.read_csv(lfile, truncate_ragged_lines=True, ignore_errors=True)),
-             how='horizontal')
+        sdf = pl.read_csv(sfile)
+        sdf = sdf.drop('Class')
+        ldf = pl.read_csv(lfile, has_header=False)
+        ldf = ldf.rename({'column_1': 'class'})
+        df = pl.concat((sdf, ldf.select(pl.col('class'))), how='horizontal')
         df = df.with_columns([
             pl.lit(logistic_scenario).alias('logistic_scenario'),
             pl.lit(subject).alias('subject'),
             pl.lit(identity).alias('identity'),
             pl.lit(recording_number).alias('recording_number')])
-    
-        # fix col names
-        if 'Class' in df.columns:
-            df = df.rename({'Class': 'class'})
         
         df = df.filter(pl.col('class') != 1) # drop samples of activtiy ignore 
 
         # cast columns to smaller datatypes
         df = df.with_columns([
             pl.col('class').cast(pl.UInt8),
-            pl.col('logistic_scenario').cast(pl.UInt8),
+            # pl.col('logistic_scenario').cast(pl.UInt8),
             pl.col('identity').cast(pl.UInt8),
             pl.col('recording_number').cast(pl.UInt8),
-            pl.col('I-A_GaitCycle').cast(pl.Boolean),
-            pl.col('I-B_Step').cast(pl.Boolean),
-            pl.col('I-C_StandingStill').cast(pl.Boolean),
-            pl.col('II-A_Upwards').cast(pl.Boolean),
-            pl.col('II-B_Centred').cast(pl.Boolean),
-            pl.col('II-C_Downwards').cast(pl.Boolean),
-            pl.col('II-D_NoIntentionalMotion').cast(pl.Boolean),
-            pl.col('II-E_TorsoRotation').cast(pl.Boolean),
-            pl.col('III-A_Right').cast(pl.Boolean),
-            pl.col('III-B_Left').cast(pl.Boolean),
-            pl.col('III-C_NoArms').cast(pl.Boolean),
-            pl.col('IV-A_BulkyUnit').cast(pl.Boolean),
-            pl.col('IV-B_HandyUnit').cast(pl.Boolean),
-            pl.col('IV-C_UtilityAux').cast(pl.Boolean),
-            pl.col('IV-D_Cart').cast(pl.Boolean),
-            pl.col('IV-E_Computer').cast(pl.Boolean),
-            pl.col('IV-F_NoItem').cast(pl.Boolean),
-            pl.col('V-A_None').cast(pl.Boolean),
-            pl.col('VI-A_Error',).cast(pl.Boolean) 
+            # pl.col('I-A_GaitCycle').cast(pl.Boolean),
+            # pl.col('I-B_Step').cast(pl.Boolean),
+            # pl.col('I-C_StandingStill').cast(pl.Boolean),
+            # pl.col('II-A_Upwards').cast(pl.Boolean),
+            # pl.col('II-B_Centred').cast(pl.Boolean),
+            # pl.col('II-C_Downwards').cast(pl.Boolean),
+            # pl.col('II-D_NoIntentionalMotion').cast(pl.Boolean),
+            # pl.col('II-E_TorsoRotation').cast(pl.Boolean),
+            # pl.col('III-A_Right').cast(pl.Boolean),
+            # pl.col('III-B_Left').cast(pl.Boolean),
+            # pl.col('III-C_NoArms').cast(pl.Boolean),
+            # pl.col('IV-A_BulkyUnit').cast(pl.Boolean),
+            # pl.col('IV-B_HandyUnit').cast(pl.Boolean),
+            # pl.col('IV-C_UtilityAux').cast(pl.Boolean),
+            # pl.col('IV-D_Cart').cast(pl.Boolean),
+            # pl.col('IV-E_Computer').cast(pl.Boolean),
+            # pl.col('IV-F_NoItem').cast(pl.Boolean),
+            # pl.col('V-A_None').cast(pl.Boolean),
+            # pl.col('VI-A_Error',).cast(pl.Boolean) 
             ])
 
-        # normalization
-        df = df.with_columns(
-            [(pl.col(c) -  min_df[c]) / (max_df[c] - min_df[c])  for c in set(df.columns).intersection(min_df.columns)]
-        )
-
-        df = df.with_columns(
-            pl.col(__get_data_col_names__('mm')).clip(0.0, 1.0)
-        )
         recordings.append(df)
     
-        
+
     # concat into big df
     recordings = pl.concat(recordings, how='vertical')
+
+    # normalization
+    recordings = recordings.with_columns(
+        [(pl.col(c) -  min_df[c]) / (max_df[c] - min_df[c])  for c in set(recordings.columns).intersection(min_df.columns)]
+    )
+
+    recordings = recordings.with_columns(
+        pl.col(__get_data_col_names__('lara_mm')).clip(0.0, 1.0)
+    )
+
+    # fill gap in labels 
+    mapping_classes_training = {0: 0, 2: 1, 3: 2, 4: 3, 5: 4, 6: 5}
+    recordings = recordings.with_columns(
+        pl.col('class').map_dict(mapping_classes_training).alias('class').cast(pl.Int32)
+    )
 
     return recordings
 

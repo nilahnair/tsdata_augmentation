@@ -48,6 +48,7 @@ class QAssistant(object):
         max_used_mem=3,
         ignore_ready_check=False,
         readonly=False,
+        filter_by_hostname=True,
         logdir='queue_assistant_logs/'):
         '''
         Constructor
@@ -61,6 +62,7 @@ class QAssistant(object):
         self.visible_exps = visible_exps
         self.max_used_mem = max_used_mem
         self.ignore_ready_check = ignore_ready_check
+        self.filter_by_hostname = filter_by_hostname
 
         
         self.port = port
@@ -134,12 +136,13 @@ class QAssistant(object):
 
             # exp_path = exp['config']['fs_observer_path'] #TODO: check if experiment path exists, avoid constantly failing experiments
 
-            local_hostname = os.uname()[1]
-            exp_hostname = exp['host']['hostname']
-            if local_hostname != exp_hostname:
-                filtered_ids.remove(exp_id)
-                logger.info(f'Skipping {exp_id} - Experiment was queued on a different host (local hostname {local_hostname} != experiment hostname {exp_hostname})')
-                continue
+            if self.filter_by_hostname:
+                local_hostname = os.uname()[1]
+                exp_hostname = exp['host']['hostname']
+                if local_hostname != exp_hostname:
+                    filtered_ids.remove(exp_id)
+                    logger.info(f'Skipping {exp_id} - Experiment was queued on a different host (local hostname {local_hostname} != experiment hostname {exp_hostname})')
+                    continue
 
             # check if exp depends on a pretrained_id
             if 'pretrained_id' in exp['config']:
@@ -502,11 +505,13 @@ if __name__ == '__main__':
     parser.add_argument('--max_used_mem_perc', '-mem', action='store',
                         type=int, default=3)
     parser.add_argument('--ignore_ready_check', '-irc', action='store_true')
+    parser.add_argument('--filter_by_hostname', type=bool, default=True)
     args = parser.parse_args()
 
     assistant = QAssistant(visible_gpus=args.visible_gpus,
                            visible_exps=args.visible_exps,
                            max_used_mem=args.max_used_mem_perc,
-                           ignore_ready_check=args.ignore_ready_check
+                           ignore_ready_check=args.ignore_ready_check,
+                           filter_by_hostname=args.filter_by_hostname
                            )
     assistant.check_and_run_queue()
