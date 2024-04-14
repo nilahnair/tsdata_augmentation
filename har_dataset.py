@@ -1098,6 +1098,7 @@ def __prepare_mobiact__(path, split, half_dataset):
         std_values = pl.DataFrame([ 3.18530934,   6.34963055,   3.34537117,   1.16675544,   1.10560823,
                                    0.66171724, 107.29336703,  51.92894512,  15.70740516]).transpose(column_names=__get_data_col_names__('mobiact'))
         all_files = list(filter(lambda p: (str(identity) in p.name.split('_')[1] for identity in ids), all_files))
+        print(all_files)
     else:
         # remove subjects
        
