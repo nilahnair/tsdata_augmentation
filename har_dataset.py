@@ -1150,7 +1150,7 @@ def __prepare_mobiact__(path, split, half_dataset):
         subject= group_name[1]
         match split:
             case 'train':
-                if half_dataset==True and subject in ids:
+                if half_dataset==True and str(subject) in ids:
                     dfs_by_split.append(data[0:val_start_row])
                 elif half_dataset==False:
                     dfs_by_split.append(data[0:val_start_row])
