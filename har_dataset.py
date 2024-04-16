@@ -654,7 +654,7 @@ def __prepare_lara_3s__(path, split, half_dataset):
         if 'Class' in df.columns:
             df = df.rename({'Class': 'class'})
         
-        df = df.filter(pl.col('class') != 7) # drop samples of activity 7
+        df = df.filter(pl.col('class') != '7') # drop samples of activity 7
 
         # cast columns to smaller datatypes
         df = df.with_columns([
