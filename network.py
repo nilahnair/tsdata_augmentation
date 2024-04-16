@@ -405,7 +405,7 @@ class Network(nn.Module):
         if self.config["network"] == "cnn":
             x = self.tcnn(x)
         elif self.config["network"] == "cnn_imu":
-            if self.config["dataset"] in ['motionminers_real', 'motionminers_flw']:
+            if self.config["dataset"] in ['motionminers_real', 'motionminers_flw', 'lara_3s']:
                 x_LA, x_N, x_RA = self.tcnn_imu(x)
                 x = torch.cat((x_LA, x_N, x_RA), 1)
             else:
