@@ -114,7 +114,7 @@ def __get_separating_cols__(dataset_name):
             return ['class', 'subject']
         case 'mobiact':
             return ['class', 'subject']
-         case 'lara_3s':
+        case 'lara_3s':
             return ['logistic_scenario', 'subject', 'recording_number']
         case _:
             raise ValueError(f'Unique column names for {dataset_name=} not defined.')
