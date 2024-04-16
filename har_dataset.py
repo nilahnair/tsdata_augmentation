@@ -659,7 +659,7 @@ def __prepare_lara_3s__(path, split, half_dataset):
         # cast columns to smaller datatypes
         df = df.with_columns([
             pl.col('class').cast(pl.UInt8),
-            pl.col('logistic_scenario').cast(pl.UInt8),
+            #pl.col('logistic_scenario').cast(pl.UInt8),
             pl.col('identity').cast(pl.UInt8),
             pl.col('recording_number').cast(pl.UInt8),
             #pl.col('I-A_GaitCycle').cast(pl.Boolean),
