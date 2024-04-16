@@ -632,11 +632,18 @@ def __prepare_lara_3s__(path, split, half_dataset):
         logistic_scenario = int(logistic_scenario[1:])
         identity = int(subject[1:]) - 1 # same as original preprocessing
         recording_number = int(recording_number[1:])
-
+        
+        sdf = pl.read_csv(sfile)
+        sdf = sdf.drop('Class')
+        ldf = pl.read_csv(lfile, has_header=False)
+        ldf = ldf.rename({'column_1': 'class'})
+        df = pl.concat((sdf, ldf.select(pl.col('class'))), how='horizontal')
+        '''
         df = pl.concat(
             (pl.read_csv(sfile, truncate_ragged_lines=True, ignore_errors=True),
              pl.read_csv(lfile, truncate_ragged_lines=True, ignore_errors=True)),
              how='horizontal')
+        '''
         df = df.with_columns([
             pl.lit(logistic_scenario).alias('logistic_scenario'),
             pl.lit(subject).alias('subject'),
@@ -655,25 +662,25 @@ def __prepare_lara_3s__(path, split, half_dataset):
             pl.col('logistic_scenario').cast(pl.UInt8),
             pl.col('identity').cast(pl.UInt8),
             pl.col('recording_number').cast(pl.UInt8),
-            pl.col('I-A_GaitCycle').cast(pl.Boolean),
-            pl.col('I-B_Step').cast(pl.Boolean),
-            pl.col('I-C_StandingStill').cast(pl.Boolean),
-            pl.col('II-A_Upwards').cast(pl.Boolean),
-            pl.col('II-B_Centred').cast(pl.Boolean),
-            pl.col('II-C_Downwards').cast(pl.Boolean),
-            pl.col('II-D_NoIntentionalMotion').cast(pl.Boolean),
-            pl.col('II-E_TorsoRotation').cast(pl.Boolean),
-            pl.col('III-A_Right').cast(pl.Boolean),
-            pl.col('III-B_Left').cast(pl.Boolean),
-            pl.col('III-C_NoArms').cast(pl.Boolean),
-            pl.col('IV-A_BulkyUnit').cast(pl.Boolean),
-            pl.col('IV-B_HandyUnit').cast(pl.Boolean),
-            pl.col('IV-C_UtilityAux').cast(pl.Boolean),
-            pl.col('IV-D_Cart').cast(pl.Boolean),
-            pl.col('IV-E_Computer').cast(pl.Boolean),
-            pl.col('IV-F_NoItem').cast(pl.Boolean),
-            pl.col('V-A_None').cast(pl.Boolean),
-            pl.col('VI-A_Error',).cast(pl.Boolean) 
+            #pl.col('I-A_GaitCycle').cast(pl.Boolean),
+            #pl.col('I-B_Step').cast(pl.Boolean),
+            #pl.col('I-C_StandingStill').cast(pl.Boolean),
+            #pl.col('II-A_Upwards').cast(pl.Boolean),
+            #pl.col('II-B_Centred').cast(pl.Boolean),
+            #pl.col('II-C_Downwards').cast(pl.Boolean),
+            #pl.col('II-D_NoIntentionalMotion').cast(pl.Boolean),
+            #pl.col('II-E_TorsoRotation').cast(pl.Boolean),
+            #pl.col('III-A_Right').cast(pl.Boolean),
+            #pl.col('III-B_Left').cast(pl.Boolean),
+            #pl.col('III-C_NoArms').cast(pl.Boolean),
+            #pl.col('IV-A_BulkyUnit').cast(pl.Boolean),
+            #pl.col('IV-B_HandyUnit').cast(pl.Boolean),
+            #pl.col('IV-C_UtilityAux').cast(pl.Boolean),
+            #pl.col('IV-D_Cart').cast(pl.Boolean),
+            #pl.col('IV-E_Computer').cast(pl.Boolean),
+            #pl.col('IV-F_NoItem').cast(pl.Boolean),
+            #pl.col('V-A_None').cast(pl.Boolean),
+            #pl.col('VI-A_Error',).cast(pl.Boolean) 
             ])
 
         # normalization
