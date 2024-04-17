@@ -29,8 +29,8 @@ def draw(*args):
         plt.fill_between(x, y-error, y+error, color=color, alpha=0.2) 
 
     plt.xticks(rotation=45, ha='right')
-    if title == "LSTM":
-        plt.xlabel('Augmentations')
+    #if title == "LSTM":
+    #    plt.xlabel('Augmentations')
     if title == "CNN":
         plt.ylabel('Accuracy')
     plt.title(title) 
@@ -38,7 +38,8 @@ def draw(*args):
         plt.legend(loc='right', framealpha=0.4, fontsize="10")
     plt.rcParams["font.family"] = "Arial"
     plt.rcParams.update({'font.size': 13})
-    plt.tight_layout() 
+    plt.tight_layout()
+    plt.ylim((10,100))
     plt.show()
     
 
