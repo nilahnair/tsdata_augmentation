@@ -604,6 +604,20 @@ def window_slice(x, reduce_ratio=0.9):
 #     return x
 
 def resampling_random(x):
+    '''
+    https://github.com/diheal/resampling/blob/main/Augment.py
+
+    Parameters
+    ----------
+    x : TYPE
+        DESCRIPTION.
+
+    Returns
+    -------
+    x_selected : TYPE
+        DESCRIPTION.
+
+    '''
     import random
     M = random.randint(1, 3)
     N = random.randint(0, M - 1)
