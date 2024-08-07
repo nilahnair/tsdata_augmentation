@@ -4,6 +4,7 @@ from tqdm import tqdm
 import torch
 import math
 import dtw as dtw
+import random
 
 def get_augmentation(augmentation):
     if isinstance(augmentation, str):
@@ -627,6 +628,108 @@ def resampling_random(x):
         index_selected = np.arange(start, start + timesetps * (N + 1), N + 1)
         x_selected = np.concatenate((x_selected,x[k,index_selected,:][np.newaxis,]),axis=0)
     return x_selected
+
+def resampling_random_vectorized(x):
+    time_steps = x.shape[1]
+    
+    ## Todo: Make rename extra values and refactor +1's to -1 
+    
+    #### BEGIN MY CODE 
+    extra_values = random.randint(1,3)
+    selector = random.randint(0, extra_values - 1)
+    
+    diff_between_two_cons_time_steps = np.diff(x, axis=1, append=1)
+    diffs_repeated = np.repeat(diff_between_two_cons_time_steps, axis=1, repeats=extra_values+1)
+    
+    x_repeated = np.repeat(x, axis=1, repeats=extra_values + 1)
+
+    
+    numerator = np.arange(0, extra_values + 1)
+    numerator_norm = np.divide(numerator, (extra_values + 1))
+    scaling_repeated = np.tile(numerator_norm, x.shape[1])
+    
+    
+    new_x = x_repeated + diffs_repeated * scaling_repeated[np.newaxis, :, np.newaxis]
+    new_x = new_x[:, :-extra_values, : ] 
+    x = new_x
+    #### END MY CODE 
+    
+
+    length_inserted = x.shape[1]
+    num = x.shape[0]
+    
+
+    start = random.randint(0, length_inserted - time_steps * (selector + 1))
+    index_selected = np.arange(start, start + time_steps * (selector + 1), selector + 1)
+    x_selected=x[0,index_selected,:][np.newaxis,]
+
+    for k in range(1,num):
+        start = random.randint(0, length_inserted - time_steps * (selector + 1))
+        index_selected = np.arange(start, start + time_steps * (selector + 1), selector + 1)
+        x_selected = np.concatenate((x_selected,x[k,index_selected,:][np.newaxis,]),axis=0)
+    return x_selected
+
+def resampling_random_original(x):
+    M = random.randint(1,3)
+    N = random.randint(0, M - 1)
+
+    timesetps = x.shape[1]
+
+    for i in range(timesetps - 1):
+        x1 = x[:, i * (M + 1), :]
+        x2 = x[:, i * (M + 1) + 1, :]
+        for j in range(M):
+            v = np.add(x1, np.subtract(x2, x1) * (j + 1) / (M + 1))
+            x = np.insert(x, i * (M + 1) + j + 1, v, axis=1)
+    length_inserted = x.shape[1]
+    num = x.shape[0]
+    
+    #print("THEIRS x", x.shape)
+    
+    start = random.randint(0, length_inserted - timesetps * (N + 1))
+    index_selected = np.arange(start, start + timesetps * (N + 1), N + 1)
+    x_selected=x[0,index_selected,:][np.newaxis,]
+    
+    #print("THEIRS x selected", x_selected.shape) 
+    for k in range(1,num):
+        start = random.randint(0, length_inserted - timesetps * (N + 1))
+        index_selected = np.arange(start, start + timesetps * (N + 1), N + 1)
+        x_selected = np.concatenate((x_selected,x[k,index_selected,:][np.newaxis,]),axis=0)
+    return x_selected
+
+def _interpolate(x, extra_values):
+    ## Todo: Make rename extra values and refactor +1's to -1 
+
+    diff_between_two_cons_time_steps = np.diff(x, axis=1, append=1)
+    diffs_repeated = np.repeat(diff_between_two_cons_time_steps, axis=1, repeats=extra_values+1)
+    
+    x_repeated = np.repeat(x, axis=1, repeats=extra_values + 1)
+
+    
+    numerator = np.arange(0, extra_values + 1)
+    numerator_norm = np.divide(numerator, (extra_values + 1))
+    scaling_repeated = np.tile(numerator_norm, x.shape[1])
+    
+    
+    new_x = x_repeated + diffs_repeated * scaling_repeated[np.newaxis, :, np.newaxis]
+    new_x = new_x[:, :-extra_values, : ] 
+    x = new_x
+
+    return x
+
+def windowed_subsample(x, extra_values, randomly=True):
+    orig_idxs = np.arange(start=0, stop=x.shape[1], step=extra_values+1, dtype=int)
+    rnd_offset = np.random.randint(low=0, high=extra_values + 1, size=orig_idxs.shape[0] if randomly else 1)
+    new_idxs = orig_idxs + rnd_offset 
+    new_idxs[-1] = orig_idxs[-1]
+
+    return x[:, new_idxs]
+
+def windowed_resampling_random(x, extra_values=2):
+    return windowed_subsample(_interpolate(x, extra_values=extra_values), extra_values=extra_values, randomly=True)
+
+def windowed_resampling_fixed(x, extra_values=2):
+    return windowed_subsample(_interpolate(x, extra_values=extra_values), extra_values=extra_values, randomly=False)
 
 def magnify(x):
     lam = np.random.randint(11,14)/10 #(11,14)
