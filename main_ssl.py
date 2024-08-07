@@ -129,9 +129,12 @@ def main():
     # logic to load backbone
     encoder_config = {
         'dataset': args.dataset,
+        'network': args.arch,
         'reshape_input': False, #fixed
         'sliding_window_length': 100 if args.dataset in ['mbientlab', 'lara_mm'] and args.arch != 'cnn_transformer' else 200,
         'fully_convolutional': 'FC', #fixed
+        'hidden_layer': 256,
+        'layer_dim': 4,
         'filter_size': 5, #fixed
         'num_filters': 64, #fixed
         'transformer_dim': 64, #fixed
@@ -143,7 +146,6 @@ def main():
         'output': 'softmax', #fixed
         'num_classes': args.dim 
     }
-    encoder_config['network'] = args.arch
     # backbone_config['NB_sensor_channels'] = {'mbientlab': 30, 'mocap': 126}.get(args.dataset, 9)
     encoder_config['NB_sensor_channels'] =   30 if args.dataset == 'mbientlab' else \
                                              27 if args.dataset == 'lara_mm' else \
@@ -454,6 +456,10 @@ class SimSiam(nn.Module):
             case 'cnn_transformer':
                 prev_dim = self.encoder.transformer_dim
                 self.encoder.imu_head = torch.nn.Identity()
+            case 'lstm':
+                self.encoder.fc3 = torch.nn.Linear(self.encoder.fc3.in_features, 2048)
+                prev_dim = self.encoder.fc3.out_features
+                self.encoder.fc4 = torch.nn.Identity()
 
         # self.encoder.fc5 = nn.Sequential(nn.Linear(prev_dim, prev_dim, bias=False),
         #                                 nn.BatchNorm1d(prev_dim),
@@ -472,7 +478,7 @@ class SimSiam(nn.Module):
                                         # self.encoder.fc,
                                         nn.Linear(prev_dim, dim, bias=False),
                                         nn.BatchNorm1d(dim, affine=False)) # output layer
-        if self.encoder.config['network'] in ['cnn', 'cnn_imu']:
+        if self.encoder.config['network'] in ['cnn', 'cnn_imu', 'lstm']:
             self.encoder.fc5 = projection_layer
         else: # else cnn_transformer
             self.encoder.imu_head = projection_layer
