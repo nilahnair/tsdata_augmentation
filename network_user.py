@@ -621,6 +621,7 @@ class Network_User(object):
             transform=get_augmentation(self.config['augmentations']),
             augmenation_probability=self.config['augmentation_probability'],
             split='train', half_dataset=self.config['half_dataset']
+            split='train', half_dataset=self.config['half_dataset']
             )
 # 
         # Creating the dataloader
@@ -1077,7 +1078,7 @@ class Network_User(object):
             dataset_name=self.config['dataset'],
             window_length=self.config['sliding_window_length'],
             window_stride=self.config['sliding_window_step'],
-            split='val', half_dataset=self.config['half_dataset']
+            split='val' #, half_dataset=self.config['half_dataset']
         )
 
         dataLoader_val = DataLoader(
@@ -1211,7 +1212,7 @@ class Network_User(object):
             dataset_name=self.config['dataset'],
             window_length=self.config['sliding_window_length'],
             window_stride=self.config['sliding_window_step'],
-            split='test', half_dataset=self.config['half_dataset']
+            split='test' #, half_dataset=self.config['half_dataset']
         )
 
         dataLoader_test = DataLoader(
