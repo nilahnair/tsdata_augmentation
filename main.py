@@ -8,6 +8,7 @@ from __future__ import print_function
 import os
 import io
 import logging
+import yaml
 import torch
 import numpy as np
 import random
@@ -455,6 +456,10 @@ def _check_and_create_fldr(folder):
 @ex.automain
 def run(_config):
     config = _config
+
+    with open(os.path.join(config['folder_exp'], 'config.yaml'), 'w') as cfile:
+        yaml.dump(vars(config), cfile, default_flow_style=False)
+
     seed_everything(config['seed'])
     file_name='/data/nnair/icpr2024/'
    
