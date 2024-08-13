@@ -692,14 +692,14 @@ def __prepare_lara_mm__(path, split, half_dataset):
     # fill gap in labels 
     mapping_classes_training = {0: 0, 2: 1, 3: 2, 4: 3, 5: 4, 6: 5}
     recordings = recordings.with_columns(
-        pl.col('class').map_dict(mapping_classes_training).alias('class').cast(pl.Int32)
+        pl.col('class').replace(mapping_classes_training).alias('class').cast(pl.Int32)
     )
 
     return recordings
 
 
 def __prepare_lara_3s__(path, split, half_dataset):
-    print(f'Preparing DataFrame for Mbientlab {split}')
+    print(f'Preparing DataFrame for LARa_3s {split}')
     all_files = sorted(Path(path).glob('**/*.csv'))
     sample_files = list(filter(lambda f: 'labels' not in str(f), all_files))
     label_files =    list(filter(lambda f: 'labels'     in str(f), all_files))
@@ -1122,7 +1122,7 @@ def __prepare_motionsense__(path, split, half_dataset):
     all_activities = ["dws","ups", "wlk", "jog", "std", "sit"]
     activities_map = {a: i for i, a in enumerate(all_activities)}
     recordings = recordings.with_columns(
-        pl.col('class_name').map_dict(activities_map).alias('class').cast(pl.Int32)
+        pl.col('class_name').replace(activities_map).alias('class').cast(pl.Int32)
     )
 
     return recordings
@@ -1217,7 +1217,7 @@ def __prepare_sisfall__(path, split, half_dataset):
     all_activities = recordings['class_name'].unique().sort()
     activities_map = {a: i for i, a in enumerate(all_activities)}
     recordings = recordings.with_columns(
-        pl.col('class_name').map_dict(activities_map).alias('class').cast(pl.Int32)
+        pl.col('class_name').replace(activities_map).alias('class').cast(pl.Int32)
     )
     
     dfs_by_split = []
@@ -1310,7 +1310,7 @@ def __prepare_mobiact__(path, split, half_dataset):
     #all_activities = recordings[class_col_name].unique().sort() # don't query, defined above, preserve order
     activities_map = {a: i for i, a in enumerate(all_activities)}
     recordings = recordings.with_columns(
-        pl.col(class_col_name).map_dict(activities_map).alias('class').cast(pl.Int16)
+        pl.col(class_col_name).replace(activities_map).alias('class').cast(pl.Int16)
     )
     
     dfs_by_split = []
