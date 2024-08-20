@@ -603,7 +603,7 @@ def run(_config):
     config = _config
 
     with open(os.path.join(config['folder_exp'], 'config.yaml'), 'w') as cfile:
-        yaml.dump(vars(config), cfile, default_flow_style=False)
+        yaml.dump(config, cfile, default_flow_style=False)
 
     seed_everything(config['seed'])
     file_name='/data/nnair/icpr2024/'
