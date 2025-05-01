@@ -8,6 +8,7 @@ from __future__ import print_function
 import os
 import io
 import logging
+import yaml
 import torch
 import numpy as np
 import random
@@ -103,7 +104,8 @@ def my_config():
     #dataset_finetuning = config["dataset_finetuning"]
     #pooling = config["pooling"]
 
-    assert dataset in ['mocap', 'mbientlab', 'lara_mm', 'mobiact', 'motionsense', 'sisfall'], 'Dataset is configured wrong'
+    assert dataset in ['mocap', 'mbientlab', 'lara_mm', 'lara_3s',
+                       'mobiact', 'motionsense', 'sisfall'], 'Dataset is configured wrong'
     assert network in ['cnn', 'lstm', 'cnn_imu', 'cnn_transformer'], 'Network is configured wrong'
     assert output in ['softmax', 'attribute'], 'Output is configured wrong'
     assert usage_modus in ['train', 'test',  'evolution',  'train_final',  'train_random',  'fine_tuning'], 'usage_mouds configured wrong'
@@ -128,6 +130,7 @@ def my_config():
         'mocap':        "/vol/actrec/DFG_Project/2019/LARa_dataset/MoCap/LARa_dataset_mocap/",
         'mbientlab':    "/vol/actrec/DFG_Project/2019/LARa_dataset/Mbientlab/LARa_dataset_mbientlab/",
         'lara_mm':      "/vol/actrec/DFG_Project/2019/Motionminers_Dataset/DFG-Data/",
+        'lara_3s':      "/vol/actrec/DFG_Project/2019/LARa_dataset/Motionminers/LARa_dataset_motionminers/",
         'mobiact':      "/vol/actrec/MobiAct_Dataset/",
         'motionsense':  "/vol/actrec/motion-sense-master/data/A_DeviceMotion_data/A_DeviceMotion_data",
         'sisfall':      "/vol/actrec/SisFall_dataset"
@@ -135,59 +138,92 @@ def my_config():
     dataset_root = dataset_root_defaults[dataset]
 
     # Dataset Hyperparameters
-    NB_sensor_channels_defaults = {'mocap': 126, 'mbientlab': 30, 'lara_mm': 27, 'mobiact': 9, 'motionsense': 9, 'sisfall': 9}
-    sliding_window_length_defaults = {'mocap': 200, 'mbientlab': 100, 'lara_mm': 100, 'mobiact': 200, 'motionsense': 200, 'sisfall': 200}
-    sliding_window_step_defaults = {'mocap': 25, 'mbientlab': 12, 'lara_mm': 12, 'mobiact': 50, 'motionsense': 25, 'sisfall': 50}
+    NB_sensor_channels_defaults = {
+        'mocap'      : 126,
+        'mbientlab'  : 30,
+        'lara_mm'    : 27,
+        'lara_3s'    : 27,
+        'mobiact'    : 9,
+        'motionsense': 9,
+        'sisfall'    : 9
+        }
+    sliding_window_length_defaults = {
+        'mocap'      : 200,
+        'mbientlab'  : 100,
+        'lara_mm'    : 100,
+        'lara_3s'    : 100,
+        'mobiact'    : 200,
+        'motionsense': 200,
+        'sisfall'    : 200
+        }
+    sliding_window_step_defaults = {
+        'mocap'      : 25,
+        'mbientlab'  : 12,
+        'lara_mm'    : 12,
+        'lara_3s'    : 12,
+        'mobiact'    : 50,
+        'motionsense': 25,
+        'sisfall'    : 50
+        }
 
-    NB_sensor_channels = NB_sensor_channels_defaults[dataset]
+    NB_sensor_channels    = NB_sensor_channels_defaults[dataset]
     sliding_window_length = sliding_window_length_defaults[dataset]
-    sliding_window_step = sliding_window_step_defaults[dataset]
+    sliding_window_step   = sliding_window_step_defaults[dataset]
     
     # Number of classes for either for activity recognition
-    num_classes_defaults = {'mocap': 7, 'mbientlab': 7, 'lara_mm': 6, 'mobiact': 9, 'motionsense': 6, 'sisfall': 15}
-    num_attributes_defaults = {'mocap': 19, 'mbientlab': 19, 'lara_mm': 0, 'mobiact': 0, 'motionsense': 0, 'sisfall': 0}
-    num_tr_inputs_defaults = {'mocap': 345417, 'mbientlab': 94753, 'lara_mm': 94753, 'mobiact': 160561, 'motionsense': 118671, 'sisfall': 118610}
+    num_classes_defaults = {
+        'mocap'      : 7,
+        'mbientlab'  : 7,
+        'lara_mm'    : 4,
+        'lara_3s'    : 7,
+        'mobiact'    : 9,
+        'motionsense': 6,
+        'sisfall'    : 15
+        }
+    num_attributes_defaults = {
+		'mocap'      : 19,
+		'mbientlab'  : 19,
+		'lara_mm'    : 0,
+		'lara_3s'    : 0,
+		'mobiact'    : 0,
+		'motionsense': 0,
+		'sisfall'    : 0
+        }
+    num_tr_inputs_defaults = {
+		'mocap'      : 345417,
+		'mbientlab'  : 94753,
+		'lara_mm'    : 94753,
+        'lara_3s'    : 53635,
+		'mobiact'    : 160561,
+		'motionsense': 118671,
+		'sisfall'    : 118610
+        }
 
-    num_classes = num_classes_defaults[dataset]
+    num_classes    = num_classes_defaults[dataset]
     num_attributes = num_attributes_defaults[dataset]
-    num_tr_inputs = num_tr_inputs_defaults[dataset]
+    num_tr_inputs  = num_tr_inputs_defaults[dataset]
     
-
-
-    # It was thought to have different LR per dataset, but experimentally have worked the next three
-    # Learning rate
-    # learning_rates = [0.001, 0.0001, 0.00001, 0.000001]
-    # lr = {'mocap': {'cnn': learning_rates[learning_rates_idx],
-    #                 'lstm': learning_rates[learning_rates_idx],
-    #                 'cnn_imu': learning_rates[learning_rates_idx],
-    #                 'cnn_transformer':learning_rates[learning_rates_idx]},
-    #       'mbientlab': {'cnn': learning_rates[learning_rates_idx],
-    #                     'lstm': learning_rates[learning_rates_idx],
-    #                     'cnn_imu': learning_rates[learning_rates_idx],
-    #                     'cnn_transformer': learning_rates[learning_rates_idx]},
-    #       'mobiact': {'cnn': learning_rates[learning_rates_idx],
-    #                   'lstm': learning_rates[learning_rates_idx],
-    #                   'cnn_imu': learning_rates[learning_rates_idx],
-    #                   'cnn_transformer':learning_rates[learning_rates_idx]},
-    #       'motionsense': {'cnn': learning_rates[learning_rates_idx],
-    #                      'lstm': learning_rates[learning_rates_idx],
-    #                      'cnn_imu': learning_rates[learning_rates_idx],
-    #                      'cnn_transformer':learning_rates[learning_rates_idx]},
-    #       'sisfall': {'cnn': learning_rates[learning_rates_idx],
-    #                   'lstm': learning_rates[learning_rates_idx],
-    #                   'cnn_imu': learning_rates[learning_rates_idx],
-    #                   'cnn_transformer':learning_rates[learning_rates_idx]}
-          
-    #       }
     lr_mult = 1.0
 
     # Maxout
-    use_maxout_defaults = {'cnn': False, 'lstm': False, 'cnn_imu': False, 'cnn_transformer':False}
+    use_maxout_defaults = {
+        'cnn'            : False,
+        'lstm'           : False,
+        'cnn_imu'        : False,
+        'cnn_transformer': False}
     use_maxout = use_maxout_defaults[network]
 
     # Balacing the proportion of classes into the dataset dataset
     # This will be deprecated
-    balancing_defaults = {'mocap': False, 'mbientlab': False, 'lara_mm': False, 'mobiact': False, 'motionsense': False, 'sisfall': False}
+    balancing_defaults = {
+        'mocap'      : False,
+        'mbientlab'  : False,
+        'lara_mm'    : False,
+        'lara_3s'    : False,
+        'mobiact'    : False,
+        'motionsense': False,
+        'sisfall'    : False
+        }
     balancing = balancing_defaults[dataset]
 
     # Epochs
@@ -212,6 +248,10 @@ def my_config():
                             'lstm': {'softmax': 15, 'attribute': 10},
                             'cnn_imu': {'softmax': 30, 'attribute': 10},
                             'cnn_transformer':{'softmax': 50, 'attribute': 6}},
+              'lara_3s': {'cnn': {'softmax': 10, 'attribute': 10},
+                            'lstm': {'softmax': 15, 'attribute': 10},
+                            'cnn_imu': {'softmax': 30, 'attribute': 10},
+                            'cnn_transformer':{'softmax': 50, 'attribute': 6}},
               'mobiact': {'cnn': {'softmax': 10, 'attribute': 50},
                           'lstm': {'softmax': 15, 'attribute': 5},
                           'cnn_imu': {'softmax': 32, 'attribute': 50},
@@ -233,40 +273,145 @@ def my_config():
     #                   'permutation',  'slicing',  'window_warping', 'tilt', 'spawner'], 'augmentation configured wrong' # TODO can directly infer list by sys.module[transforms]
     augmentation_probability = 0.5
     
-    division_epochs_defaults = {'mocap': 2, 'mbientlab': 1,'lara_mm':1, 'mobiact': 1, 'motionsense': 1, 'sisfall': 1}
+    division_epochs_defaults = {
+        'mocap': 2,
+        'mbientlab': 1,
+        'lara_mm':1,
+        'lara_3s':1,
+        'mobiact': 1,
+        'motionsense': 1,
+        'sisfall': 1
+        }
     division_epochs = division_epochs_defaults[dataset]
 
     # Batch size
     batch_size_train_defaults = {
-        'cnn': {'mocap': 100, 'mbientlab': 100, 'lara_mm': 100, 'mobiact': 100, 'motionsense': 50, 'sisfall': 50},
-        'lstm': {'mocap': 50, 'mbientlab': 50, 'lara_mm':50, 'mobiact': 100, 'motionsense': 50, 'sisfall': 50},
-        'cnn_imu': {'mocap': 100, 'mbientlab': 100, 'lara_mm':100, 'mobiact': 100, 'motionsense': 100, 'sisfall': 100},
-        'cnn_transformer': {'mocap': 50, 'mbientlab': 128, 'lara_mm':100, 'mobiact': 200, 'motionsense': 50, 'sisfall': 50}}
+        'cnn': {
+            'mocap'      : 100,
+            'mbientlab'  : 100,
+            'lara_mm'    : 100,
+            'lara_3s'    : 100,
+            'mobiact'    : 100,
+            'motionsense': 50,
+            'sisfall'    : 50
+            },
+        'lstm': {
+            'mocap'      : 50,
+            'mbientlab'  : 50,
+            'lara_mm'    : 50,
+            'lara_3s'    : 50,
+            'mobiact'    : 100,
+            'motionsense': 50,
+            'sisfall'    : 50
+            },
+        'cnn_imu': {
+            'mocap'      : 100,
+            'mbientlab'  : 100,
+            'lara_mm'    : 100,
+            'lara_3s'    : 100,
+            'mobiact'    : 100,
+            'motionsense': 100,
+            'sisfall'    : 100
+            },
+        'cnn_transformer': {
+            'mocap'      : 50,
+            'mbientlab'  : 128,
+            'lara_mm'    : 100,
+            'lara_3s'    : 100,
+            'mobiact'    : 200,
+            'motionsense': 50,
+            'sisfall'    : 50
+            }
+        }
 
-    batch_size_val_defaults = {'cnn': {'mocap': 100, 'mbientlab': 100, 'lara_mm':100, 'mobiact': 100, 'motionsense': 50,'sisfall': 50},
-                      'lstm': {'mocap': 50, 'mbientlab': 50, 'lara_mm':50, 'mobiact': 100, 'motionsense': 50,'sisfall': 50},
-                      'cnn_imu': {'mocap': 100, 'mbientlab': 100,'lara_mm':100, 'mobiact': 100, 'motionsense': 100,'sisfall': 100},
-                      'cnn_transformer': {'mocap': 50, 'mbientlab': 128,'lara_mm':100,'mobiact': 200, 'motionsense': 50,'sisfall': 50}}
+    batch_size_val_defaults = {
+        'cnn': {
+			'mocap'      : 100,
+			'mbientlab'  : 100,
+			'lara_mm'    : 100,
+			'lara_3s'    : 100,
+			'mobiact'    : 100,
+			'motionsense': 50,
+			'sisfall'    : 50
+            },
+        'lstm': {
+			'mocap'      : 50,
+			'mbientlab'  : 50,
+			'lara_mm'    : 50,
+			'lara_3s'    : 50,
+			'mobiact'    : 100,
+			'motionsense': 50,
+			'sisfall'    : 50
+            },
+        'cnn_imu': {
+			'mocap'      : 100,
+			'mbientlab'  : 100,
+			'lara_mm'    : 100,
+			'lara_3s'    : 100,
+			'mobiact'    : 100,
+			'motionsense': 100,
+			'sisfall'    : 100
+            },
+        'cnn_transformer': {
+			'mocap'      : 50,
+			'mbientlab'  : 128,
+			'lara_mm'    : 100,
+			'lara_3s'    : 100,
+			'mobiact'    : 200,
+			'motionsense': 50,
+			'sisfall'    : 50
+            }
+        }
 
     batch_size_train = batch_size_train_defaults[network][dataset]
     batch_size_val = batch_size_val_defaults[network][dataset]
     
 
     # Number of iterations for accumulating the gradients
-    accumulation_steps_defaults = {'mocap': 4, 'mbientlab': 4, 'lara_mm':4, 'mobiact': 4, 'motionsense': 4, 'sisfall': 4}
+    accumulation_steps_defaults = {
+		'mocap'      : 4,
+		'mbientlab'  : 4,
+		'lara_mm'    : 4,
+		'lara_3s'    : 4,
+		'mobiact'    : 4,
+		'motionsense': 4,
+		'sisfall'    : 4
+        }
     accumulation_steps = accumulation_steps_defaults[dataset]
 
     # Filters
-    filter_size_defaults = {'mocap': 5, 'mbientlab': 5, 'lara_mm':5, 'mobiact': 5, 'motionsense': 5, 'sisfall': 5}
+    filter_size_defaults = {
+		'mocap'      : 5,
+		'mbientlab'  : 5,
+		'lara_mm'    : 5,
+		'lara_3s'    : 5,
+		'mobiact'    : 5,
+		'motionsense': 5,
+		'sisfall'    : 5
+        }
     filter_size = filter_size_defaults[dataset]
-    num_filters_defaults = {'mocap': {'cnn': 64, 'lstm': 64, 'cnn_imu': 64, 'cnn_transformer':64},
-                   'mbientlab': {'cnn': 64, 'lstm': 64, 'cnn_imu': 64, 'cnn_transformer':64},
-                   'lara_mm': {'cnn': 64, 'lstm': 64, 'cnn_imu': 64, 'cnn_transformer':64},
-                   'mobiact': {'cnn': 64, 'lstm': 64, 'cnn_imu': 64, 'cnn_transformer':64},
-                   'motionsense': {'cnn': 64, 'lstm': 64, 'cnn_imu': 64, 'cnn_transformer':64},
-                   'sisfall': {'cnn': 64, 'lstm': 64, 'cnn_imu': 64, 'cnn_transformer':64}
-                   }
-    num_filters = num_filters_defaults[dataset][network]
+    # num_filters_defaults = {
+    #     'mocap': {
+    #         'cnn': 64, 'lstm': 64, 'cnn_imu': 64, 'cnn_transformer':64
+    #         },
+    #     'mbientlab': {
+    #         'cnn': 64, 'lstm': 64, 'cnn_imu': 64, 'cnn_transformer':64
+    #         },
+    #     'lara_mm': {
+    #         'cnn': 64, 'lstm': 64, 'cnn_imu': 64, 'cnn_transformer':64
+    #         },
+    #     'mobiact': {
+    #         'cnn': 64, 'lstm': 64, 'cnn_imu': 64, 'cnn_transformer':64
+    #         },
+    #     'motionsense': {
+    #         'cnn': 64, 'lstm': 64, 'cnn_imu': 64, 'cnn_transformer':64
+    #         },
+    #     'sisfall': {
+    #         'cnn': 64, 'lstm': 64, 'cnn_imu': 64, 'cnn_transformer':64
+    #         }
+    #     }
+    # num_filters = num_filters_defaults[dataset][network]
+    num_filters = 64
     
     #lstm hyperparameters hidden layer and layer dimension
     lstm_hidlyr= 256
@@ -325,13 +470,14 @@ def my_config():
     if output == 'softmax':
         labeltype = "class"
         folder_exp_defaults = { 
-            'mocap':        str(Path(base_folder_exp) / "lara/results/"),
-            'mbientlab':    str(Path(base_folder_exp) / "lara_imu/results/"),
-            'lara_mm':    str(Path(base_folder_exp) / "lara_mm/results/"),
-            'mobiact':      str(Path(base_folder_exp) / "mobiact/results/"),
-            'motionsense':  str(Path(base_folder_exp) / "motionsense/results/"),
-            'sisfall':      str(Path(base_folder_exp) / "sisfall/results/")
-                    }
+            'mocap'      : str(Path(base_folder_exp) / "lara/results/"),
+            'mbientlab'  : str(Path(base_folder_exp) / "lara_imu/results/"),
+            'lara_mm'    : str(Path(base_folder_exp) / "lara_mm/results/"),
+            'lara_3s'    : str(Path(base_folder_exp) / "lara_3s/results/"),
+            'mobiact'    : str(Path(base_folder_exp) / "mobiact/results/"),
+            'motionsense': str(Path(base_folder_exp) / "motionsense/results/"),
+            'sisfall'    : str(Path(base_folder_exp) / "sisfall/results/")
+            }
         if folder_exp is None: # if not set via cmd pick from defaults
             folder_exp =  _check_and_create_fldr(folder_exp_defaults[dataset])
         if run_id is None: # if not set by cmd pick highest
@@ -455,6 +601,10 @@ def _check_and_create_fldr(folder):
 @ex.automain
 def run(_config):
     config = _config
+
+    with open(os.path.join(config['folder_exp'], 'config.yaml'), 'w') as cfile:
+        yaml.dump(config, cfile, default_flow_style=False)
+
     seed_everything(config['seed'])
     file_name='/data/nnair/icpr2024/'
    
