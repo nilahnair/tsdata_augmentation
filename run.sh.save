@@ -1,0 +1,2 @@
+python3 main.py with base_folder_exp=/data/nnair/icpr2024/debug/ network=lstm dataset=sisfall epochs=15 batch_size_train=50 repetitions=3 env=py311_pt212 -f -q  -c 'sisfall x3 lstm' 
+omniboard --mu "mongodb://nnair:Germany2018@curtiz/nnair_sacred?authSource=admin"

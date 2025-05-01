@@ -1,0 +1,489 @@
+[2024-04-15 19:35:53, INFO, ::load_credentials] Loading credientials from /home/nnair/.mongodb_credentials
+[2024-04-15 19:35:57, INFO, ::load_credentials] Loading credientials from /home/nnair/.mongodb_credentials
+[2024-04-15 19:35:57, INFO, ICPR 2024] Running command 'run'
+[2024-04-15 19:35:58, INFO, ICPR 2024] Started run with ID "3881"
+root        : INFO     Finished
+root        : INFO     Dataset mbientlab Network cnn_imu Output softmax Modus train
+root        : INFO         Network_selecter: Constructor
+root        : INFO         Network_selecter: 
+GPU: 0
+NB_sensor_channels: 30
+NB_sensor_channels_defaults:
+  lara_mm: 27
+  mbientlab: 30
+  mobiact: 9
+  mocap: 126
+  motionsense: 9
+  sisfall: 9
+accumulation_steps: 4
+accumulation_steps_defaults:
+  lara_mm: 4
+  mbientlab: 4
+  mobiact: 4
+  mocap: 4
+  motionsense: 4
+  sisfall: 4
+augmentation_probability: 0.5
+augmentations: null
+balancing: false
+balancing_defaults:
+  lara_mm: false
+  mbientlab: false
+  mobiact: false
+  mocap: false
+  motionsense: false
+  sisfall: false
+base_folder_exp: /data/nnair/icpr2024/debug/
+batch_size_train: 100
+batch_size_train_defaults:
+  cnn:
+    lara_mm: 100
+    mbientlab: 100
+    mobiact: 100
+    mocap: 100
+    motionsense: 50
+    sisfall: 50
+  cnn_imu:
+    lara_mm: 100
+    mbientlab: 100
+    mobiact: 100
+    mocap: 100
+    motionsense: 100
+    sisfall: 100
+  cnn_transformer:
+    lara_mm: 100
+    mbientlab: 128
+    mobiact: 200
+    mocap: 50
+    motionsense: 50
+    sisfall: 50
+  lstm:
+    lara_mm: 50
+    mbientlab: 50
+    mobiact: 100
+    mocap: 50
+    motionsense: 50
+    sisfall: 50
+batch_size_val: 100
+batch_size_val_defaults:
+  cnn:
+    lara_mm: 100
+    mbientlab: 100
+    mobiact: 100
+    mocap: 100
+    motionsense: 50
+    sisfall: 50
+  cnn_imu:
+    lara_mm: 100
+    mbientlab: 100
+    mobiact: 100
+    mocap: 100
+    motionsense: 100
+    sisfall: 100
+  cnn_transformer:
+    lara_mm: 100
+    mbientlab: 128
+    mobiact: 200
+    mocap: 50
+    motionsense: 50
+    sisfall: 50
+  lstm:
+    lara_mm: 50
+    mbientlab: 50
+    mobiact: 100
+    mocap: 50
+    motionsense: 50
+    sisfall: 50
+dataset: mbientlab
+dataset_finetuning: mbientlab
+dataset_root: /vol/actrec/DFG_Project/2019/LARa_dataset/Mbientlab/LARa_dataset_mbientlab/
+dataset_root_defaults:
+  lara_mm: /vol/actrec/DFG_Project/2019/Motionminers_Dataset/DFG-Data/
+  mbientlab: /vol/actrec/DFG_Project/2019/LARa_dataset/Mbientlab/LARa_dataset_mbientlab/
+  mobiact: /vol/actrec/MobiAct_Dataset/
+  mocap: /vol/actrec/DFG_Project/2019/LARa_dataset/MoCap/LARa_dataset_mocap/
+  motionsense: /vol/actrec/motion-sense-master/data/A_DeviceMotion_data/A_DeviceMotion_data
+  sisfall: /vol/actrec/SisFall_dataset
+dim_fc: 128
+division_epochs: 1
+division_epochs_defaults:
+  lara_mm: 1
+  mbientlab: 1
+  mobiact: 1
+  mocap: 2
+  motionsense: 1
+  sisfall: 1
+dtw_application: false
+dtw_aug: spawner
+env: py311_pt212
+epoch_mult: 1
+epochs: 30
+epochs_defaults:
+  lara_mm:
+    cnn:
+      attribute: 10
+      softmax: 10
+    cnn_imu:
+      attribute: 10
+      softmax: 30
+    cnn_transformer:
+      attribute: 6
+      softmax: 50
+    lstm:
+      attribute: 10
+      softmax: 15
+  mbientlab:
+    cnn:
+      attribute: 10
+      softmax: 10
+    cnn_imu:
+      attribute: 10
+      softmax: 30
+    cnn_transformer:
+      attribute: 6
+      softmax: 50
+    lstm:
+      attribute: 10
+      softmax: 15
+  mobiact:
+    cnn:
+      attribute: 50
+      softmax: 10
+    cnn_imu:
+      attribute: 50
+      softmax: 32
+    cnn_transformer:
+      attribute: 6
+      softmax: 15
+    lstm:
+      attribute: 5
+      softmax: 15
+  mocap:
+    cnn:
+      attribute: 6
+      softmax: 6
+    cnn_imu:
+      attribute: 6
+      softmax: 10
+    cnn_transformer:
+      attribute: 6
+      softmax: 15
+    lstm:
+      attribute: 6
+      softmax: 15
+  motionsense:
+    cnn:
+      attribute: 50
+      softmax: 30
+    cnn_imu:
+      attribute: 10
+      softmax: 32
+    cnn_transformer:
+      attribute: 6
+      softmax: 15
+    lstm:
+      attribute: 5
+      softmax: 15
+  sisfall:
+    cnn:
+      attribute: 50
+      softmax: 30
+    cnn_imu:
+      attribute: 50
+      softmax: 32
+    cnn_transformer:
+      attribute: 6
+      softmax: 15
+    lstm:
+      attribute: 5
+      softmax: 15
+evolution_iter: 10000
+file_suffix: results_yy2024mm4dd15hh19mm31.xml
+filter_size: 5
+filter_size_defaults:
+  lara_mm: 5
+  mbientlab: 5
+  mobiact: 5
+  mocap: 5
+  motionsense: 5
+  sisfall: 5
+fine_tune_path: null
+folder_exp: /data/nnair/icpr2024/debug/lara_imu/results/1
+folder_exp_defaults:
+  lara_mm: /data/nnair/icpr2024/debug/lara_mm/results
+  mbientlab: /data/nnair/icpr2024/debug/lara_imu/results
+  mobiact: /data/nnair/icpr2024/debug/mobiact/results
+  mocap: /data/nnair/icpr2024/debug/lara/results
+  motionsense: /data/nnair/icpr2024/debug/motionsense/results
+  sisfall: /data/nnair/icpr2024/debug/sisfall/results
+freeze_options: false
+fully_convolutional: FC
+half_dataset: true
+hidden_layer: 256
+label_pos: end
+labeltype: class
+layer_dim: 4
+log_per_epoch: 20
+lr: 0.0001
+lr_mult: 1.0
+lstm_hidlyr: 256
+lstm_lyrdim: 4
+n_embedding_layers: 4
+n_head: 8
+n_layers: 6
+name_counter: 0
+network: cnn_imu
+num_attributes: 19
+num_attributes_defaults:
+  lara_mm: 0
+  mbientlab: 19
+  mobiact: 0
+  mocap: 19
+  motionsense: 0
+  sisfall: 0
+num_classes: 7
+num_classes_defaults:
+  lara_mm: 6
+  mbientlab: 7
+  mobiact: 9
+  mocap: 7
+  motionsense: 6
+  sisfall: 15
+num_filters: 64
+num_filters_defaults:
+  lara_mm:
+    cnn: 64
+    cnn_imu: 64
+    cnn_transformer: 64
+    lstm: 64
+  mbientlab:
+    cnn: 64
+    cnn_imu: 64
+    cnn_transformer: 64
+    lstm: 64
+  mobiact:
+    cnn: 64
+    cnn_imu: 64
+    cnn_transformer: 64
+    lstm: 64
+  mocap:
+    cnn: 64
+    cnn_imu: 64
+    cnn_transformer: 64
+    lstm: 64
+  motionsense:
+    cnn: 64
+    cnn_imu: 64
+    cnn_transformer: 64
+    lstm: 64
+  sisfall:
+    cnn: 64
+    cnn_imu: 64
+    cnn_transformer: 64
+    lstm: 64
+num_tr_inputs: 94753
+num_tr_inputs_defaults:
+  lara_mm: 94753
+  mbientlab: 94753
+  mobiact: 160561
+  mocap: 345417
+  motionsense: 118671
+  sisfall: 118610
+num_workers: 8
+output: softmax
+percentages_dataset:
+- 0.01
+- 0.02
+- 0.05
+- 0.1
+- 0.2
+- 0.3
+- 0.4
+- 0.5
+- 0.6
+- 0.7
+- 0.8
+- 0.9
+- 1.0
+percentages_names:
+- '001'
+- '002'
+- '005'
+- '01'
+- '02'
+- '03'
+- '04'
+- '05'
+- '06'
+- '07'
+- 08
+- 09
+- '10'
+plotting: false
+polars_max_threads: 4
+repetitions: 3
+reshape_folder: noreshape
+reshape_input: false
+run_id: 1
+sacred: true
+seed: 42
+sliding_window_length: 100
+sliding_window_length_defaults:
+  lara_mm: 100
+  mbientlab: 100
+  mobiact: 200
+  mocap: 200
+  motionsense: 200
+  sisfall: 200
+sliding_window_step: 12
+sliding_window_step_defaults:
+  lara_mm: 12
+  mbientlab: 12
+  mobiact: 50
+  mocap: 25
+  motionsense: 25
+  sisfall: 50
+train_show: 18
+train_show_defaults:
+  cnn: 18
+  cnn_imu: 18
+  cnn_transformer: 18
+  lstm: 50
+train_show_value: 947.53
+trans_embed_layer: 4
+trans_pos_embed: true
+transformer_dim: 64
+transformer_fc: 128
+transformer_heads: 8
+transformer_layers: 6
+usage_modus: train
+use_maxout: false
+use_maxout_defaults:
+  cnn: false
+  cnn_imu: false
+  cnn_transformer: false
+  lstm: false
+use_pos_embedding: true
+valid_show: 94
+valid_show_defaults:
+  cnn: 94
+  cnn_imu: 94
+  cnn_transformer: 94
+  lstm: 10
+
+root        : INFO             Network_User: Constructor
+root        : INFO         Network_selecter: Net modus: train
+root        : INFO         Network_selecter: Train
+root        : INFO         Network_selecter:    Train iter 0
+root        : INFO             Network_User: Evolution evaluation iter 0
+root        : INFO             Network_User: Training
+root        : INFO             Network_User: Train---->
+root        : INFO             Network_User:     Creating Dataloader---->
+root        : INFO             Network_User:    Train:    creating network
+root        : INFO                 Network: Constructor
+root        : INFO                 Network: Wx 96.0 and Hx 30.0
+root        : INFO                 Network: Wx 92.0 and Hx 30.0
+root        : INFO                 Network: Wx 88.0 and Hx 30.0
+root        : INFO                 Network: Wx 84.0 and Hx 30.0
+root        : INFO             Network_User:    Train:    network layers
+root        : INFO             Network_User:    Train:    conv_LA_1_1.weight : (64, 1, 5, 1)
+root        : INFO             Network_User:    Train:    conv_LA_1_1.bias : (64,)
+root        : INFO             Network_User:    Train:    conv_LA_1_2.weight : (64, 64, 5, 1)
+root        : INFO             Network_User:    Train:    conv_LA_1_2.bias : (64,)
+root        : INFO             Network_User:    Train:    conv_LA_2_1.weight : (64, 64, 5, 1)
+root        : INFO             Network_User:    Train:    conv_LA_2_1.bias : (64,)
+root        : INFO             Network_User:    Train:    conv_LA_2_2.weight : (64, 64, 5, 1)
+root        : INFO             Network_User:    Train:    conv_LA_2_2.bias : (64,)
+root        : INFO             Network_User:    Train:    fc3_LA.weight : (256, 32256)
+root        : INFO             Network_User:    Train:    fc3_LA.bias : (256,)
+root        : INFO             Network_User:    Train:    conv_LL_1_1.weight : (64, 1, 5, 1)
+root        : INFO             Network_User:    Train:    conv_LL_1_1.bias : (64,)
+root        : INFO             Network_User:    Train:    conv_LL_1_2.weight : (64, 64, 5, 1)
+root        : INFO             Network_User:    Train:    conv_LL_1_2.bias : (64,)
+root        : INFO             Network_User:    Train:    conv_LL_2_1.weight : (64, 64, 5, 1)
+root        : INFO             Network_User:    Train:    conv_LL_2_1.bias : (64,)
+root        : INFO             Network_User:    Train:    conv_LL_2_2.weight : (64, 64, 5, 1)
+root        : INFO             Network_User:    Train:    conv_LL_2_2.bias : (64,)
+root        : INFO             Network_User:    Train:    fc3_LL.weight : (256, 32256)
+root        : INFO             Network_User:    Train:    fc3_LL.bias : (256,)
+root        : INFO             Network_User:    Train:    conv_N_1_1.weight : (64, 1, 5, 1)
+root        : INFO             Network_User:    Train:    conv_N_1_1.bias : (64,)
+root        : INFO             Network_User:    Train:    conv_N_1_2.weight : (64, 64, 5, 1)
+root        : INFO             Network_User:    Train:    conv_N_1_2.bias : (64,)
+root        : INFO             Network_User:    Train:    conv_N_2_1.weight : (64, 64, 5, 1)
+root        : INFO             Network_User:    Train:    conv_N_2_1.bias : (64,)
+root        : INFO             Network_User:    Train:    conv_N_2_2.weight : (64, 64, 5, 1)
+root        : INFO             Network_User:    Train:    conv_N_2_2.bias : (64,)
+root        : INFO             Network_User:    Train:    fc3_N.weight : (256, 32256)
+root        : INFO             Network_User:    Train:    fc3_N.bias : (256,)
+root        : INFO             Network_User:    Train:    conv_RA_1_1.weight : (64, 1, 5, 1)
+root        : INFO             Network_User:    Train:    conv_RA_1_1.bias : (64,)
+root        : INFO             Network_User:    Train:    conv_RA_1_2.weight : (64, 64, 5, 1)
+root        : INFO             Network_User:    Train:    conv_RA_1_2.bias : (64,)
+root        : INFO             Network_User:    Train:    conv_RA_2_1.weight : (64, 64, 5, 1)
+root        : INFO             Network_User:    Train:    conv_RA_2_1.bias : (64,)
+root        : INFO             Network_User:    Train:    conv_RA_2_2.weight : (64, 64, 5, 1)
+root        : INFO             Network_User:    Train:    conv_RA_2_2.bias : (64,)
+root        : INFO             Network_User:    Train:    fc3_RA.weight : (256, 32256)
+root        : INFO             Network_User:    Train:    fc3_RA.bias : (256,)
+root        : INFO             Network_User:    Train:    conv_RL_1_1.weight : (64, 1, 5, 1)
+root        : INFO             Network_User:    Train:    conv_RL_1_1.bias : (64,)
+root        : INFO             Network_User:    Train:    conv_RL_1_2.weight : (64, 64, 5, 1)
+root        : INFO             Network_User:    Train:    conv_RL_1_2.bias : (64,)
+root        : INFO             Network_User:    Train:    conv_RL_2_1.weight : (64, 64, 5, 1)
+root        : INFO             Network_User:    Train:    conv_RL_2_1.bias : (64,)
+root        : INFO             Network_User:    Train:    conv_RL_2_2.weight : (64, 64, 5, 1)
+root        : INFO             Network_User:    Train:    conv_RL_2_2.bias : (64,)
+root        : INFO             Network_User:    Train:    fc3_RL.weight : (256, 32256)
+root        : INFO             Network_User:    Train:    fc3_RL.bias : (256,)
+root        : INFO             Network_User:    Train:    fc4.weight : (256, 1280)
+root        : INFO             Network_User:    Train:    fc4.bias : (256,)
+root        : INFO             Network_User:    Train:    fc5.weight : (7, 256)
+root        : INFO             Network_User:    Train:    fc5.bias : (7,)
+root        : INFO             Network_User:    Train:    setting device
+root        : INFO             Network_User:    Train:    setting criterion optimizer Softmax
+root        : INFO                 Metrics: Constructor
+ICPR 2024   : ERROR    Failed after 0:00:20!
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/home/nnair/tsdata_augmentation/queue_assistant.py", line 494, in start_experiment
+    assistant._start_experiment(exp)
+  File "/home/nnair/tsdata_augmentation/queue_assistant.py", line 266, in _start_experiment
+    ex.run(config_updates=queued_exp['config'], options=options)
+  File "/home/nnair/miniconda3/envs/py311_pt212/lib/python3.11/site-packages/sacred/experiment.py", line 276, in run
+    run()
+  File "/home/nnair/miniconda3/envs/py311_pt212/lib/python3.11/site-packages/sacred/run.py", line 238, in __call__
+    self.result = self.main_function(*args)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nnair/miniconda3/envs/py311_pt212/lib/python3.11/site-packages/sacred/config/captured_function.py", line 42, in captured_function
+    result = wrapped(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nnair/tsdata_augmentation/main.py", line 471, in run
+    modus.net_modus()
+  File "/home/nnair/tsdata_augmentation/modus_selecter.py", line 239, in net_modus
+    self.train(itera=self.config['repetitions'], testing=True)
+  File "/home/nnair/tsdata_augmentation/modus_selecter.py", line 143, in train
+    results_train, confusion_matrix_train, best_itera = self.network.evolution_evaluation(ea_iter=iter_evl)
+                                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nnair/tsdata_augmentation/network_user.py", line 1434, in evolution_evaluation
+    results, best_itera = self.train(ea_iter)
+                          ^^^^^^^^^^^^^^^^^^^
+  File "/home/nnair/tsdata_augmentation/network_user.py", line 775, in train
+    metrics_obj = Metrics(self.config, self.device, self.attrs)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nnair/tsdata_augmentation/metrics.py", line 31, in __init__
+    self.atts = self.atts.type(dtype=torch.cuda.FloatTensor)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: The NVIDIA driver on your system is too old (found version 11040). Please update your GPU driver by downloading and installing a new version from the URL: http://www.nvidia.com/Download/index.aspx Alternatively, go to: https://pytorch.org to install a PyTorch version that has been compiled with your version of the CUDA driver.
+
+ERROR conda.cli.main_run:execute(124): `conda run nice python3 -c from queue_assistant import start_experiment; start_experiment() -exp_id 3881` failed. (See above for error)
+Parsing MongoDB credentials from /home/nnair/.mongodb_credentials
+Adding MongoObserver for curtiz
+configuration function began
+Preparing DataFrame for Mbientlab train
+Build index
+Convert labels to numpy
+Convert data to numpy
+Dataset constructed
+Logging every 24 batches (every 5.0\%)
+

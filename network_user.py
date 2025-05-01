@@ -621,7 +621,6 @@ class Network_User(object):
             transform=get_augmentation(self.config['augmentations']),
             augmenation_probability=self.config['augmentation_probability'],
             split='train', half_dataset=self.config['half_dataset']
-            split='train', half_dataset=self.config['half_dataset']
             )
 # 
         # Creating the dataloader

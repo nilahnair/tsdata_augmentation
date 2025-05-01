@@ -1,0 +1,8 @@
+stm' 
+python3 main.py with base_folder_exp=/data/nnair/icpr2024/debug/ network=cnn_transformer dataset=sisfall epochs=30 batch_size_train=100 repetitions=3 env=py311_pt212 -f -q  -c 'sisfall x3 cnntrans' 
+python3 main.py with base_folder_exp=/data/nnair/icpr2024/debug/ network=cnn dataset=motionsense epochs=30 batch_size_train=50 repetitions=3 env=py311_pt212 -f -q  -c 'motionsense x3' 
+python3 main.py with base_folder_exp=/data/nnair/icpr2024/debug/ network=lstm dataset=motionsense epochs=30 batch_size_train=100 repetitions=3 env=py311_pt212 -f -q  -c 'motionsense lstm x3' 
+python3 main.py with base_folder_exp=/data/nnair/icpr2024/debug/ network=cnn_transformer dataset=motionsense epochs=15 batch_size_train=50 repetitions=3 env=py311_pt212 -f -q  -c 'motionsense cnntrans x3' 
+
+python3 main.py with base_folder_exp=/data/nnair/icpr2024/debug/ network=cnn_imu dataset=mocap epochs=10 batch_size_train=100 repetitions=1 env=py311_pt212 -f -q  -c 'mocap  cnn x3' 
+
